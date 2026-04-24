@@ -1,0 +1,311 @@
+[
+  {
+    "id": "jamie",
+    "email": "jamie.chen.demo@merit.app",
+    "password": "DemoPass123!",
+    "name": "Jamie L",
+    "roleType": "candidate",
+    "headline": "Tech student building full-stack products with AI workflows",
+    "bio": "Tech student focused on shipping practical web products with clean UX, data signals, and measurable outcomes.",
+    "contactEmail": "jamie.chen.demo@merit.app",
+    "targetRoles": ["Software Engineer Intern", "Product Engineer Intern"],
+    "portfolioLinks": [
+      "https://github.com/vercel",
+      "https://nextjs.org/showcase"
+    ],
+    "projects": [
+      {
+        "title": "Campus Navigator",
+        "problemSolved": "New students struggled to find events, clubs, and relevant resources in one place.",
+        "whatWasBuilt": "Built a personalized campus discovery web app with event filters, saved plans, and recommendation cards.",
+        "category": "Web App",
+        "impact": "Drove 1,200+ active users and improved student event participation by 24% during pilot.",
+        "skills": ["next.js", "typescript", "supabase", "product analytics"],
+        "artifacts": [
+          {
+            "url": "https://nextjs.org/showcase",
+            "type": "website",
+            "previewUrl": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80"
+          },
+          {
+            "url": "https://github.com/vercel/next.js",
+            "type": "github",
+            "previewUrl": "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80"
+          },
+          {
+            "url": "https://www.youtube.com/watch?v=wm5gMKuwSYk",
+            "type": "video",
+            "previewUrl": "https://img.youtube.com/vi/wm5gMKuwSYk/hqdefault.jpg"
+          }
+        ]
+      },
+      {
+        "title": "Buildboard API Monitor",
+        "problemSolved": "Student teams lacked visibility on API reliability during hackathon sprints.",
+        "whatWasBuilt": "Created a monitoring dashboard with request latency charts, incident notes, and alert summaries.",
+        "category": "Developer Tools",
+        "impact": "Reduced API outage debugging time by 38% across team projects.",
+        "skills": ["api design", "postgresql", "observability", "charts"],
+        "artifacts": [
+          {
+            "url": "https://supabase.com",
+            "type": "website",
+            "previewUrl": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80"
+          },
+          {
+            "url": "https://github.com/supabase/supabase",
+            "type": "github",
+            "previewUrl": "https://images.unsplash.com/photo-1517180102446-f3ece451e9d8?auto=format&fit=crop&w=1200&q=80"
+          },
+          {
+            "url": "https://www.figma.com/community/file/1167288987392788794",
+            "type": "figma",
+            "previewUrl": "https://images.unsplash.com/photo-1551650975-87deedd944c3?auto=format&fit=crop&w=1200&q=80"
+          }
+        ]
+      },
+      {
+        "title": "Study Copilot",
+        "problemSolved": "Students lost time turning raw notes into structured study plans.",
+        "whatWasBuilt": "Built an AI study planner that converts notes into flashcards, weekly plans, and revision reminders.",
+        "category": "AI Tooling",
+        "impact": "Improved self-reported study consistency by 31% in beta cohort.",
+        "skills": ["llm integration", "prompt engineering", "full-stack", "ux writing"],
+        "artifacts": [
+          {
+            "url": "https://openai.com",
+            "type": "website",
+            "previewUrl": "https://images.unsplash.com/photo-1504639725590-34d0984388bd?auto=format&fit=crop&w=1200&q=80"
+          },
+          {
+            "url": "https://github.com/openai/openai-node",
+            "type": "github",
+            "previewUrl": "https://images.unsplash.com/photo-1526379095098-d400fd0bf935?auto=format&fit=crop&w=1200&q=80"
+          },
+          {
+            "url": "https://www.youtube.com/watch?v=5MgBikgcWnY",
+            "type": "video",
+            "previewUrl": "https://img.youtube.com/vi/5MgBikgcWnY/hqdefault.jpg"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "nora",
+    "email": "nora.patel.demo@merit.app",
+    "password": "DemoPass123!",
+    "name": "Bricia G",
+    "roleType": "candidate",
+    "headline": "Design student crafting polished product experiences",
+    "bio": "Design student focused on visual systems, interaction clarity, and storytelling through high-quality product design.",
+    "contactEmail": "nora.patel.demo@merit.app",
+    "targetRoles": ["Product Design Intern", "UX Design Intern"],
+    "portfolioLinks": [
+      "https://www.figma.com/community",
+      "https://www.behance.net"
+    ],
+    "projects": [
+      {
+        "title": "Student Portfolio System",
+        "problemSolved": "Student creators struggled to present multi-project work in a coherent way.",
+        "whatWasBuilt": "Designed an end-to-end portfolio experience with reusable layouts, case-study modules, and motion cues.",
+        "category": "Product Design",
+        "impact": "Increased portfolio completion rate by 46% in campus design club rollout.",
+        "skills": ["figma", "interaction design", "design systems", "prototyping"],
+        "artifacts": [
+          {
+            "url": "https://www.figma.com/community",
+            "type": "figma",
+            "previewUrl": "https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=1200&q=80"
+          },
+          {
+            "url": "https://www.behance.net",
+            "type": "website",
+            "previewUrl": "https://images.unsplash.com/photo-1505238680356-667803448bb6?auto=format&fit=crop&w=1200&q=80"
+          },
+          {
+            "url": "https://www.youtube.com/watch?v=zHALaH0o4K8",
+            "type": "video",
+            "previewUrl": "https://img.youtube.com/vi/zHALaH0o4K8/hqdefault.jpg"
+          }
+        ]
+      },
+      {
+        "title": "Transit App Visual Refresh",
+        "problemSolved": "A campus transit app had confusing hierarchy and low readability under time pressure.",
+        "whatWasBuilt": "Redesigned trip cards, map overlays, and alert states with an accessibility-first UI kit.",
+        "category": "Mobile UX",
+        "impact": "Reduced route selection errors by 29% in usability tests.",
+        "skills": ["ux research", "visual hierarchy", "accessibility", "usability testing"],
+        "artifacts": [
+          {
+            "url": "https://material.io/design",
+            "type": "website",
+            "previewUrl": "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=1200&q=80"
+          },
+          {
+            "url": "https://www.figma.com/community/file/1288302936323381887",
+            "type": "figma",
+            "previewUrl": "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=1200&q=80"
+          },
+          {
+            "url": "https://dribbble.com",
+            "type": "website",
+            "previewUrl": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80"
+          }
+        ]
+      },
+      {
+        "title": "Campaign Motion Toolkit",
+        "problemSolved": "Student organizations had inconsistent social visuals and slow turnaround for campaign assets.",
+        "whatWasBuilt": "Created a modular motion template system with brand-safe components and export presets.",
+        "category": "Brand & Motion",
+        "impact": "Cut campaign asset production time from 4 hours to 55 minutes per launch.",
+        "skills": ["motion design", "branding", "component systems", "content design"],
+        "artifacts": [
+          {
+            "url": "https://www.adobe.com/products/aftereffects.html",
+            "type": "website",
+            "previewUrl": "https://images.unsplash.com/photo-1559028012-481c04fa702d?auto=format&fit=crop&w=1200&q=80"
+          },
+          {
+            "url": "https://www.canva.com/designschool/",
+            "type": "website",
+            "previewUrl": "https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=1200&q=80"
+          },
+          {
+            "url": "https://www.youtube.com/watch?v=0ifChJ0nJfM",
+            "type": "video",
+            "previewUrl": "https://img.youtube.com/vi/0ifChJ0nJfM/hqdefault.jpg"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "malik",
+    "email": "malik.rivera.demo@merit.app",
+    "password": "DemoPass123!",
+    "name": "Hazril I",
+    "roleType": "candidate",
+    "headline": "Engineering student building systems and hardware-connected products",
+    "bio": "Engineering student focused on practical systems work spanning IoT, simulation, and reliability engineering.",
+    "contactEmail": "malik.rivera.demo@merit.app",
+    "targetRoles": ["Engineering Intern", "Systems Engineering Intern"],
+    "portfolioLinks": [
+      "https://www.arduino.cc",
+      "https://www.mathworks.com/products/simulink.html"
+    ],
+    "projects": [
+      {
+        "title": "Smart Lab Reliability Dashboard",
+        "problemSolved": "Lab teams had limited visibility into equipment downtime and maintenance cycles.",
+        "whatWasBuilt": "Built a reliability dashboard with maintenance scheduling, sensor alerts, and failure trend analysis.",
+        "category": "Engineering Analytics",
+        "impact": "Reduced unplanned lab downtime by 21% over one semester.",
+        "skills": ["systems engineering", "reliability", "data pipelines", "dashboards"],
+        "artifacts": [
+          {
+            "url": "https://www.autodesk.com",
+            "type": "website",
+            "previewUrl": "https://images.unsplash.com/photo-1581090700227-1e8e8d2f8f31?auto=format&fit=crop&w=1200&q=80"
+          },
+          {
+            "url": "https://github.com/plotly/dash",
+            "type": "github",
+            "previewUrl": "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=1200&q=80"
+          },
+          {
+            "url": "https://www.youtube.com/watch?v=6xB7f0NQ3Q8",
+            "type": "video",
+            "previewUrl": "https://img.youtube.com/vi/6xB7f0NQ3Q8/hqdefault.jpg"
+          }
+        ]
+      },
+      {
+        "title": "IoT Power Monitor",
+        "problemSolved": "Prototype devices consumed unpredictable energy and failed during extended testing.",
+        "whatWasBuilt": "Developed an IoT monitor capturing current draw, anomaly spikes, and battery degradation patterns.",
+        "category": "Embedded Systems",
+        "impact": "Extended average prototype runtime by 34% through power optimization decisions.",
+        "skills": ["iot", "embedded", "sensor integration", "testing"],
+        "artifacts": [
+          {
+            "url": "https://www.arduino.cc",
+            "type": "website",
+            "previewUrl": "https://images.unsplash.com/photo-1518773553398-650c184e0bb3?auto=format&fit=crop&w=1200&q=80"
+          },
+          {
+            "url": "https://github.com/espressif/arduino-esp32",
+            "type": "github",
+            "previewUrl": "https://images.unsplash.com/photo-1517420704952-d9f39e95b43e?auto=format&fit=crop&w=1200&q=80"
+          },
+          {
+            "url": "https://www.youtube.com/watch?v=Yw6u6YkTgQ4",
+            "type": "video",
+            "previewUrl": "https://img.youtube.com/vi/Yw6u6YkTgQ4/hqdefault.jpg"
+          }
+        ]
+      },
+      {
+        "title": "EV Thermal Study Tool",
+        "problemSolved": "Student EV teams lacked a fast way to compare cooling strategies before fabrication.",
+        "whatWasBuilt": "Built a simulation helper combining thermal assumptions, scenario presets, and result visualizations.",
+        "category": "Simulation",
+        "impact": "Shortened pre-build thermal decision cycles by 42%.",
+        "skills": ["simulation", "matlab", "systems modeling", "engineering communication"],
+        "artifacts": [
+          {
+            "url": "https://www.mathworks.com/products/simulink.html",
+            "type": "website",
+            "previewUrl": "https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=1200&q=80"
+          },
+          {
+            "url": "https://openmodelica.org",
+            "type": "website",
+            "previewUrl": "https://images.unsplash.com/photo-1563920443079-783e5c786b83?auto=format&fit=crop&w=1200&q=80"
+          },
+          {
+            "url": "https://www.youtube.com/watch?v=aircAruvnKk",
+            "type": "video",
+            "previewUrl": "https://img.youtube.com/vi/aircAruvnKk/hqdefault.jpg"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "recruiter",
+    "email": "recruiter.demo@merit.app",
+    "password": "DemoPass123!",
+    "name": "Ari R",
+    "roleType": "recruiter",
+    "headline": "Recruiter demo account for internship hiring",
+    "bio": "Recruiter profile used for hackathon demos. Posts realistic internship roles and reviews proof-based portfolios.",
+    "contactEmail": "recruiter.demo@merit.app",
+    "targetRoles": ["Recruiter"],
+    "portfolioLinks": [],
+    "projects": [],
+    "opportunities": [
+      {
+        "title": "Software Engineering Intern (Product)",
+        "company": "Meridian Labs",
+        "description": "Build product features end-to-end in React/TypeScript, collaborate with design, and ship measurable improvements to student-facing workflows.",
+        "skillsSought": ["typescript", "react", "next.js", "api design", "product thinking"]
+      },
+      {
+        "title": "Product Design Intern",
+        "company": "NorthBridge Digital",
+        "description": "Design and prototype high-quality user flows, run lightweight usability tests, and contribute to a scalable component system.",
+        "skillsSought": ["figma", "interaction design", "design systems", "ux research", "prototyping"]
+      },
+      {
+        "title": "Systems Engineering Intern",
+        "company": "Vector Dynamics",
+        "description": "Support systems modeling and reliability analysis for engineering programs, with hands-on work in data, simulation, and reporting.",
+        "skillsSought": ["systems engineering", "simulation", "matlab", "reliability", "data analysis"]
+      }
+    ]
+  }
+]
