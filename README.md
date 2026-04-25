@@ -2,6 +2,8 @@
 
 Proof over pedigree.
 
+https://meritv1.vercel.app/
+
 ## Stack
 - Next.js (App Router)
 - TypeScript
