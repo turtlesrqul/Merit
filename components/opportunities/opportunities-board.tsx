@@ -41,19 +41,19 @@ export function OpportunitiesBoard({ opportunities }: OpportunitiesBoardProps) {
 
   return (
     <div className="space-y-4">
-      <Card className="space-y-3">
+      <Card className="space-y-3 border-[#e5dccd] bg-[#fdfbf7]">
         <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
           <Input
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search title, company, skill"
             value={query}
           />
-          <label className="inline-flex items-center gap-2 rounded-xl border border-ink-200 bg-sun-50 px-3 py-2 text-sm text-ink-700">
+          <label className="inline-flex items-center gap-2 rounded-xl border border-[#e2d8c8] bg-[#f6efdf] px-3 py-2 text-sm text-[#5e574c]">
             <input checked={onlyMatched} onChange={(event) => setOnlyMatched(event.target.checked)} type="checkbox" />
             Show matched only
           </label>
         </div>
-        <p className="text-sm text-ink-600">
+        <p className="text-sm text-[#6b6356]">
           {visibleOpportunities.length} opportunity{visibleOpportunities.length === 1 ? "" : "ies"} shown,{" "}
           {matchedCount} matched
         </p>

@@ -34,10 +34,10 @@ export function CandidateExplorer({ candidates }: CandidateExplorerProps) {
   }, [candidates, query, skillFilter]);
 
   return (
-    <Card className="space-y-4 border-ink-100">
+    <Card className="space-y-4 border-[#e5dccd] bg-[#fdfbf7]">
       <div>
-        <h2 className="text-lg font-semibold text-ink-950">Candidate Discovery</h2>
-        <p className="text-sm text-ink-700">Filter by profile text and demonstrated skills.</p>
+        <h2 className="text-lg font-semibold text-[#171512]">Candidate Discovery</h2>
+        <p className="text-sm text-[#5e574c]">Filter by profile text and demonstrated skills.</p>
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
         <Input onChange={(event) => setQuery(event.target.value)} placeholder="Search name/headline" value={query} />

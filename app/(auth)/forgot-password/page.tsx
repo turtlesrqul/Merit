@@ -1,0 +1,101 @@
+"use client";
+
+import { FormEvent, useState } from "react";
+import Link from "next/link";
+import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
+import { isRateLimitedAuthError, mapSupabaseAuthError } from "@/lib/auth/auth-errors";
+import { resolvePasswordResetRedirectUrl } from "@/lib/auth/auth-urls";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+
+function normalizeEmailAddress(value: string) {
+  return value.trim().toLowerCase();
+}
+
+function isValidEmail(value: string) {
+  const normalized = normalizeEmailAddress(value);
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized);
+}
+
+export default function ForgotPasswordPage() {
+  const [email, setEmail] = useState("");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (isSubmitting) {
+      return;
+    }
+
+    const normalizedEmail = normalizeEmailAddress(email);
+    if (!isValidEmail(normalizedEmail)) {
+      setErrorMessage("Enter a valid email address.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    try {
+      const supabase = createBrowserSupabaseClient();
+      const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
+        redirectTo: resolvePasswordResetRedirectUrl()
+      });
+
+      if (error && isRateLimitedAuthError(error)) {
+        setErrorMessage(mapSupabaseAuthError(error, "forgot-password"));
+        return;
+      }
+
+      setSuccessMessage("If an account exists, we sent a password reset link.");
+    } catch {
+      setSuccessMessage("If an account exists, we sent a password reset link.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <main className="mx-auto flex min-h-screen w-full max-w-[1680px] items-center px-4 py-10">
+      <Card className="mx-auto w-full max-w-lg space-y-5 border-[#ddcfac] bg-gradient-to-b from-[#fffdf9] to-[#f9f4ea]">
+        <div className="space-y-2">
+          <h1 className="text-3xl font-semibold tracking-tight text-[#171512]">Reset your password</h1>
+          <p className="text-sm text-[#5e574c]">Enter your email and we will send a reset link.</p>
+        </div>
+
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <label className="block space-y-2 text-sm text-ink-900">
+            Email
+            <Input
+              autoComplete="email"
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="you@example.com"
+              required
+              type="email"
+              value={email}
+            />
+          </label>
+
+          {errorMessage ? <p className="text-sm text-red-700">{errorMessage}</p> : null}
+          {successMessage ? <p className="text-sm text-green-700">{successMessage}</p> : null}
+
+          <Button className="w-full" disabled={isSubmitting} type="submit">
+            {isSubmitting ? "Sending reset link..." : "Send reset link"}
+          </Button>
+        </form>
+
+        <p className="text-sm text-ink-700">
+          Back to{" "}
+          <Link className="font-semibold text-[#171512] underline decoration-[#c5a65a] underline-offset-4" href="/sign-in">
+            sign in
+          </Link>
+          .
+        </p>
+      </Card>
+    </main>
+  );
+}

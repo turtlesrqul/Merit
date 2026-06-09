@@ -42,9 +42,9 @@ export function PeopleDirectory({ members }: PeopleDirectoryProps) {
 
   return (
     <section className="space-y-4">
-      <Card className="space-y-2 border-sun-200 bg-gradient-to-r from-sun-50 to-white">
-        <h1 className="text-2xl font-semibold text-ink-950">People Directory</h1>
-        <p className="text-sm text-ink-700">
+      <Card className="space-y-2 border-[#ddcfac] bg-gradient-to-r from-[#f7f1e2] to-[#fdfbf7]">
+        <h1 className="text-3xl font-semibold tracking-tight text-[#171512]">People Directory</h1>
+        <p className="text-sm text-[#5e574c]">
           Browse all users, inspect profile signals, and open their Passport pages.
         </p>
       </Card>
@@ -55,7 +55,7 @@ export function PeopleDirectory({ members }: PeopleDirectoryProps) {
           placeholder="Search by name, headline, role, skill, or project title"
           value={query}
         />
-        <p className="text-sm text-ink-600">
+        <p className="text-sm text-[#6b6356]">
           Showing {visibleMembers.length} of {members.length} users
         </p>
       </Card>
@@ -67,7 +67,7 @@ export function PeopleDirectory({ members }: PeopleDirectoryProps) {
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {visibleMembers.map((member) => (
-            <Card className="space-y-3 border-ink-100" key={member.userId}>
+            <Card className="space-y-3 border-[#e5dccd] bg-[#fdfbf7]" key={member.userId}>
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-lg font-semibold text-ink-950">

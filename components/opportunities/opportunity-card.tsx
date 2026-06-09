@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import type { OpportunityRecord, RecruiterOpportunity } from "@/lib/db/opportunities";
 
@@ -63,6 +65,13 @@ export function OpportunityCard(props: OpportunityCardProps) {
               {props.opportunity.recruiterName ?? "Merit Recruiter"}
             </span>
           </p>
+          {props.opportunity.recruiterId ? (
+            <Link href={`/c/${props.opportunity.recruiterId}`}>
+              <Button className="mt-1" variant="secondary">
+                View recruiter passport
+              </Button>
+            </Link>
+          ) : null}
           {props.opportunity.matchRationale.length > 0 ? (
             <ul className="list-disc space-y-1 pl-5 text-sm text-ink-700">
               {props.opportunity.matchRationale.map((reason) => (

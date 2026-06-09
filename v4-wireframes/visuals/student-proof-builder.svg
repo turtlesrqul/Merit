@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820">
+  <rect width="1280" height="820" fill="#f8f7f3"/>
+  <text x="48" y="70" font-family="Georgia" font-size="44" fill="#111">Build your first proof card</text>
+  <rect x="48" y="112" width="640" height="650" fill="#fff" stroke="#d8d4ca"/>
+  <text x="76" y="152" font-family="Arial" font-size="18" font-weight="700" fill="#111">Guided fields</text>
+  <g font-family="Arial" font-size="15" fill="#111">
+    <text x="76" y="208">1. Target role</text>
+    <rect x="76" y="222" width="520" height="42" fill="#fafafa" stroke="#d8d4ca"/>
+    <text x="76" y="302">2. Project title</text>
+    <rect x="76" y="316" width="520" height="42" fill="#fafafa" stroke="#d8d4ca"/>
+    <text x="76" y="396">3. Personal contribution</text>
+    <rect x="76" y="410" width="520" height="92" fill="#fafafa" stroke="#d8d4ca"/>
+    <text x="76" y="542">4. Evidence upload or link</text>
+    <rect x="76" y="556" width="240" height="64" fill="#ebe7dc" stroke="#cfcac0"/>
+    <rect x="336" y="556" width="260" height="64" fill="#fafafa" stroke="#d8d4ca"/>
+    <text x="76" y="668">5. Skills and outcome</text>
+    <rect x="76" y="684" width="150" height="40" fill="#111" rx="4"/>
+    <text x="104" y="709" fill="#fff">Publish proof</text>
+  </g>
+  <rect x="732" y="112" width="500" height="650" fill="#fff" stroke="#d8d4ca"/>
+  <text x="760" y="152" font-family="Arial" font-size="18" font-weight="700" fill="#111">Live recruiter preview</text>
+  <rect x="760" y="188" width="420" height="390" fill="#fafafa" stroke="#d8d4ca"/>
+  <rect x="788" y="220" width="364" height="150" fill="#ebe7dc" stroke="#cfcac0"/>
+  <text x="916" y="300" font-family="Arial" font-size="14" fill="#555">artifact</text>
+  <text x="788" y="414" font-family="Arial" font-size="20" font-weight="700" fill="#111">What this proves</text>
+  <text x="788" y="448" font-family="Arial" font-size="15" fill="#333">Contribution, skills, evidence, outcome.</text>
+  <text x="760" y="628" font-family="Arial" font-size="16" font-weight="700" fill="#8a5a00">Gaps to improve</text>
+  <text x="760" y="660" font-family="Arial" font-size="15" fill="#333">Contribution unclear until you add ownership.</text>
+</svg>
+

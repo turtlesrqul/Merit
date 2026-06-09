@@ -7,6 +7,10 @@ type ProfileCompletionPromptProps = {
 };
 
 export function ProfileCompletionPrompt({ score }: ProfileCompletionPromptProps) {
+  if (score >= 100) {
+    return null;
+  }
+
   return (
     <Card className="space-y-4 border-sun-200 bg-gradient-to-br from-sun-50 to-white">
       <h3 className="text-base font-semibold text-ink-950">Complete your profile</h3>

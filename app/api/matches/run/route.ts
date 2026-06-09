@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { isEmailVerified, verificationRequiredMessage } from "@/lib/auth/verification";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getSupabaseEnvOrNull } from "@/lib/supabase/env";
 import {
   upsertMatchesForOpportunity,
   upsertMatchesForRecruiter
@@ -10,6 +12,13 @@ type RequestBody = {
 };
 
 export async function POST(request: Request) {
+  if (!getSupabaseEnvOrNull()) {
+    return NextResponse.json(
+      { error: "Supabase is not configured yet for this environment." },
+      { status: 503 }
+    );
+  }
+
   const supabase = await createServerSupabaseClient();
   const {
     data: { user }
@@ -17,6 +26,12 @@ export async function POST(request: Request) {
 
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!isEmailVerified(user)) {
+    return NextResponse.json(
+      { error: verificationRequiredMessage("running the match engine") },
+      { status: 403 }
+    );
   }
 
   const body = (await request.json().catch(() => ({}))) as RequestBody;

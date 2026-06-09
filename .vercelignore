@@ -1,0 +1,7 @@
+.codex-dev-server.*.log
+.codex-backups/
+.next/
+.tmp-chrome-*/
+.vercel/
+node_modules/
+tsconfig.tsbuildinfo

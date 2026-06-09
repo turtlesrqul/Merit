@@ -4,9 +4,15 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export default async function SignUpPage() {
   const supabase = await createServerSupabaseClient();
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
+  let user: Awaited<ReturnType<typeof supabase.auth.getUser>>["data"]["user"] = null;
+  try {
+    const {
+      data: { user: resolvedUser }
+    } = await supabase.auth.getUser();
+    user = resolvedUser;
+  } catch {
+    user = null;
+  }
 
   if (user) {
     redirect("/home");

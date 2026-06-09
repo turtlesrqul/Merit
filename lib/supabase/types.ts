@@ -75,6 +75,10 @@ export type Database = {
           what_was_built: string;
           category: string;
           impact: string | null;
+          hook: string | null;
+          project_type: "web" | "design" | "document" | "other" | null;
+          cover_image_url: string | null;
+          is_featured: boolean;
           created_at: string;
         },
         {
@@ -85,6 +89,10 @@ export type Database = {
           what_was_built: string;
           category: string;
           impact?: string | null;
+          hook?: string | null;
+          project_type?: "web" | "design" | "document" | "other" | null;
+          cover_image_url?: string | null;
+          is_featured?: boolean;
           created_at?: string;
         },
         {
@@ -95,6 +103,10 @@ export type Database = {
           what_was_built?: string;
           category?: string;
           impact?: string | null;
+          hook?: string | null;
+          project_type?: "web" | "design" | "document" | "other" | null;
+          cover_image_url?: string | null;
+          is_featured?: boolean;
           created_at?: string;
         }
       >;
@@ -180,6 +192,23 @@ export type Database = {
         {
           user_id?: string;
           project_id?: string;
+          created_at?: string;
+        }
+      >;
+      project_views: Table<
+        {
+          project_id: string;
+          viewer_user_id: string;
+          created_at: string;
+        },
+        {
+          project_id: string;
+          viewer_user_id: string;
+          created_at?: string;
+        },
+        {
+          project_id?: string;
+          viewer_user_id?: string;
           created_at?: string;
         }
       >;

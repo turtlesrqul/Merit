@@ -53,6 +53,67 @@ function normalizeSkills(values) {
   return Array.from(new Set((values || []).map(normalizeSkill).filter(Boolean)));
 }
 
+function toOneLine(value, fallback = "") {
+  const firstLine = String(value || "")
+    .split(/\r?\n/)[0]
+    .trim();
+  if (firstLine.length > 0) {
+    return firstLine.slice(0, 140);
+  }
+  return String(fallback || "").trim().slice(0, 140);
+}
+
+function normalizeProjectType(value, category = "") {
+  const direct = String(value || "").trim().toLowerCase();
+  if (["web", "design", "document", "other"].includes(direct)) {
+    return direct;
+  }
+
+  const normalizedCategory = String(category || "").trim().toLowerCase();
+  if (normalizedCategory.includes("web")) return "web";
+  if (normalizedCategory.includes("design") || normalizedCategory.includes("ux")) return "design";
+  if (
+    normalizedCategory.includes("document") ||
+    normalizedCategory.includes("deck") ||
+    normalizedCategory.includes("paper")
+  ) {
+    return "document";
+  }
+  return "other";
+}
+
+function categoryForProjectType(projectType) {
+  if (projectType === "web") return "Web App / Website";
+  if (projectType === "design") return "Design / Visual";
+  if (projectType === "document") return "Deck / Document";
+  return "Other";
+}
+
+function resolveProjectCoverImage(project) {
+  if (typeof project.coverImageUrl === "string" && project.coverImageUrl.trim().length > 0) {
+    return project.coverImageUrl.trim();
+  }
+
+  const artifacts = Array.isArray(project.artifacts) ? project.artifacts : [];
+  const artifactWithPreview = artifacts.find(
+    (artifact) => typeof artifact.previewUrl === "string" && artifact.previewUrl.trim().length > 0
+  );
+  if (artifactWithPreview) {
+    return artifactWithPreview.previewUrl.trim();
+  }
+
+  const imageArtifact = artifacts.find((artifact) =>
+    String(artifact.url || "")
+      .toLowerCase()
+      .match(/\.(png|jpe?g|gif|webp|avif|svg)(\?.*)?$/i)
+  );
+  if (imageArtifact && typeof imageArtifact.url === "string") {
+    return imageArtifact.url.trim();
+  }
+
+  return null;
+}
+
 function normalizeArtifactType(type, url) {
   const normalized = String(type || "").trim().toLowerCase();
   if (normalized) {
@@ -237,15 +298,24 @@ async function seedAccount(adminClient, account, authUsersByEmail) {
   const createdOpportunityIds = [];
 
   const projects = Array.isArray(account.projects) ? account.projects : [];
-  for (const project of projects) {
+  for (const [projectIndex, project] of projects.entries()) {
+    const projectType = normalizeProjectType(project.projectType, project.category);
+    const category = categoryForProjectType(projectType);
+    const hook = toOneLine(project.hook, project.problemSolved || project.title);
+    const coverImageUrl = resolveProjectCoverImage(project);
+
     const { data: projectData, error: projectError } = await adminClient
       .from("projects")
       .insert({
         user_id: userId,
         title: project.title,
-        problem_solved: project.problemSolved,
-        what_was_built: project.whatWasBuilt,
-        category: project.category,
+        hook,
+        problem_solved: hook,
+        what_was_built: String(project.whatWasBuilt || "").trim(),
+        category,
+        project_type: projectType,
+        cover_image_url: coverImageUrl,
+        is_featured: Boolean(project.isFeatured ?? (account.roleType === "candidate" && projectIndex === 0)),
         impact: project.impact
       })
       .select("project_id")
@@ -376,6 +446,49 @@ async function seedInteractions(adminClient, seededAccounts) {
       throw new Error(`Failed to seed inspired projects: ${error.message}`);
     }
   }
+}
+
+async function seedProjectViews(adminClient, seededAccounts) {
+  const allProjectIds = seededAccounts.flatMap((account) => account.createdProjectIds || []);
+  if (allProjectIds.length === 0) {
+    return 0;
+  }
+
+  const viewerIds = seededAccounts.map((account) => account.userId);
+  await adminClient.from("project_views").delete().in("project_id", allProjectIds);
+  await adminClient.from("project_views").delete().in("viewer_user_id", viewerIds);
+
+  const rows = [];
+  for (const viewer of seededAccounts) {
+    for (const owner of seededAccounts) {
+      if (viewer.userId === owner.userId) {
+        continue;
+      }
+
+      const targetProjects = owner.createdProjectIds.slice(0, 2);
+      targetProjects.forEach((projectId) => {
+        rows.push({
+          project_id: projectId,
+          viewer_user_id: viewer.userId
+        });
+      });
+    }
+  }
+
+  if (rows.length === 0) {
+    return 0;
+  }
+
+  const { data, error } = await adminClient
+    .from("project_views")
+    .upsert(rows, { onConflict: "project_id,viewer_user_id" })
+    .select("project_id");
+
+  if (error) {
+    throw new Error(`Failed to seed project views: ${error.message}`);
+  }
+
+  return Array.isArray(data) ? data.length : rows.length;
 }
 
 async function seedMatches(adminClient, seededAccounts) {
@@ -538,6 +651,7 @@ async function main() {
   }
 
   await seedInteractions(adminClient, seededAccounts);
+  const seededViewCount = await seedProjectViews(adminClient, seededAccounts);
   const seededMatchCount = await seedMatches(adminClient, seededAccounts);
 
   const seededProjectCount = seededAccounts.reduce(
@@ -550,7 +664,7 @@ async function main() {
   );
 
   console.log(
-    `Seeded ${seededAccounts.length} demo accounts, ${seededProjectCount} projects, ${seededOpportunityCount} opportunities, and ${seededMatchCount} matches.`
+    `Seeded ${seededAccounts.length} demo accounts, ${seededProjectCount} projects, ${seededOpportunityCount} opportunities, ${seededViewCount} project views, and ${seededMatchCount} matches.`
   );
   console.log("Credentials:");
   seededAccounts.forEach((account) => {

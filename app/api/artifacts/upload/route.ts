@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { isEmailVerified, verificationRequiredMessage } from "@/lib/auth/verification";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { getSupabaseEnv } from "@/lib/supabase/env";
+import { getSupabaseEnv, getSupabaseEnvOrNull } from "@/lib/supabase/env";
 
 const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
 const ARTIFACT_BUCKET =
@@ -45,6 +46,13 @@ async function ensureArtifactBucket(
 
 export async function POST(request: Request) {
   try {
+    if (!getSupabaseEnvOrNull()) {
+      return NextResponse.json(
+        { error: "Supabase is not configured yet for this environment." },
+        { status: 503 }
+      );
+    }
+
     const supabase = await createServerSupabaseClient();
     const {
       data: { user }
@@ -52,6 +60,12 @@ export async function POST(request: Request) {
 
     if (!user) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
+    if (!isEmailVerified(user)) {
+      return NextResponse.json(
+        { error: verificationRequiredMessage("uploading project files") },
+        { status: 403 }
+      );
     }
 
     const formData = await request.formData();

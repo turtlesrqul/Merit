@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820">
+  <rect width="1280" height="820" fill="#f8f7f3"/>
+  <rect x="48" y="40" width="1184" height="118" fill="#fff" stroke="#d8d4ca"/>
+  <text x="76" y="92" font-family="Georgia" font-size="38" fill="#111">Candidate Passport</text>
+  <text x="76" y="126" font-family="Arial" font-size="18" fill="#333">Amira Tan - Frontend Intern</text>
+  <rect x="1050" y="78" width="120" height="40" fill="#111" rx="4"/>
+  <text x="1086" y="104" font-family="Arial" font-size="14" fill="#fff">Contact</text>
+  <rect x="48" y="192" width="760" height="440" fill="#fff" stroke="#d8d4ca"/>
+  <text x="76" y="236" font-family="Arial" font-size="19" font-weight="700" fill="#111">Strongest proof</text>
+  <rect x="76" y="266" width="290" height="188" fill="#ebe7dc" stroke="#cfcac0"/>
+  <text x="172" y="364" font-family="Arial" font-size="14" fill="#555">artifact preview</text>
+  <text x="394" y="304" font-family="Arial" font-size="24" font-weight="700" fill="#111">Admin dashboard</text>
+  <text x="394" y="346" font-family="Arial" font-size="16" fill="#333">Proves React UI implementation</text>
+  <text x="394" y="378" font-family="Arial" font-size="16" fill="#333">Evidence: live demo + screenshots</text>
+  <text x="394" y="410" font-family="Arial" font-size="16" fill="#333">Contribution: solo frontend</text>
+  <rect x="394" y="454" width="134" height="34" fill="#eef5ff" stroke="#2f6fed"/>
+  <text x="412" y="476" font-family="Arial" font-size="13" fill="#2f6fed">Level 3 proof</text>
+  <rect x="850" y="192" width="382" height="440" fill="#fff" stroke="#d8d4ca"/>
+  <text x="880" y="236" font-family="Arial" font-size="19" font-weight="700" fill="#111">Evidence-backed skills</text>
+  <text x="880" y="282" font-family="Arial" font-size="16" fill="#333">React x2</text>
+  <text x="880" y="320" font-family="Arial" font-size="16" fill="#333">UI systems x3</text>
+  <text x="880" y="358" font-family="Arial" font-size="16" fill="#333">Forms x1</text>
+  <text x="880" y="430" font-family="Arial" font-size="19" font-weight="700" fill="#111">CV / contact</text>
+  <text x="880" y="470" font-family="Arial" font-size="16" fill="#333">Resume PDF attached</text>
+  <text x="880" y="506" font-family="Arial" font-size="16" fill="#333">hello@example.com</text>
+</svg>
+

@@ -1,8 +1,9 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
+import { resolveProjectVisualPreview } from "@/lib/artifacts";
+import type { ProjectCardData } from "@/lib/db/projects";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import type { ProjectCardData } from "@/lib/db/projects";
 
 type ProjectCardProps = {
   project: ProjectCardData;
@@ -10,105 +11,87 @@ type ProjectCardProps = {
   actions?: React.ReactNode;
 };
 
+function labelProjectType(projectType: ProjectCardData["projectType"]) {
+  if (projectType === "web") return "Web App";
+  if (projectType === "design") return "Design";
+  if (projectType === "document") return "Deck / Document";
+  return "Other";
+}
+
 export function ProjectCard({ project, showAuthor = true, actions }: ProjectCardProps) {
-  const primaryArtifact = project.artifacts[0] ?? null;
+  const visual = resolveProjectVisualPreview({
+    artifacts: project.artifacts,
+    coverImageUrl: project.coverImageUrl,
+    projectType: project.projectType
+  });
 
   return (
-    <Card className="space-y-4 border-ink-100">
-      <div className="overflow-hidden rounded-xl border border-ink-100">
-        {primaryArtifact ? (
-          <a className="block" href={primaryArtifact.url} rel="noreferrer" target="_blank">
-            <div className="relative aspect-video bg-ink-100">
-              {primaryArtifact.previewUrl ? (
-                <img
-                  alt={`${project.title} preview`}
-                  className="h-full w-full object-cover"
-                  src={primaryArtifact.previewUrl}
-                />
-              ) : (
-                <div className="flex h-full items-center justify-center text-sm text-ink-500">
-                  Preview unavailable
-                </div>
-              )}
-              <div className="absolute left-3 top-3">
-                <Badge className="bg-white/92 capitalize text-ink-900 shadow-sm">{primaryArtifact.type}</Badge>
-              </div>
+    <Card className="space-y-0 overflow-hidden border-[#e2d8c8] bg-[#fdfbf7] p-0 shadow-[0_3px_10px_rgba(18,18,18,0.08),0_26px_44px_rgba(18,18,18,0.1)] transition-shadow duration-300 hover:shadow-[0_8px_24px_rgba(18,18,18,0.12),0_32px_52px_rgba(18,18,18,0.14)]">
+      <Link className="group block" href={`/projects/${project.projectId}`}>
+        <div className="relative aspect-[16/9] bg-[#ece4d4]">
+          {visual.previewUrl ? (
+            <img
+              alt={`${project.title} preview`}
+              className={`h-full w-full transition-transform duration-500 group-hover:scale-[1.025] ${
+                visual.source === "cover" ? "bg-[#f6f2e8] object-contain p-3" : "object-cover"
+              }`}
+              src={visual.previewUrl}
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center bg-[radial-gradient(circle_at_20%_20%,rgba(197,166,90,0.26),transparent_34%),linear-gradient(120deg,#f7edd8_0%,#f8f4eb_55%,#f3efe7_100%)] text-sm font-medium text-[#635c50]">
+              Visual preview coming soon
             </div>
-          </a>
-        ) : (
-          <div className="flex aspect-video items-center justify-center bg-ink-50 text-sm text-ink-500">
-            No artifacts added yet
+          )}
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0f0d09]/40 via-transparent to-transparent" />
+          <div className="absolute left-3 top-3 flex flex-wrap items-center gap-2">
+            {project.feedLabel ? (
+              <Badge className="border-none bg-[#1a1814]/90 text-[#f7f4ec] shadow-sm">{project.feedLabel}</Badge>
+            ) : null}
+            <Badge className="border-none bg-white/92 text-[#1e1a14] shadow-sm">
+              {labelProjectType(project.projectType)}
+            </Badge>
           </div>
-        )}
-      </div>
+        </div>
+      </Link>
 
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <Badge>{project.category || "Project"}</Badge>
-        <p className="text-xs text-ink-500">{new Date(project.createdAt).toLocaleDateString()}</p>
-      </div>
+      <div className="space-y-4 px-5 pb-5 pt-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <Badge>{project.category || "Project"}</Badge>
+          <p className="text-xs text-[#7a7265]">{new Date(project.createdAt).toLocaleDateString()}</p>
+        </div>
 
-      <div className="space-y-2">
-        <h3 className="text-[1.3rem] font-semibold leading-tight text-ink-950">{project.title}</h3>
-        <p className="text-sm text-ink-700">
-          <span className="font-semibold text-ink-900">Problem solved:</span> {project.problemSolved}
-        </p>
-        <p className="text-sm text-ink-700">
-          <span className="font-semibold text-ink-900">What was built:</span> {project.whatWasBuilt}
-        </p>
-        {project.impact ? (
-          <p className="text-sm text-ink-700">
-            <span className="font-semibold text-ink-900">Impact:</span> {project.impact}
+        <Link className="block space-y-2" href={`/projects/${project.projectId}`}>
+          <h3 className="line-clamp-2 text-[2rem] font-semibold leading-[1.02] tracking-tight text-[#171512]">
+            {project.title}
+          </h3>
+          <p className="line-clamp-2 text-[15px] text-[#343026]">{project.hook || "No hook added yet."}</p>
+        </Link>
+
+        {showAuthor ? (
+          <p className="text-sm text-[#6a6257]">
+            by <span className="font-semibold text-[#1f1b15]">{project.authorName ?? "Candidate"}</span>
+            {project.authorHeadline ? ` • ${project.authorHeadline}` : ""}
           </p>
         ) : null}
-      </div>
 
-      {project.skills.length > 0 ? (
-        <div className="flex flex-wrap gap-2">
-          {project.skills.map((skill) => (
-            <Badge key={skill}>{skill}</Badge>
-          ))}
-        </div>
-      ) : null}
-
-      {project.artifacts.length > 0 ? (
-        <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-wide text-ink-500">Proof links</p>
+        {project.skills.length > 0 ? (
           <div className="flex flex-wrap gap-2">
-            {project.artifacts.slice(0, 4).map((artifact) => (
-              <a
-                className="inline-flex max-w-full items-center rounded-full border border-sun-200 bg-sun-50 px-3 py-1 text-sm text-ink-900 underline decoration-sun-300 underline-offset-2"
-                href={artifact.url}
-                key={artifact.url}
-                rel="noreferrer"
-                target="_blank"
-              >
-                {artifact.label}
-              </a>
+            {project.skills.slice(0, 5).map((skill) => (
+              <Badge key={`${project.projectId}-${skill}`}>{skill}</Badge>
             ))}
           </div>
+        ) : null}
+
+        <div className="flex items-center gap-2 text-sm text-[#61594d]">
+          <span>{project.engagement.views} views</span>
+          <span className="text-[#a89b83]">•</span>
+          <span>{project.engagement.likes} likes</span>
+          <span className="text-[#a89b83]">•</span>
+          <span>{project.engagement.saves} saves</span>
         </div>
-      ) : null}
 
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-ink-100 pt-3">
-        {showAuthor ? (
-          <div className="space-y-0.5">
-            <p className="text-sm font-semibold text-ink-900">{project.authorName ?? "Candidate"}</p>
-            {project.authorHeadline ? (
-              <p className="text-sm text-ink-600">{project.authorHeadline}</p>
-            ) : null}
-          </div>
-        ) : (
-          <span />
-        )}
-        <Link
-          className="text-sm font-semibold text-ink-900 underline underline-offset-2"
-          href={`/c/${project.userId}`}
-        >
-          View Passport
-        </Link>
+        {actions ? <div className="flex flex-wrap gap-2 border-t border-[#ece3d5] pt-3">{actions}</div> : null}
       </div>
-
-      {actions ? <div className="flex flex-wrap gap-2 border-t border-ink-100 pt-3">{actions}</div> : null}
     </Card>
   );
 }

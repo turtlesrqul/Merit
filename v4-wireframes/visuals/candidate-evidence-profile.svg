@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820">
+  <rect width="1280" height="820" fill="#f8f7f3"/>
+  <rect x="48" y="42" width="1184" height="92" fill="#fff" stroke="#d8d4ca"/>
+  <text x="76" y="92" font-family="Georgia" font-size="38" fill="#111">Amira Tan</text>
+  <text x="300" y="92" font-family="Arial" font-size="17" fill="#333">Frontend Intern</text>
+  <rect x="1048" y="68" width="116" height="38" fill="#111" rx="4"/>
+  <text x="1082" y="92" font-family="Arial" font-size="14" fill="#fff">Shortlist</text>
+  <rect x="48" y="162" width="760" height="132" fill="#fff" stroke="#d8d4ca"/>
+  <text x="76" y="204" font-family="Arial" font-size="18" font-weight="700" fill="#111">Evidence summary</text>
+  <text x="76" y="238" font-family="Arial" font-size="15" fill="#333">May be relevant because her strongest proof includes a shipped dashboard,</text>
+  <text x="76" y="264" font-family="Arial" font-size="15" fill="#333">live demo evidence, and React/UI work mapped to the role brief.</text>
+  <rect x="48" y="326" width="760" height="342" fill="#fff" stroke="#d8d4ca"/>
+  <text x="76" y="368" font-family="Arial" font-size="18" font-weight="700" fill="#111">Strongest proof</text>
+  <rect x="76" y="396" width="278" height="178" fill="#ebe7dc" stroke="#cfcac0"/>
+  <text x="162" y="490" font-family="Arial" font-size="14" fill="#555">artifact preview</text>
+  <text x="382" y="424" font-family="Arial" font-size="22" font-weight="700" fill="#111">Admin dashboard</text>
+  <text x="382" y="462" font-family="Arial" font-size="15" fill="#333">Contribution: solo frontend implementation</text>
+  <text x="382" y="490" font-family="Arial" font-size="15" fill="#333">Skills: React, data tables, forms</text>
+  <text x="382" y="518" font-family="Arial" font-size="15" fill="#333">Evidence: live link + screenshots</text>
+  <text x="382" y="546" font-family="Arial" font-size="15" fill="#8a5a00">Gap: usage metrics missing</text>
+  <rect x="850" y="162" width="382" height="506" fill="#fff" stroke="#d8d4ca"/>
+  <text x="880" y="204" font-family="Arial" font-size="18" font-weight="700" fill="#111">Recruiter review</text>
+  <text x="880" y="248" font-family="Arial" font-size="14" fill="#666">Evidence level</text>
+  <rect x="880" y="266" width="154" height="30" fill="#eef5ff" stroke="#2f6fed"/>
+  <text x="896" y="286" font-family="Arial" font-size="13" fill="#2f6fed">Inspectable artifact</text>
+  <text x="880" y="342" font-family="Arial" font-size="14" fill="#666">Skills backed by proof</text>
+  <text x="880" y="374" font-family="Arial" font-size="15" fill="#111">React x2, UI systems, QA</text>
+  <text x="880" y="430" font-family="Arial" font-size="14" fill="#666">Notes</text>
+  <rect x="880" y="450" width="280" height="112" fill="#fafafa" stroke="#d8d4ca"/>
+</svg>
+

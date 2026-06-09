@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820">
+  <rect width="1280" height="820" fill="#f8f7f3"/>
+  <rect x="48" y="36" width="1184" height="62" fill="#fff" stroke="#d8d4ca"/>
+  <text x="72" y="75" font-family="Arial" font-size="24" font-weight="700" fill="#111">Merit</text>
+  <text x="860" y="72" font-family="Arial" font-size="15" fill="#333">Proof</text>
+  <text x="930" y="72" font-family="Arial" font-size="15" fill="#333">Students</text>
+  <text x="1035" y="72" font-family="Arial" font-size="15" fill="#333">Recruiters</text>
+  <rect x="1125" y="52" width="88" height="30" fill="#111" rx="4"/>
+  <text x="1146" y="72" font-family="Arial" font-size="13" fill="#fff">Sign in</text>
+  <text x="72" y="202" font-family="Georgia" font-size="72" fill="#111">Proven by work.</text>
+  <text x="76" y="248" font-family="Arial" font-size="23" fill="#333">Merit turns student projects into recruiter-readable proof.</text>
+  <rect x="76" y="286" width="158" height="44" fill="#111" rx="4"/>
+  <text x="101" y="314" font-family="Arial" font-size="15" fill="#fff">Build passport</text>
+  <rect x="250" y="286" width="180" height="44" fill="#fff" stroke="#111" rx="4"/>
+  <text x="276" y="314" font-family="Arial" font-size="15" fill="#111">Review as recruiter</text>
+  <rect x="76" y="390" width="690" height="300" fill="#fff" stroke="#cfcac0"/>
+  <text x="104" y="430" font-family="Arial" font-size="16" font-weight="700" fill="#111">Proof Card</text>
+  <rect x="104" y="458" width="250" height="148" fill="#ebe7dc" stroke="#cfcac0"/>
+  <text x="141" y="535" font-family="Arial" font-size="15" fill="#555">artifact preview</text>
+  <text x="384" y="478" font-family="Arial" font-size="18" font-weight="700" fill="#111">Admin dashboard for review ops</text>
+  <text x="384" y="512" font-family="Arial" font-size="15" fill="#333">Contribution: solo frontend build</text>
+  <text x="384" y="540" font-family="Arial" font-size="15" fill="#333">Skills: React, forms, data tables</text>
+  <text x="384" y="568" font-family="Arial" font-size="15" fill="#333">Evidence: live demo + screenshots</text>
+  <rect x="384" y="592" width="164" height="30" fill="#eef5ff" stroke="#2f6fed"/>
+  <text x="398" y="613" font-family="Arial" font-size="13" fill="#2f6fed">Evidence level 3</text>
+  <path d="M790 540 H892" stroke="#111" stroke-width="2"/>
+  <path d="M882 530 L898 540 L882 550" fill="none" stroke="#111" stroke-width="2"/>
+  <rect x="920" y="430" width="260" height="220" fill="#111"/>
+  <text x="950" y="470" font-family="Arial" font-size="18" font-weight="700" fill="#fff">Recruiter shortlist</text>
+  <text x="950" y="512" font-family="Arial" font-size="15" fill="#e8e8e8">3 candidates worth review</text>
+  <text x="950" y="542" font-family="Arial" font-size="15" fill="#e8e8e8">Reasons attached</text>
+  <text x="950" y="572" font-family="Arial" font-size="15" fill="#e8e8e8">Gaps visible</text>
+  <rect x="76" y="735" width="1110" height="1" fill="#d8d4ca"/>
+  <text x="76" y="772" font-family="Arial" font-size="18" fill="#333">Next: resumes claim. Merit shows evidence.</text>
+</svg>
+

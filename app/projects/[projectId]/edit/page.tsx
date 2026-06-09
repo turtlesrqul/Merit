@@ -35,9 +35,12 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
         initialData={{
           projectId: project.projectId,
           title: project.title,
+          hook: project.hook,
           problemSolved: project.problemSolved,
           whatWasBuilt: project.whatWasBuilt,
           category: project.category,
+          projectType: project.projectType,
+          coverImageUrl: project.coverImageUrl,
           impact: project.impact,
           skills: project.skills,
           artifactLinks: project.artifactLinks

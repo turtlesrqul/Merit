@@ -24,9 +24,11 @@ function projectMatchesQuery(project: ProjectCardData, query: string) {
 
   const searchableText = [
     project.title,
+    project.hook,
     project.problemSolved,
     project.whatWasBuilt,
     project.category,
+    project.projectType,
     project.impact ?? "",
     project.skills.join(" ")
   ]
@@ -116,6 +118,7 @@ export function ProfileProjectSearch({
               <ProjectCard
                 actions={
                   <ProjectInteractions
+                    display="icons"
                     initialInspired={inspiredIds.has(project.projectId)}
                     initialSaved={savedIds.has(project.projectId)}
                     projectId={project.projectId}

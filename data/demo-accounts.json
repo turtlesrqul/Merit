@@ -8,7 +8,10 @@
     "headline": "Tech student building full-stack products with AI workflows",
     "bio": "Tech student focused on shipping practical web products with clean UX, data signals, and measurable outcomes.",
     "contactEmail": "jamie.chen.demo@merit.app",
-    "targetRoles": ["Software Engineer Intern", "Product Engineer Intern"],
+    "targetRoles": [
+      "Software Engineer Intern",
+      "Product Engineer Intern"
+    ],
     "portfolioLinks": [
       "https://github.com/vercel",
       "https://nextjs.org/showcase"
@@ -16,14 +19,23 @@
     "projects": [
       {
         "title": "Campus Navigator",
+        "hook": "Personalized campus discovery app that helped students find events faster.",
+        "projectType": "web",
+        "coverImageUrl": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80",
+        "isFeatured": true,
         "problemSolved": "New students struggled to find events, clubs, and relevant resources in one place.",
         "whatWasBuilt": "Built a personalized campus discovery web app with event filters, saved plans, and recommendation cards.",
         "category": "Web App",
         "impact": "Drove 1,200+ active users and improved student event participation by 24% during pilot.",
-        "skills": ["next.js", "typescript", "supabase", "product analytics"],
+        "skills": [
+          "next.js",
+          "typescript",
+          "supabase",
+          "product analytics"
+        ],
         "artifacts": [
           {
-            "url": "https://nextjs.org/showcase",
+            "url": "https://www.openstreetmap.org/export/embed.html?bbox=103.790%2C1.280%2C103.910%2C1.370&layer=mapnik",
             "type": "website",
             "previewUrl": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80"
           },
@@ -41,14 +53,22 @@
       },
       {
         "title": "Buildboard API Monitor",
+        "hook": "Monitoring dashboard for student teams to track API reliability in real time.",
+        "projectType": "web",
+        "coverImageUrl": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80",
         "problemSolved": "Student teams lacked visibility on API reliability during hackathon sprints.",
         "whatWasBuilt": "Created a monitoring dashboard with request latency charts, incident notes, and alert summaries.",
         "category": "Developer Tools",
         "impact": "Reduced API outage debugging time by 38% across team projects.",
-        "skills": ["api design", "postgresql", "observability", "charts"],
+        "skills": [
+          "api design",
+          "postgresql",
+          "observability",
+          "charts"
+        ],
         "artifacts": [
           {
-            "url": "https://supabase.com",
+            "url": "https://www.openstreetmap.org/export/embed.html?bbox=-122.53%2C37.68%2C-122.34%2C37.84&layer=mapnik",
             "type": "website",
             "previewUrl": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80"
           },
@@ -66,14 +86,22 @@
       },
       {
         "title": "Study Copilot",
+        "hook": "AI study planner that turns messy notes into weekly revision systems.",
+        "projectType": "web",
+        "coverImageUrl": "https://images.unsplash.com/photo-1504639725590-34d0984388bd?auto=format&fit=crop&w=1200&q=80",
         "problemSolved": "Students lost time turning raw notes into structured study plans.",
         "whatWasBuilt": "Built an AI study planner that converts notes into flashcards, weekly plans, and revision reminders.",
         "category": "AI Tooling",
         "impact": "Improved self-reported study consistency by 31% in beta cohort.",
-        "skills": ["llm integration", "prompt engineering", "full-stack", "ux writing"],
+        "skills": [
+          "llm integration",
+          "prompt engineering",
+          "full-stack",
+          "ux writing"
+        ],
         "artifacts": [
           {
-            "url": "https://openai.com",
+            "url": "https://www.openstreetmap.org/export/embed.html?bbox=-0.170%2C51.490%2C-0.090%2C51.540&layer=mapnik",
             "type": "website",
             "previewUrl": "https://images.unsplash.com/photo-1504639725590-34d0984388bd?auto=format&fit=crop&w=1200&q=80"
           },
@@ -100,7 +128,10 @@
     "headline": "Design student crafting polished product experiences",
     "bio": "Design student focused on visual systems, interaction clarity, and storytelling through high-quality product design.",
     "contactEmail": "nora.patel.demo@merit.app",
-    "targetRoles": ["Product Design Intern", "UX Design Intern"],
+    "targetRoles": [
+      "Product Design Intern",
+      "UX Design Intern"
+    ],
     "portfolioLinks": [
       "https://www.figma.com/community",
       "https://www.behance.net"
@@ -108,11 +139,20 @@
     "projects": [
       {
         "title": "Student Portfolio System",
+        "hook": "Portfolio UX system helping creators showcase multi-project work clearly.",
+        "projectType": "design",
+        "coverImageUrl": "https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=1200&q=80",
+        "isFeatured": true,
         "problemSolved": "Student creators struggled to present multi-project work in a coherent way.",
         "whatWasBuilt": "Designed an end-to-end portfolio experience with reusable layouts, case-study modules, and motion cues.",
         "category": "Product Design",
         "impact": "Increased portfolio completion rate by 46% in campus design club rollout.",
-        "skills": ["figma", "interaction design", "design systems", "prototyping"],
+        "skills": [
+          "figma",
+          "interaction design",
+          "design systems",
+          "prototyping"
+        ],
         "artifacts": [
           {
             "url": "https://www.figma.com/community",
@@ -120,7 +160,7 @@
             "previewUrl": "https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=1200&q=80"
           },
           {
-            "url": "https://www.behance.net",
+            "url": "https://www.openstreetmap.org/export/embed.html?bbox=2.290%2C48.840%2C2.370%2C48.890&layer=mapnik",
             "type": "website",
             "previewUrl": "https://images.unsplash.com/photo-1505238680356-667803448bb6?auto=format&fit=crop&w=1200&q=80"
           },
@@ -133,14 +173,22 @@
       },
       {
         "title": "Transit App Visual Refresh",
+        "hook": "Accessibility-first transit redesign that reduced route selection errors.",
+        "projectType": "design",
+        "coverImageUrl": "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=1200&q=80",
         "problemSolved": "A campus transit app had confusing hierarchy and low readability under time pressure.",
         "whatWasBuilt": "Redesigned trip cards, map overlays, and alert states with an accessibility-first UI kit.",
         "category": "Mobile UX",
         "impact": "Reduced route selection errors by 29% in usability tests.",
-        "skills": ["ux research", "visual hierarchy", "accessibility", "usability testing"],
+        "skills": [
+          "ux research",
+          "visual hierarchy",
+          "accessibility",
+          "usability testing"
+        ],
         "artifacts": [
           {
-            "url": "https://material.io/design",
+            "url": "https://www.openstreetmap.org/export/embed.html?bbox=139.730%2C35.650%2C139.800%2C35.710&layer=mapnik",
             "type": "website",
             "previewUrl": "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=1200&q=80"
           },
@@ -150,7 +198,7 @@
             "previewUrl": "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=1200&q=80"
           },
           {
-            "url": "https://dribbble.com",
+            "url": "https://www.openstreetmap.org/export/embed.html?bbox=151.180%2C-33.920%2C151.260%2C-33.840&layer=mapnik",
             "type": "website",
             "previewUrl": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80"
           }
@@ -158,19 +206,27 @@
       },
       {
         "title": "Campaign Motion Toolkit",
+        "hook": "Modular motion template kit that cut campaign asset turnaround dramatically.",
+        "projectType": "design",
+        "coverImageUrl": "https://images.unsplash.com/photo-1559028012-481c04fa702d?auto=format&fit=crop&w=1200&q=80",
         "problemSolved": "Student organizations had inconsistent social visuals and slow turnaround for campaign assets.",
         "whatWasBuilt": "Created a modular motion template system with brand-safe components and export presets.",
         "category": "Brand & Motion",
         "impact": "Cut campaign asset production time from 4 hours to 55 minutes per launch.",
-        "skills": ["motion design", "branding", "component systems", "content design"],
+        "skills": [
+          "motion design",
+          "branding",
+          "component systems",
+          "content design"
+        ],
         "artifacts": [
           {
-            "url": "https://www.adobe.com/products/aftereffects.html",
+            "url": "https://www.openstreetmap.org/export/embed.html?bbox=-74.040%2C40.690%2C-73.940%2C40.760&layer=mapnik",
             "type": "website",
             "previewUrl": "https://images.unsplash.com/photo-1559028012-481c04fa702d?auto=format&fit=crop&w=1200&q=80"
           },
           {
-            "url": "https://www.canva.com/designschool/",
+            "url": "https://www.openstreetmap.org/export/embed.html?bbox=-87.690%2C41.860%2C-87.600%2C41.920&layer=mapnik",
             "type": "website",
             "previewUrl": "https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=1200&q=80"
           },
@@ -192,7 +248,10 @@
     "headline": "Engineering student building systems and hardware-connected products",
     "bio": "Engineering student focused on practical systems work spanning IoT, simulation, and reliability engineering.",
     "contactEmail": "malik.rivera.demo@merit.app",
-    "targetRoles": ["Engineering Intern", "Systems Engineering Intern"],
+    "targetRoles": [
+      "Engineering Intern",
+      "Systems Engineering Intern"
+    ],
     "portfolioLinks": [
       "https://www.arduino.cc",
       "https://www.mathworks.com/products/simulink.html"
@@ -200,14 +259,23 @@
     "projects": [
       {
         "title": "Smart Lab Reliability Dashboard",
+        "hook": "Reliability dashboard that surfaced equipment downtime before failures escalated.",
+        "projectType": "document",
+        "coverImageUrl": "https://images.unsplash.com/photo-1581090700227-1e8e8d2f8f31?auto=format&fit=crop&w=1200&q=80",
+        "isFeatured": true,
         "problemSolved": "Lab teams had limited visibility into equipment downtime and maintenance cycles.",
         "whatWasBuilt": "Built a reliability dashboard with maintenance scheduling, sensor alerts, and failure trend analysis.",
         "category": "Engineering Analytics",
         "impact": "Reduced unplanned lab downtime by 21% over one semester.",
-        "skills": ["systems engineering", "reliability", "data pipelines", "dashboards"],
+        "skills": [
+          "systems engineering",
+          "reliability",
+          "data pipelines",
+          "dashboards"
+        ],
         "artifacts": [
           {
-            "url": "https://www.autodesk.com",
+            "url": "https://www.openstreetmap.org/export/embed.html?bbox=13.350%2C52.490%2C13.450%2C52.540&layer=mapnik",
             "type": "website",
             "previewUrl": "https://images.unsplash.com/photo-1581090700227-1e8e8d2f8f31?auto=format&fit=crop&w=1200&q=80"
           },
@@ -225,14 +293,22 @@
       },
       {
         "title": "IoT Power Monitor",
+        "hook": "Embedded power monitor that improved prototype runtime through anomaly detection.",
+        "projectType": "other",
+        "coverImageUrl": "https://images.unsplash.com/photo-1518773553398-650c184e0bb3?auto=format&fit=crop&w=1200&q=80",
         "problemSolved": "Prototype devices consumed unpredictable energy and failed during extended testing.",
         "whatWasBuilt": "Developed an IoT monitor capturing current draw, anomaly spikes, and battery degradation patterns.",
         "category": "Embedded Systems",
         "impact": "Extended average prototype runtime by 34% through power optimization decisions.",
-        "skills": ["iot", "embedded", "sensor integration", "testing"],
+        "skills": [
+          "iot",
+          "embedded",
+          "sensor integration",
+          "testing"
+        ],
         "artifacts": [
           {
-            "url": "https://www.arduino.cc",
+            "url": "https://www.openstreetmap.org/export/embed.html?bbox=100.470%2C13.700%2C100.580%2C13.790&layer=mapnik",
             "type": "website",
             "previewUrl": "https://images.unsplash.com/photo-1518773553398-650c184e0bb3?auto=format&fit=crop&w=1200&q=80"
           },
@@ -250,19 +326,27 @@
       },
       {
         "title": "EV Thermal Study Tool",
+        "hook": "Simulation workflow for comparing EV thermal strategies before fabrication.",
+        "projectType": "document",
+        "coverImageUrl": "https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=1200&q=80",
         "problemSolved": "Student EV teams lacked a fast way to compare cooling strategies before fabrication.",
         "whatWasBuilt": "Built a simulation helper combining thermal assumptions, scenario presets, and result visualizations.",
         "category": "Simulation",
         "impact": "Shortened pre-build thermal decision cycles by 42%.",
-        "skills": ["simulation", "matlab", "systems modeling", "engineering communication"],
+        "skills": [
+          "simulation",
+          "matlab",
+          "systems modeling",
+          "engineering communication"
+        ],
         "artifacts": [
           {
-            "url": "https://www.mathworks.com/products/simulink.html",
+            "url": "https://www.openstreetmap.org/export/embed.html?bbox=144.920%2C-37.850%2C145.020%2C-37.780&layer=mapnik",
             "type": "website",
             "previewUrl": "https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=1200&q=80"
           },
           {
-            "url": "https://openmodelica.org",
+            "url": "https://www.openstreetmap.org/export/embed.html?bbox=-46.700%2C-23.620%2C-46.580%2C-23.520&layer=mapnik",
             "type": "website",
             "previewUrl": "https://images.unsplash.com/photo-1563920443079-783e5c786b83?auto=format&fit=crop&w=1200&q=80"
           },
@@ -284,7 +368,9 @@
     "headline": "Recruiter demo account for internship hiring",
     "bio": "Recruiter profile used for hackathon demos. Posts realistic internship roles and reviews proof-based portfolios.",
     "contactEmail": "recruiter.demo@merit.app",
-    "targetRoles": ["Recruiter"],
+    "targetRoles": [
+      "Recruiter"
+    ],
     "portfolioLinks": [],
     "projects": [],
     "opportunities": [
@@ -292,19 +378,37 @@
         "title": "Software Engineering Intern (Product)",
         "company": "Meridian Labs",
         "description": "Build product features end-to-end in React/TypeScript, collaborate with design, and ship measurable improvements to student-facing workflows.",
-        "skillsSought": ["typescript", "react", "next.js", "api design", "product thinking"]
+        "skillsSought": [
+          "typescript",
+          "react",
+          "next.js",
+          "api design",
+          "product thinking"
+        ]
       },
       {
         "title": "Product Design Intern",
         "company": "NorthBridge Digital",
         "description": "Design and prototype high-quality user flows, run lightweight usability tests, and contribute to a scalable component system.",
-        "skillsSought": ["figma", "interaction design", "design systems", "ux research", "prototyping"]
+        "skillsSought": [
+          "figma",
+          "interaction design",
+          "design systems",
+          "ux research",
+          "prototyping"
+        ]
       },
       {
         "title": "Systems Engineering Intern",
         "company": "Vector Dynamics",
         "description": "Support systems modeling and reliability analysis for engineering programs, with hands-on work in data, simulation, and reporting.",
-        "skillsSought": ["systems engineering", "simulation", "matlab", "reliability", "data analysis"]
+        "skillsSought": [
+          "systems engineering",
+          "simulation",
+          "matlab",
+          "reliability",
+          "data analysis"
+        ]
       }
     ]
   }

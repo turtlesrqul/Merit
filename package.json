@@ -9,7 +9,9 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "seed:demo": "node scripts/seed-demo-data.cjs"
+    "seed:demo": "node scripts/seed-demo-data.cjs",
+    "clear:demo": "node scripts/clear-demo-data.cjs",
+    "ui:restore-v2": "powershell -ExecutionPolicy Bypass -File scripts/restore-v2-ui.ps1"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",
@@ -18,12 +20,14 @@
     "next": "^15.2.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "tailwind-merge": "^3.3.0"
+    "tailwind-merge": "^3.3.0",
+    "three": "^0.184.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.1",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
+    "@types/three": "^0.184.1",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.24.0",
     "eslint-config-next": "^15.2.0",

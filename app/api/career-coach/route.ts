@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isCareerCoachEnabled } from "@/lib/runtime-config";
 
 type CareerCoachRequest = {
   profile: {
@@ -548,6 +549,13 @@ function buildRulesChatFallback(input: CareerCoachRequest): CareerCoachChatRespo
 }
 
 export async function POST(request: Request) {
+  if (!isCareerCoachEnabled()) {
+    return NextResponse.json(
+      { error: "Career coach is disabled for this beta." },
+      { status: 404 }
+    );
+  }
+
   const body = (await request.json().catch(() => null)) as CareerCoachRequest | null;
   if (!body) {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });

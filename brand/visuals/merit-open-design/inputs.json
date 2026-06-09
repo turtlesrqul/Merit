@@ -1,0 +1,226 @@
+{
+  "$schema": "open-design-landing/schema.ts",
+  "brand": {
+    "name": "Merit",
+    "mark": "M",
+    "meta": { "title": "Proof Layer", "subtitle": "Singapore / Early Talent" },
+    "filed_under": "Talent Signal / Proof of Ability",
+    "tagline": "Proof over pedigree.",
+    "description": "Merit turns student projects, CVs, skills, and artifacts into trusted proof profiles recruiters can evaluate beyond the resume.",
+    "locale": "en",
+    "edition": "Vol. 04 / V4 Direction",
+    "version": "v4.0-strategy",
+    "license": "Brand Study",
+    "primary_url": "https://meritv3.vercel.app",
+    "primary_url_label": "Open Merit",
+    "download_url": "https://meritv3.vercel.app/home",
+    "download_url_label": "View Product",
+    "contact_email": "mailto:turtlesrqul@gmail.com",
+    "location": "Singapore / Early-Career Hiring",
+    "coordinates": "1.3521 N / 103.8198 E",
+    "year": "2026",
+    "year_roman": "MMXXVI",
+    "founded": "Beta MMXXVI",
+    "rails": {
+      "right": "Merit / Proof over pedigree / Talent proven through work",
+      "left": "Passport / Proof Card / Match Signal / Recruiter Confidence"
+    },
+    "languages": ["EN"],
+    "status": "Brand study / V4"
+  },
+  "nav": [
+    { "label": "Proof", "href": "#proof", "count": "04" },
+    { "label": "Visuals", "href": "#visuals", "count": "03" },
+    { "label": "Cards", "href": "#cards", "count": "06" },
+    { "label": "Recruiter", "href": "#recruiter", "count": "01" },
+    { "label": "Logos", "href": "#logos" }
+  ],
+  "rules": {
+    "about": { "roman": "II.", "meta": ["Brand thesis", ".", "Proof over pedigree"], "pagination": "002 / 008" },
+    "capabilities": { "roman": "III.", "meta": ["System objects", ".", "Passport / Proof / Signal"], "pagination": "003 / 008" },
+    "labs": { "roman": "IV.", "meta": ["Creative routes", ".", "Three directions"], "pagination": "004 / 008" },
+    "method": { "roman": "V.", "meta": ["Method", ".", "Work becomes evidence"], "pagination": "005 / 008" },
+    "work": { "roman": "VI.", "meta": ["Applications", ".", "Cards / dashboards"], "pagination": "006 / 008" },
+    "testimonial": { "roman": "VII.", "meta": ["Market proof", ".", "Recruiter confidence"], "pagination": "007 / 008" },
+    "cta": { "roman": "VIII.", "meta": ["Focus", ".", "Next 90 days"], "pagination": "008 / 008" }
+  },
+  "hero": {
+    "label": "Proof-of-ability platform",
+    "ix": "/ V4",
+    "headline": [
+      { "text": "Proven " },
+      { "text": "by work", "em": true },
+      { "text": "." , "dot": true}
+    ],
+    "lead": "Merit should feel like the trusted proof layer for early-career work: elegant enough for students to be proud of, structured enough for recruiters to use, and serious enough for investors to believe.",
+    "primary": { "label": "Build your passport", "href": "https://meritv3.vercel.app/profile" },
+    "secondary": { "label": "Discover talent", "href": "https://meritv3.vercel.app/recruiter" },
+    "stats": [
+      { "value": "52.9K", "label": "graduates / yr", "sub": "Singapore", "variant": "solid" },
+      { "value": "77.6K", "label": "paid segment", "sub": "recruiter wedge", "variant": "dashed" },
+      { "value": "2-sided", "label": "marketplace", "sub": "students + recruiters", "variant": "coral" }
+    ],
+    "meta": "Proof Card -> Passport -> Match Rationale -> Opportunity",
+    "index": [
+      { "num": "01", "label": "Capture" },
+      { "num": "02", "label": "Structure", "active": true },
+      { "num": "03", "label": "Surface" },
+      { "num": "04", "label": "Match" }
+    ],
+    "annotations": {
+      "tl": "FIG. 01 / Merit V4",
+      "tr": "Plate / Proof Layer",
+      "bl": "Singapore / MMXXVI",
+      "br": "Open Design visual board"
+    }
+  },
+  "about": {
+    "label": "Brand thesis",
+    "ix": "/ II",
+    "headline": [
+      { "text": "Ability should be " },
+      { "text": "demonstrated", "em": true },
+      { "text": ", not merely described" },
+      { "text": ".", "dot": true }
+    ],
+    "lead": "The V4 identity turns the current warm gallery into premium proof infrastructure. Real student work remains the hero, but recruiter evaluation becomes the organizing system.",
+    "cta_label": "Read brand book",
+    "cta_href": "../../merit-brand-book.md",
+    "footer_text": "Proof / Evidence / Signal / Opportunity",
+    "stamp_top": "Proof over pedigree",
+    "stamp_bottom": "Merit Passport",
+    "side_note": "Do not make this another portfolio site. Make it hiring signal.",
+    "caption": {
+      "bold": "Structured proof for human potential.",
+      "rest": "Merit V4 creative thesis."
+    }
+  },
+  "capabilities": {
+    "label": "Brand objects",
+    "ix": "/ III",
+    "headline": [
+      { "text": "A system of " },
+      { "text": "credible hiring objects", "em": true },
+      { "text": ".", "dot": true }
+    ],
+    "lead": "Merit becomes ownable when it consistently names and designs the objects recruiters evaluate.",
+    "ribbon": "<b>MERIT</b> / PASSPORT / PROOF CARD / MATCH SIGNAL",
+    "cards": [
+      { "num": "01", "tag": "Passport", "icon_svg": "<rect x='6' y='4' width='12' height='16'/><path d='M10 4v16M8 9h8M8 13h6'/>", "title": "Portable proof identity", "body": "A public profile that feels more official than a portfolio and more useful than a resume.", "href": "#passport" },
+      { "num": "02", "tag": "Proof Card", "icon_svg": "<rect x='4' y='5' width='16' height='14'/><path d='M7 9h10M7 13h7'/>", "title": "Work as evidence", "body": "Each card answers what was built, what it proves, and why it matters for a role.", "href": "#cards" },
+      { "num": "03", "tag": "Signal", "icon_svg": "<path d='M4 16l5-5 4 3 7-8'/><path d='M4 20h16'/>", "title": "Skills in context", "body": "Skills are not floating tags. They are backed by project artifacts and outcomes.", "href": "#signal" },
+      { "num": "04", "tag": "Match", "icon_svg": "<circle cx='7' cy='12' r='3'/><circle cx='17' cy='12' r='3'/><path d='M10 12h4'/>", "title": "Explainable fit", "body": "Recruiters see why a candidate matches, what evidence is strong, and what is missing.", "href": "#recruiter" }
+    ]
+  },
+  "labs": {
+    "label": "Creative directions",
+    "ix": "/ IV",
+    "headline": [
+      { "text": "Three routes, one recommended " },
+      { "text": "future", "em": true },
+      { "text": ".", "dot": true }
+    ],
+    "pills": [
+      { "label": "A Premium Future Workforce", "count": "01", "active": true },
+      { "label": "B Builder Culture", "count": "02" },
+      { "label": "C Elite Discovery", "count": "03" }
+    ],
+    "meta": { "ring": "A", "bold": "Recommended route", "sub": "Premium proof infrastructure" },
+    "cards": [
+      { "badge": "A", "num": "01", "year": "Recommended", "title": "Premium Future Workforce", "body": "Institutional trust, precise evidence hierarchy, artifact-first surfaces.", "href": "#visuals" },
+      { "badge": "B", "num": "02", "year": "Student growth", "title": "Modern Builder Culture", "body": "More energetic, more maker-led, useful for acquisition but less buyer-authoritative.", "href": "#visuals" },
+      { "badge": "C", "num": "03", "year": "Recruiter-led", "title": "Elite Talent Discovery", "body": "Sharp and analytical, strongest for monetization but risks reducing students to scores.", "href": "#visuals" },
+      { "badge": "Palette", "num": "04", "year": "V4", "title": "Ink / Paper / Signal", "body": "Gold becomes signal, blue becomes recruiter trust, green becomes validation.", "href": "#palette" },
+      { "badge": "Type", "num": "05", "year": "V4", "title": "Serif / Sans / Mono", "body": "Serif sells belief, sans runs product, mono marks evidence.", "href": "#type" }
+    ],
+    "progress": { "total": 5, "filled": 5 },
+    "foot": "The visual recommendation is Direction A with controlled energy borrowed from B and evidence density borrowed from C."
+  },
+  "method": {
+    "label": "Method",
+    "ix": "/ V",
+    "headline": [
+      { "text": "Work becomes " },
+      { "text": "evidence", "em": true },
+      { "text": ". Evidence becomes " },
+      { "text": "signal", "em": true },
+      { "text": ".", "dot": true }
+    ],
+    "right": "The product should make the transformation visible in every surface.",
+    "steps": [
+      { "num": "01", "title": "Capture", "body": "Students add projects, CVs, links, screenshots, decks, repos, and artifacts." },
+      { "num": "02", "title": "Structure", "body": "Merit asks what was built, what role was played, what skills were demonstrated, and what changed." },
+      { "num": "03", "title": "Surface", "body": "The passport presents proof cards as recruiter-readable evidence." },
+      { "num": "04", "title": "Match", "body": "Recruiters see fit rationale, missing evidence, and shortlist confidence." }
+    ],
+    "foot_left": "Do not make proof decorative.",
+    "foot_right_bold": "Make it inspectable.",
+    "foot_right_rest": "Merit V4"
+  },
+  "work": {
+    "label": "Selected applications",
+    "headline": [
+      { "text": "Proof cards and recruiter surfaces need " },
+      { "text": "authority", "em": true },
+      { "text": ".", "dot": true }
+    ],
+    "link_label": "Open design critique",
+    "link_href": "../../design-critique.md",
+    "cards": [
+      { "small_label": "Proof object", "index": "01 / 02", "title": "Proof Card", "body": "Artifact preview, what it proves, skills backed by evidence, outcome, candidate, recruiter action.", "year": "2026 / PRODUCT", "tag": "CORE" },
+      { "small_label": "Buyer surface", "index": "02 / 02", "title": "Recruiter Workspace", "body": "Role fit, candidate evidence, match rationale, missing signal, and shortlist action.", "year": "2026 / REVENUE", "tag": "BUYER" }
+    ]
+  },
+  "testimonial": {
+    "label": "Market belief",
+    "ix": "/ VII",
+    "quote": [
+      { "text": "The future belongs to people who can " },
+      { "text": "demonstrate", "em": true },
+      { "text": " what they can build, create, solve, and execute." }
+    ],
+    "author": { "initial": "M", "name": "Merit brand thesis", "title": "Proof over pedigree" },
+    "partners_text": "The competitor gap is structured proof for early-career hiring.",
+    "partners": [
+      { "glyph_svg": "<path d='M6 20V6h12v14M9 10h6M9 14h4'/>", "name": "LinkedIn", "role": "Graph", "href": "https://business.linkedin.com/talent-solutions" },
+      { "glyph_svg": "<path d='M5 18l7-12 7 12M8 14h8'/>", "name": "Handshake", "role": "Campus", "href": "https://joinhandshake.com/employers/" },
+      { "glyph_svg": "<path d='M5 7h14v10H5zM8 11h8'/>", "name": "GitHub", "role": "Code proof", "href": "https://github.com/" },
+      { "glyph_svg": "<circle cx='12' cy='12' r='7'/><path d='M8 12h8M12 8v8'/>", "name": "Behance", "role": "Portfolio", "href": "https://www.behance.net/" },
+      { "glyph_svg": "<path d='M6 16c4-8 8-8 12 0M6 8c4 8 8 8 12 0'/>", "name": "Merit", "role": "Proof layer", "href": "https://meritv3.vercel.app" }
+    ],
+    "read_more_label": "Read competitor analysis",
+    "read_more_href": "../../competitor-analysis.md"
+  },
+  "cta": {
+    "label": "90-day focus",
+    "ix": "/ VIII",
+    "headline": [
+      { "text": "Make the Passport and Proof Card feel like " },
+      { "text": "credible hiring objects", "em": true },
+      { "text": ".", "dot": true }
+    ],
+    "lead": "Single product focus: prove recruiter confidence improves after reviewing structured student proof.",
+    "primary": { "label": "Open V4 direction", "href": "../../merit-v4-creative-direction.md" },
+    "ribbon": "MERIT / PROOF OVER PEDIGREE / V4"
+  },
+  "footer": {
+    "brand_description": "Merit is a proof-of-ability platform. This visual board translates the brand strategy into an Open Design-style editorial direction.",
+    "brand_cta": { "label": "View product", "href": "https://meritv3.vercel.app", "meta": "Merit Beta" },
+    "columns": [
+      { "title": "Brand", "links": [{ "label": "Brand book", "href": "../../merit-brand-book.md" }, { "label": "Creative direction", "href": "../../merit-v4-creative-direction.md" }] },
+      { "title": "Research", "links": [{ "label": "Competitors", "href": "../../competitor-analysis.md" }, { "label": "Critique", "href": "../../design-critique.md" }] },
+      { "title": "Objects", "links": [{ "label": "Passport", "href": "#passport" }, { "label": "Proof card", "href": "#cards" }, { "label": "Recruiter workspace", "href": "#recruiter" }] },
+      { "title": "Thesis", "links": [{ "label": "Proof over pedigree", "href": "#proof" }, { "label": "Proven by work", "href": "#top" }] }
+    ],
+    "mega": [
+      { "text": "Proof " },
+      { "text": "wins", "em": true },
+      { "text": "." }
+    ]
+  },
+  "imagery": {
+    "strategy": "placeholder",
+    "assets_path": "./assets/",
+    "provider": "fal"
+  }
+}

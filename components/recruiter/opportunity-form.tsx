@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
+import { requireVerifiedBrowserUser } from "@/lib/auth/browser-verified-user";
 
 function parseSkills(value: string): string[] {
   return Array.from(
@@ -40,14 +40,7 @@ export function OpportunityForm({ onCreated }: OpportunityFormProps) {
     setIsSubmitting(true);
 
     try {
-      const supabase = createBrowserSupabaseClient();
-      const {
-        data: { user }
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        throw new Error("Please sign in again.");
-      }
+      const { supabase, user } = await requireVerifiedBrowserUser("posting opportunities");
 
       const parsedSkills = parseSkills(skillsSought);
       const { data, error } = await supabase

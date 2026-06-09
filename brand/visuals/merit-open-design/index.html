@@ -1,0 +1,1066 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Merit V4 Visual Direction / Open Design Board</title>
+  <meta name="description" content="Open Design-style visual direction board for Merit V4: proof over pedigree, proof cards, passports, recruiter evidence, and logo concepts." />
+  <style>
+    :root {
+      --paper: #f7f3ea;
+      --paper-2: #fffdf8;
+      --ink: #101010;
+      --muted: #70695d;
+      --line: #dcd2c0;
+      --gold: #d6a72c;
+      --gold-soft: #f1dfab;
+      --blue: #2f6fed;
+      --green: #1e8a5a;
+      --clay: #b85c38;
+      --graphite: #2b2b2b;
+      --white: #ffffff;
+      --shadow: 0 24px 70px rgba(27, 23, 15, .16);
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --serif: Georgia, "Times New Roman", serif;
+      --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: var(--sans);
+      background:
+        linear-gradient(90deg, rgba(16,16,16,.035) 1px, transparent 1px),
+        linear-gradient(rgba(16,16,16,.025) 1px, transparent 1px),
+        radial-gradient(circle at 12% 0%, rgba(214,167,44,.2), transparent 32rem),
+        radial-gradient(circle at 94% 10%, rgba(47,111,237,.12), transparent 28rem),
+        var(--paper);
+      background-size: 36px 36px, 36px 36px, auto, auto, auto;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .top-strip {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 16px;
+      align-items: center;
+      border-bottom: 1px solid var(--line);
+      background: rgba(247, 243, 234, .9);
+      backdrop-filter: blur(18px);
+      padding: 10px 24px;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .top-strip nav {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,.58);
+      padding: 7px 10px;
+      line-height: 1;
+    }
+
+    .pill strong { color: var(--blue); }
+
+    .right { text-align: right; }
+
+    .rail {
+      position: fixed;
+      z-index: 20;
+      top: 50%;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: rgba(16,16,16,.36);
+      pointer-events: none;
+    }
+
+    .rail.left { left: 12px; transform: translateY(-50%) rotate(-90deg); transform-origin: left top; }
+    .rail.right-rail { right: 12px; transform: translateY(-50%) rotate(90deg); transform-origin: right top; }
+
+    main { overflow: hidden; }
+
+    .section {
+      width: min(1480px, calc(100vw - 48px));
+      margin: 0 auto;
+      padding: 72px 0;
+    }
+
+    .hero {
+      min-height: calc(100vh - 42px);
+      display: grid;
+      grid-template-columns: minmax(0, 1.02fr) minmax(420px, .98fr);
+      gap: 42px;
+      align-items: center;
+      padding-top: 44px;
+    }
+
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 42px;
+      height: 1px;
+      background: var(--gold);
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+
+    h1 {
+      margin: 22px 0 22px;
+      font-family: var(--sans);
+      font-size: clamp(72px, 10vw, 164px);
+      line-height: .82;
+      letter-spacing: 0;
+      max-width: 940px;
+    }
+
+    h1 em, h2 em, .mega em {
+      font-family: var(--serif);
+      font-style: italic;
+      font-weight: 400;
+    }
+
+    .dot { color: var(--clay); }
+
+    .lead {
+      max-width: 740px;
+      color: #3f392f;
+      font-size: clamp(19px, 1.8vw, 28px);
+      line-height: 1.35;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 30px 0;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      border-radius: 999px;
+      border: 1px solid var(--ink);
+      padding: 0 18px;
+      font-size: 14px;
+      font-weight: 750;
+      background: var(--ink);
+      color: var(--paper-2);
+    }
+
+    .button.secondary {
+      background: rgba(255,255,255,.62);
+      color: var(--ink);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      max-width: 760px;
+    }
+
+    .stat {
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      border: 1px dashed var(--muted);
+      border-radius: 50%;
+      background: rgba(255,255,255,.46);
+      padding: 18px;
+    }
+
+    .stat.solid { border-style: solid; border-color: var(--ink); }
+    .stat.coral { border-color: var(--clay); color: var(--clay); }
+    .stat b { display: block; font-size: clamp(26px, 3.2vw, 52px); letter-spacing: 0; }
+    .stat span { display: block; margin-top: 5px; font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+
+    .collage {
+      position: relative;
+      min-height: 680px;
+      border: 1px solid var(--ink);
+      background:
+        linear-gradient(135deg, rgba(255,255,255,.78), rgba(255,255,255,.34)),
+        radial-gradient(circle at 24% 20%, rgba(214,167,44,.34), transparent 22%),
+        radial-gradient(circle at 78% 22%, rgba(47,111,237,.2), transparent 24%),
+        var(--paper-2);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .collage::before,
+    .collage::after {
+      content: "";
+      position: absolute;
+      inset: 22px;
+      border: 1px solid rgba(16,16,16,.18);
+      pointer-events: none;
+    }
+
+    .collage::after {
+      inset: auto 0 0;
+      height: 44%;
+      border: 0;
+      background: linear-gradient(transparent, rgba(16,16,16,.08));
+    }
+
+    .plate {
+      position: absolute;
+      border: 1px solid rgba(16,16,16,.28);
+      background: var(--paper);
+      box-shadow: 0 18px 34px rgba(16,16,16,.15);
+      padding: 14px;
+    }
+
+    .plate .tag {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .plate h3 {
+      margin: 10px 0 0;
+      font-size: 28px;
+      line-height: .95;
+      letter-spacing: 0;
+    }
+
+    .plate.hero-card {
+      left: 38px;
+      top: 46px;
+      width: 54%;
+      min-height: 300px;
+      transform: rotate(-2deg);
+    }
+
+    .plate.passport {
+      right: 36px;
+      top: 84px;
+      width: 38%;
+      min-height: 230px;
+      transform: rotate(2deg);
+    }
+
+    .plate.signal {
+      left: 92px;
+      bottom: 58px;
+      width: 42%;
+      min-height: 188px;
+      transform: rotate(3deg);
+    }
+
+    .plate.match {
+      right: 56px;
+      bottom: 80px;
+      width: 40%;
+      min-height: 210px;
+      transform: rotate(-3deg);
+      background: #111;
+      color: #fffaf0;
+    }
+
+    .mini-browser {
+      margin-top: 18px;
+      border: 1px solid rgba(16,16,16,.2);
+      background: #fff;
+    }
+
+    .browser-bar {
+      display: flex;
+      gap: 5px;
+      border-bottom: 1px solid rgba(16,16,16,.12);
+      padding: 8px;
+    }
+
+    .browser-bar i {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--gold);
+    }
+
+    .browser-body {
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .skeleton {
+      height: 10px;
+      background: rgba(16,16,16,.12);
+    }
+
+    .skeleton.w60 { width: 60%; }
+    .skeleton.w82 { width: 82%; }
+    .skeleton.blue { background: rgba(47,111,237,.55); }
+    .skeleton.green { background: rgba(30,138,90,.55); }
+
+    .rule {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 14px;
+      align-items: center;
+      margin: 24px 0 38px;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .rule::before,
+    .rule::after {
+      content: "";
+      height: 1px;
+      background: var(--line);
+    }
+
+    h2 {
+      font-size: clamp(42px, 6vw, 92px);
+      line-height: .92;
+      letter-spacing: 0;
+      margin-bottom: 22px;
+    }
+
+    .section-lead {
+      max-width: 820px;
+      color: #4a4338;
+      font-size: 20px;
+      line-height: 1.5;
+      margin-bottom: 34px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .grid.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid.cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .grid.two { grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); }
+
+    .card {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.6);
+      box-shadow: 0 12px 30px rgba(16,16,16,.06);
+      padding: 22px;
+      min-height: 180px;
+    }
+
+    .card.dark {
+      background: var(--ink);
+      color: var(--paper-2);
+      border-color: var(--ink);
+    }
+
+    .card .num {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .14em;
+      color: var(--clay);
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+
+    .card h3 {
+      font-size: 28px;
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+
+    .card p {
+      color: var(--muted);
+      line-height: 1.5;
+      margin-bottom: 0;
+    }
+
+    .card.dark p { color: rgba(255,255,255,.74); }
+
+    .palette {
+      display: grid;
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+      border: 1px solid var(--ink);
+      background: var(--ink);
+      gap: 1px;
+    }
+
+    .swatch {
+      min-height: 168px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .swatch.light { color: var(--ink); }
+    .swatch.dark-text { color: #fff; }
+
+    .type-row {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 18px;
+      border-top: 1px solid var(--line);
+      padding: 22px 0;
+      align-items: baseline;
+    }
+
+    .type-row .label {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .type-row .sample {
+      font-size: clamp(30px, 4vw, 64px);
+      line-height: 1;
+    }
+
+    .serif { font-family: var(--serif); font-style: italic; }
+    .mono { font-family: var(--mono); letter-spacing: .02em; }
+
+    .direction-card {
+      min-height: 440px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .direction-card::after {
+      content: "";
+      position: absolute;
+      width: 170px;
+      height: 170px;
+      right: -46px;
+      top: -44px;
+      border-radius: 50%;
+      border: 1px solid currentColor;
+      opacity: .18;
+    }
+
+    .direction-card.a { background: #fffdf8; }
+    .direction-card.b { background: #111; color: #f6f2e9; }
+    .direction-card.c { background: #eef3ff; }
+    .direction-card.b p { color: rgba(246,242,233,.72); }
+
+    .badge-row {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    .badge {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.72);
+      border-radius: 999px;
+      padding: 7px 9px;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .direction-card.b .badge {
+      border-color: rgba(246,242,233,.25);
+      background: rgba(255,255,255,.08);
+    }
+
+    .proof-card {
+      background: var(--paper-2);
+      border: 1px solid var(--ink);
+      box-shadow: 0 18px 40px rgba(16,16,16,.12);
+      overflow: hidden;
+    }
+
+    .proof-media {
+      aspect-ratio: 16 / 9;
+      padding: 18px;
+      background:
+        linear-gradient(135deg, rgba(47,111,237,.18), rgba(214,167,44,.24)),
+        #ece4d4;
+      display: grid;
+      align-items: end;
+    }
+
+    .proof-media .window {
+      border: 1px solid rgba(16,16,16,.25);
+      background: rgba(255,255,255,.82);
+      padding: 14px;
+    }
+
+    .proof-body { padding: 20px; }
+
+    .proof-title {
+      font-size: 34px;
+      line-height: .98;
+      margin-bottom: 12px;
+    }
+
+    .proof-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--clay);
+      margin-bottom: 8px;
+    }
+
+    .proof-body p { color: #4b4439; line-height: 1.45; }
+
+    .metric-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      padding: 10px;
+      background: #fff;
+    }
+
+    .metric b { display: block; font-size: 22px; }
+    .metric span { font-family: var(--mono); color: var(--muted); font-size: 10px; text-transform: uppercase; }
+
+    .dashboard {
+      border: 1px solid var(--ink);
+      background: #fdfbf7;
+      box-shadow: var(--shadow);
+      display: grid;
+      grid-template-columns: 260px minmax(0,1fr) 340px;
+      min-height: 680px;
+    }
+
+    .dash-pane {
+      padding: 18px;
+      border-right: 1px solid var(--line);
+    }
+
+    .dash-pane:last-child { border-right: 0; }
+
+    .dash-kicker {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    .filter {
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 12px;
+      margin-bottom: 10px;
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .candidate {
+      border: 1px solid var(--line);
+      background: #fff;
+      padding: 14px;
+      margin-bottom: 12px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+    }
+
+    .candidate.active {
+      border-color: var(--blue);
+      box-shadow: inset 4px 0 0 var(--blue);
+    }
+
+    .candidate h4 { margin: 0 0 7px; font-size: 18px; }
+    .candidate p { margin: 0; color: var(--muted); font-size: 13px; }
+
+    .score {
+      width: 54px;
+      height: 54px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      border: 1px solid var(--blue);
+      color: var(--blue);
+      font-weight: 800;
+    }
+
+    .evidence {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .evidence-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .check {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+
+    .missing { background: var(--clay); }
+
+    .logo-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .logo-tile {
+      aspect-ratio: 1;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.62);
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 16px;
+    }
+
+    .logo-mark {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 54px;
+      line-height: 1;
+      margin-bottom: 10px;
+    }
+
+    .logo-tile span {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .landing-wire {
+      display: grid;
+      grid-template-columns: .9fr 1.1fr;
+      gap: 22px;
+      align-items: stretch;
+    }
+
+    .wireframe {
+      border: 1px solid var(--ink);
+      background: #fff;
+      padding: 18px;
+      min-height: 520px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .wire-top {
+      height: 36px;
+      border: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .wire-hero {
+      min-height: 210px;
+      background: linear-gradient(135deg, rgba(16,16,16,.9), rgba(47,111,237,.52));
+      color: white;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: end;
+    }
+
+    .wire-hero h3 {
+      font-size: 48px;
+      line-height: .9;
+      margin: 0;
+    }
+
+    .wire-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .wire-box {
+      min-height: 112px;
+      background: #f1eee7;
+      border: 1px solid var(--line);
+      padding: 10px;
+      font-family: var(--mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .mega {
+      font-size: clamp(62px, 13vw, 190px);
+      line-height: .78;
+      letter-spacing: 0;
+      margin: 0;
+    }
+
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 38px 24px 54px;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 1100px) {
+      .hero, .grid.two, .landing-wire { grid-template-columns: 1fr; }
+      .dashboard { grid-template-columns: 1fr; }
+      .dash-pane { border-right: 0; border-bottom: 1px solid var(--line); }
+      .grid.cols-4, .grid.cols-3, .logo-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .palette { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .rail { display: none; }
+    }
+
+    @media (max-width: 680px) {
+      .top-strip { grid-template-columns: 1fr; text-align: left; }
+      .right { text-align: left; }
+      .section { width: min(100vw - 28px, 1480px); padding: 48px 0; }
+      .stats, .grid.cols-4, .grid.cols-3, .logo-grid, .palette, .metric-row, .wire-grid { grid-template-columns: 1fr; }
+      .collage { min-height: 780px; }
+      .plate { position: relative; inset: auto !important; width: auto !important; margin: 18px; transform: none !important; }
+      h1 { font-size: clamp(60px, 21vw, 92px); }
+      h2 { font-size: clamp(38px, 14vw, 66px); }
+    }
+  </style>
+</head>
+<body id="top">
+  <div class="rail left">Passport / Proof Card / Match Signal / Recruiter Confidence</div>
+  <div class="rail right-rail">Merit / Proof over pedigree / Talent proven through work</div>
+
+  <header class="top-strip">
+    <div>Merit / Vol. 04 / V4 Direction</div>
+    <nav>
+      <a class="pill" href="#proof">Proof <strong>04</strong></a>
+      <a class="pill" href="#visuals">Visuals <strong>03</strong></a>
+      <a class="pill" href="#cards">Cards <strong>06</strong></a>
+      <a class="pill" href="#recruiter">Recruiter <strong>01</strong></a>
+      <a class="pill" href="#logos">Logos</a>
+    </nav>
+    <div class="right">Proof over pedigree / Singapore</div>
+  </header>
+
+  <main>
+    <section class="section hero" id="proof">
+      <div>
+        <div class="eyebrow">Proof-of-ability platform / V4</div>
+        <h1>Proven <em>by work</em><span class="dot">.</span></h1>
+        <p class="lead">Merit should feel like the trusted proof layer for early-career work: elegant enough for students to be proud of, structured enough for recruiters to use, and serious enough for investors to believe.</p>
+        <div class="hero-actions">
+          <a class="button" href="../../merit-brand-book.md">Brand book</a>
+          <a class="button secondary" href="../../merit-v4-creative-direction.md">Creative direction</a>
+        </div>
+        <div class="stats">
+          <div class="stat solid"><div><b>52.9K</b><span>graduates / yr</span><span>Singapore</span></div></div>
+          <div class="stat"><div><b>77.6K</b><span>paid segment</span><span>recruiter wedge</span></div></div>
+          <div class="stat coral"><div><b>2-sided</b><span>marketplace</span><span>students + recruiters</span></div></div>
+        </div>
+      </div>
+
+      <div class="collage" aria-label="Merit proof layer collage">
+        <article class="plate hero-card">
+          <div class="tag">FIG. 01 / proof card</div>
+          <h3>Work becomes evidence</h3>
+          <div class="mini-browser">
+            <div class="browser-bar"><i></i><i></i><i></i></div>
+            <div class="browser-body">
+              <div class="skeleton w82 blue"></div>
+              <div class="skeleton"></div>
+              <div class="skeleton w60"></div>
+              <div class="skeleton green"></div>
+            </div>
+          </div>
+        </article>
+        <article class="plate passport">
+          <div class="tag">Merit Passport</div>
+          <h3>Public identity, backed by work</h3>
+          <div class="badge-row">
+            <span class="badge">Candidate</span>
+            <span class="badge">4 proofs</span>
+            <span class="badge">Ready</span>
+          </div>
+        </article>
+        <article class="plate signal">
+          <div class="tag">Skill signal</div>
+          <h3>React / Research / Pitch</h3>
+          <div class="metric-row">
+            <div class="metric"><b>3</b><span>artifacts</span></div>
+            <div class="metric"><b>8</b><span>skills</span></div>
+            <div class="metric"><b>1</b><span>role fit</span></div>
+          </div>
+        </article>
+        <article class="plate match">
+          <div class="tag">Recruiter fit</div>
+          <h3>Strong fit, with rationale</h3>
+          <p style="color:rgba(255,255,255,.72);line-height:1.4;">Match is not magic. It is visible evidence mapped to role intent.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="visuals">
+      <div class="rule"><span>II.</span><span>Visual system</span><span>002 / 008</span></div>
+      <h2>Premium <em>proof infrastructure</em><span class="dot">.</span></h2>
+      <p class="section-lead">The V4 direction sharpens the current warm gallery. Gold becomes signal, blue becomes recruiter trust, green becomes validation, and real project artifacts stay central.</p>
+      <div class="palette" id="palette">
+        <div class="swatch dark-text" style="background:#101010"><span>Ink</span><span>#101010</span></div>
+        <div class="swatch dark-text" style="background:#2b2b2b"><span>Graphite</span><span>#2B2B2B</span></div>
+        <div class="swatch light" style="background:#f7f3ea"><span>Paper</span><span>#F7F3EA</span></div>
+        <div class="swatch light" style="background:#fffdf8"><span>Surface</span><span>#FFFDF8</span></div>
+        <div class="swatch light" style="background:#d6a72c"><span>Signal Gold</span><span>#D6A72C</span></div>
+        <div class="swatch dark-text" style="background:#2f6fed"><span>Proof Blue</span><span>#2F6FED</span></div>
+        <div class="swatch dark-text" style="background:#1e8a5a"><span>Evidence Green</span><span>#1E8A5A</span></div>
+        <div class="swatch dark-text" style="background:#b85c38"><span>Alert Clay</span><span>#B85C38</span></div>
+      </div>
+
+      <div style="margin-top:46px" id="type">
+        <div class="type-row">
+          <div class="label">Display / belief</div>
+          <div class="sample">Proof over <span class="serif">pedigree</span>.</div>
+        </div>
+        <div class="type-row">
+          <div class="label">UI / product</div>
+          <div class="sample">Recruiter evidence workspace</div>
+        </div>
+        <div class="type-row">
+          <div class="label">Mono / metadata</div>
+          <div class="sample mono">MATCH / 84 / 3 STRONG PROOFS</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="rule"><span>III.</span><span>Three routes</span><span>003 / 008</span></div>
+      <div class="grid cols-3">
+        <article class="card direction-card a">
+          <div>
+            <div class="num">A / Recommended</div>
+            <h3>Premium Future Workforce</h3>
+            <p>Institutional trust, precise evidence hierarchy, and artifact-first surfaces. Best route for students, recruiters, and investors together.</p>
+          </div>
+          <div class="badge-row">
+            <span class="badge">Paper</span>
+            <span class="badge">Ink</span>
+            <span class="badge">Signal</span>
+          </div>
+        </article>
+        <article class="card direction-card b">
+          <div>
+            <div class="num">B / Acquisition</div>
+            <h3>Modern Builder Culture</h3>
+            <p>More electric, maker-led, and student-native. Good for campus energy, weaker for recruiter authority if used alone.</p>
+          </div>
+          <div class="badge-row">
+            <span class="badge">Live</span>
+            <span class="badge">Build</span>
+            <span class="badge">Momentum</span>
+          </div>
+        </article>
+        <article class="card direction-card c">
+          <div>
+            <div class="num">C / Buyer</div>
+            <h3>Elite Talent Discovery</h3>
+            <p>Sharp, analytical, and recruiter-led. Useful density, but risks making students feel like scored inventory.</p>
+          </div>
+          <div class="badge-row">
+            <span class="badge">Fit</span>
+            <span class="badge">Compare</span>
+            <span class="badge">Shortlist</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="cards">
+      <div class="rule"><span>IV.</span><span>Proof card system</span><span>004 / 008</span></div>
+      <h2>Make proof <em>inspectable</em><span class="dot">.</span></h2>
+      <p class="section-lead">The project card should stop behaving like a social post and start behaving like a hiring evidence object. These are visual direction mocks, not app implementation.</p>
+      <div class="grid cols-3">
+        <article class="proof-card">
+          <div class="proof-media"><div class="window"><div class="skeleton blue"></div><div class="skeleton w60" style="margin-top:10px"></div></div></div>
+          <div class="proof-body">
+            <div class="proof-label">Proves / product thinking</div>
+            <h3 class="proof-title">Campus Spend Tracker</h3>
+            <p>Built a budgeting prototype from survey insights, shipped interactive dashboard and pitch deck.</p>
+            <div class="badge-row"><span class="badge">Research</span><span class="badge">Next.js</span><span class="badge">Data viz</span></div>
+          </div>
+        </article>
+        <article class="proof-card">
+          <div class="proof-media"><div class="window"><div class="skeleton green"></div><div class="skeleton" style="margin-top:10px"></div></div></div>
+          <div class="proof-body">
+            <div class="proof-label">Proves / design execution</div>
+            <h3 class="proof-title">Volunteer Match App</h3>
+            <p>Designed onboarding and matching flows with testable role intent and accessibility improvements.</p>
+            <div class="badge-row"><span class="badge">UX</span><span class="badge">Figma</span><span class="badge">Testing</span></div>
+          </div>
+        </article>
+        <article class="proof-card">
+          <div class="proof-media"><div class="window"><div class="skeleton"></div><div class="skeleton blue" style="margin-top:10px"></div></div></div>
+          <div class="proof-body">
+            <div class="proof-label">Proves / technical depth</div>
+            <h3 class="proof-title">Moderation Pipeline</h3>
+            <p>Implemented report flow, admin actions, and safe fallback behavior for production reliability.</p>
+            <div class="badge-row"><span class="badge">Backend</span><span class="badge">RLS</span><span class="badge">Ops</span></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="recruiter">
+      <div class="rule"><span>V.</span><span>Recruiter workspace</span><span>005 / 008</span></div>
+      <h2>Buyer trust needs <em>density</em><span class="dot">.</span></h2>
+      <p class="section-lead">Recruiters need a workspace that makes screening confidence visible: role fit, evidence strength, missing signals, and shortlist action.</p>
+      <div class="dashboard">
+        <aside class="dash-pane">
+          <div class="dash-kicker">Filters</div>
+          <div class="filter"><span>Role</span><strong>Product Intern</strong></div>
+          <div class="filter"><span>Skill</span><strong>Research</strong></div>
+          <div class="filter"><span>Evidence</span><strong>3+ proofs</strong></div>
+          <div class="filter"><span>Readiness</span><strong>Recruiter-ready</strong></div>
+        </aside>
+        <section class="dash-pane">
+          <div class="dash-kicker">Candidates / ranked by proof relevance</div>
+          <article class="candidate active"><div><h4>Alyssa Tan</h4><p>Product + data / 4 proof cards / strongest: spend tracker</p></div><div class="score">84</div></article>
+          <article class="candidate"><div><h4>Ravi Menon</h4><p>Frontend / 3 proof cards / strongest: booking workflow</p></div><div class="score">78</div></article>
+          <article class="candidate"><div><h4>Mei Ong</h4><p>UX research / 5 proof cards / strongest: service blueprint</p></div><div class="score">76</div></article>
+          <article class="candidate"><div><h4>Danish Lim</h4><p>Ops + analytics / 2 proof cards / strongest: dashboard rebuild</p></div><div class="score">69</div></article>
+        </section>
+        <aside class="dash-pane">
+          <div class="dash-kicker">Fit rationale</div>
+          <h3 style="font-size:34px;line-height:1;margin-bottom:12px;">Alyssa Tan</h3>
+          <p style="color:var(--muted);line-height:1.45;">Strong fit because three artifacts map directly to product research, dashboard execution, and user-facing storytelling.</p>
+          <div class="evidence">
+            <div class="evidence-row"><i class="check"></i><span>Project artifact supports role intent</span><strong>High</strong></div>
+            <div class="evidence-row"><i class="check"></i><span>Skills backed by visible work</span><strong>8</strong></div>
+            <div class="evidence-row"><i class="check missing"></i><span>Missing internship availability</span><strong>Ask</strong></div>
+          </div>
+          <a class="button" style="width:100%;margin-top:18px" href="#">Shortlist candidate</a>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section" id="logos">
+      <div class="rule"><span>VI.</span><span>Logo explorations</span><span>006 / 008</span></div>
+      <h2>Marks for a <em>proof layer</em><span class="dot">.</span></h2>
+      <p class="section-lead">Ten fast visual territories. The strongest route is a passport/signal hybrid: portable identity plus structured evidence.</p>
+      <div class="logo-grid">
+        <div class="logo-tile"><div><div class="logo-mark">M</div><span>Proof stamp</span></div></div>
+        <div class="logo-tile"><div><div class="logo-mark">|M|</div><span>Passport</span></div></div>
+        <div class="logo-tile"><div><div class="logo-mark">M^</div><span>Index</span></div></div>
+        <div class="logo-tile"><div><div class="logo-mark">[M]</div><span>Frame</span></div></div>
+        <div class="logo-tile"><div><div class="logo-mark">oMo</div><span>Match node</span></div></div>
+        <div class="logo-tile"><div><div class="logo-mark">&lt;M&gt;</div><span>Evidence tag</span></div></div>
+        <div class="logo-tile"><div><div class="logo-mark">M/</div><span>Verified path</span></div></div>
+        <div class="logo-tile"><div><div class="logo-mark">|||</div><span>Signal stack</span></div></div>
+        <div class="logo-tile"><div><div class="logo-mark">M.</div><span>Wordmark dot</span></div></div>
+        <div class="logo-tile"><div><div class="logo-mark">M+</div><span>Ability added</span></div></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="rule"><span>VII.</span><span>Landing / homepage direction</span><span>007 / 008</span></div>
+      <div class="landing-wire">
+        <div>
+          <h2>First screen must show <em>the product</em><span class="dot">.</span></h2>
+          <p class="section-lead">No abstract hero. No generic campus photos. The first viewport should show Merit as a proof layer: a passport, proof card, and recruiter fit panel in one composed scene.</p>
+        </div>
+        <div class="wireframe">
+          <div class="wire-top"><span>Merit</span><span>Students / Recruiters</span></div>
+          <div class="wire-hero"><div class="dash-kicker" style="color:rgba(255,255,255,.68)">Proof-of-ability platform</div><h3>Proven by work.</h3></div>
+          <div class="wire-grid">
+            <div class="wire-box">Proof card</div>
+            <div class="wire-box">Passport</div>
+            <div class="wire-box">Match rationale</div>
+          </div>
+          <div class="wire-box" style="min-height:86px">Recruiter confidence loop / review proof -> shortlist -> interview</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="rule"><span>VIII.</span><span>90-day focus</span><span>008 / 008</span></div>
+      <p class="mega">Proof <em>wins</em><span class="dot">.</span></p>
+      <div class="grid two" style="margin-top:34px">
+        <article class="card dark">
+          <div class="num">Design focus</div>
+          <h3>Make Passport and Proof Card unmistakably credible.</h3>
+          <p>Every screen should reinforce the same idea: work becomes evidence, evidence becomes signal, signal creates opportunity.</p>
+        </article>
+        <article class="card">
+          <div class="num">Product focus</div>
+          <h3>Prove recruiter confidence improves after reviewing structured proof.</h3>
+          <p>Measure review completion, shortlist conversion, confidence lift, time-to-identify, and percentage of candidates with one strong proof card.</p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Merit V4 visual direction / Open Design-style board / created from brand strategy, deck, repo docs, and critique.
+  </footer>
+</body>
+</html>

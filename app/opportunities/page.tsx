@@ -23,9 +23,9 @@ export default async function OpportunitiesPage() {
   return (
     <AppShell roleType={profile?.roleType} userEmail={user.email}>
       <section className="space-y-5">
-        <Card className="space-y-2 border-sun-200 bg-gradient-to-r from-sun-50 to-white">
-          <h1 className="text-2xl font-semibold text-ink-950">Opportunities</h1>
-          <p className="text-sm text-ink-700">
+        <Card className="space-y-2 border-[#ddcfac] bg-gradient-to-r from-[#f7f1e2] to-[#fdfbf7]">
+          <h1 className="text-3xl font-semibold tracking-tight text-[#171512]">Opportunities</h1>
+          <p className="text-sm text-[#5e574c]">
             Browse internship roles and track how your proof profile matches each opening.
           </p>
         </Card>

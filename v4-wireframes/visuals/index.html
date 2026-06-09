@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Merit V4 Low-Fidelity Wireframes</title>
+    <style>
+      :root {
+        --paper: #f8f7f3;
+        --ink: #111111;
+        --muted: #5c5c5c;
+        --line: #d8d4ca;
+        --blue: #2f6fed;
+        --gold: #d6a72c;
+        --green: #1e8a5a;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: Arial, sans-serif;
+      }
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 22px 36px;
+        border-bottom: 1px solid var(--line);
+        background: #fff;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+      }
+      h1, h2 {
+        font-family: Georgia, serif;
+        font-weight: 500;
+        margin: 0;
+      }
+      h1 { font-size: clamp(40px, 7vw, 88px); line-height: .95; }
+      h2 { font-size: 42px; margin-bottom: 18px; }
+      p { color: var(--muted); line-height: 1.55; }
+      .button {
+        border: 1px solid var(--ink);
+        padding: 12px 16px;
+        text-decoration: none;
+        color: var(--ink);
+        display: inline-block;
+        margin-right: 10px;
+      }
+      .button.primary { background: var(--ink); color: #fff; }
+      section { padding: 54px 36px; border-bottom: 1px solid var(--line); }
+      .hero {
+        min-height: 650px;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 42px;
+      }
+      .scene, .panel, .card {
+        background: #fff;
+        border: 1px solid var(--line);
+      }
+      .scene { padding: 28px; display: grid; grid-template-columns: 1.4fr .2fr .65fr; gap: 22px; align-items: center; }
+      .proof-card { border: 1px solid var(--line); background: #fafafa; padding: 18px; }
+      .artifact { height: 180px; background: #ebe7dc; border: 1px solid var(--line); display: grid; place-items: center; color: var(--muted); }
+      .arrow { text-align: center; font-size: 42px; }
+      .shortlist { background: var(--ink); color: #fff; padding: 28px; min-height: 220px; }
+      .shortlist p { color: #e8e8e8; }
+      .workspace { display: grid; grid-template-columns: 240px 1fr 340px; gap: 18px; }
+      .panel { padding: 20px; min-height: 460px; }
+      .result { border: 1px solid var(--line); padding: 16px; margin-bottom: 14px; background: #fafafa; }
+      .tag { display: inline-block; border: 1px solid var(--blue); color: var(--blue); padding: 5px 8px; font-size: 12px; margin-top: 8px; }
+      .builder { display: grid; grid-template-columns: 1fr 420px; gap: 18px; }
+      .field { height: 42px; border: 1px solid var(--line); background: #fafafa; margin: 10px 0 22px; }
+      .matrix { width: 100%; border-collapse: collapse; background: #fff; }
+      .matrix th, .matrix td { border: 1px solid var(--line); padding: 16px; text-align: left; }
+      @media (max-width: 900px) {
+        .scene, .workspace, .builder { grid-template-columns: 1fr; }
+        header { position: static; }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <strong>Merit V4</strong>
+      <span>Low-fidelity product wireframes</span>
+    </header>
+
+    <section class="hero">
+      <div>
+        <h1>Proven by work.</h1>
+        <p>Merit turns student projects into recruiter-readable proof, so early talent can be evaluated beyond the resume.</p>
+        <a class="button primary" href="#builder">Build passport</a>
+        <a class="button" href="#workspace">Review as recruiter</a>
+      </div>
+      <div class="scene">
+        <div class="proof-card">
+          <strong>Proof Card</strong>
+          <div class="artifact">artifact preview</div>
+          <p><strong>Proves:</strong> React UI implementation</p>
+          <p><strong>Evidence:</strong> live demo + screenshots</p>
+          <span class="tag">Evidence level 3</span>
+        </div>
+        <div class="arrow">-></div>
+        <div class="shortlist">
+          <h3>Recruiter shortlist</h3>
+          <p>3 candidates worth reviewing, with reasons and gaps attached.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="workspace">
+      <h2>Recruiter Evidence Search</h2>
+      <div class="workspace">
+        <div class="panel">
+          <strong>Role brief</strong>
+          <p>Frontend Intern</p>
+          <p>Must: React, UI, forms</p>
+          <span class="tag">Level 3+</span>
+        </div>
+        <div class="panel">
+          <strong>Candidates by relevant proof</strong>
+          <div class="result">
+            <strong>Amira Tan</strong>
+            <p>Strong evidence match. Proof: shipped Next.js dashboard. Gap: usage metrics.</p>
+            <a class="button primary" href="#profile">View evidence</a>
+          </div>
+          <div class="result">
+            <strong>Dev Malik</strong>
+            <p>Partial evidence match. Proof: API prototype screenshots. Gap: repo missing.</p>
+            <a class="button" href="#compare">Compare</a>
+          </div>
+        </div>
+        <div class="panel">
+          <strong>Evidence preview</strong>
+          <p>Why this candidate may be relevant.</p>
+          <div class="artifact">selected proof</div>
+          <a class="button primary" href="#shortlist">Shortlist</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="builder">
+      <h2>Student Proof Builder</h2>
+      <div class="builder">
+        <div class="panel">
+          <strong>Build your first proof card</strong>
+          <p>Target role</p><div class="field"></div>
+          <p>Personal contribution</p><div class="field"></div>
+          <p>Evidence upload or link</p><div class="field"></div>
+          <a class="button primary" href="#">Publish proof card</a>
+        </div>
+        <div class="panel">
+          <strong>Live recruiter preview</strong>
+          <div class="artifact">artifact</div>
+          <p><strong>What this proves:</strong> contribution, skills, evidence, outcome.</p>
+          <p style="color:#8a5a00">Gap: contribution unclear.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="compare">
+      <h2>Candidate Comparison</h2>
+      <table class="matrix">
+        <tr><th></th><th>Amira</th><th>Dev</th><th>Priya</th></tr>
+        <tr><td>Role fit</td><td>Strong</td><td>Partial</td><td>Strong</td></tr>
+        <tr><td>Strongest proof</td><td>Dashboard</td><td>API prototype</td><td>Design system</td></tr>
+        <tr><td>Evidence level</td><td>Level 3</td><td>Level 2</td><td>Level 4</td></tr>
+        <tr><td>Gaps</td><td>Usage metrics</td><td>Repo missing</td><td>None major</td></tr>
+      </table>
+    </section>
+  </body>
+</html>
+

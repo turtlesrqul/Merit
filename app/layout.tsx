@@ -1,10 +1,20 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Sans } from "next/font/google";
+import { Cormorant_Garamond, Manrope } from "next/font/google";
+import { AuthSessionSync } from "@/components/auth/auth-session-sync";
+import { SupabaseSetupRequired } from "@/components/setup/supabase-setup-required";
+import { isSupabaseConfigured } from "@/lib/supabase/env";
 import "./globals.css";
 
-const ibmPlexSans = IBM_Plex_Sans({
+const manrope = Manrope({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"]
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-ui"
+});
+
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-display"
 });
 
 export const metadata: Metadata = {
@@ -17,9 +27,20 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const supabaseConfigured = isSupabaseConfigured();
+
   return (
     <html lang="en">
-      <body className={ibmPlexSans.className}>{children}</body>
+      <body className={`${manrope.variable} ${cormorant.variable}`}>
+        {supabaseConfigured ? (
+          <>
+            <AuthSessionSync />
+            {children}
+          </>
+        ) : (
+          <SupabaseSetupRequired />
+        )}
+      </body>
     </html>
   );
 }

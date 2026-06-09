@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
+import { requireVerifiedBrowserUser } from "@/lib/auth/browser-verified-user";
 import { Button } from "@/components/ui/button";
 
 type ProjectOwnerActionsProps = {
@@ -23,20 +23,27 @@ export function ProjectOwnerActions({ projectId }: ProjectOwnerActionsProps) {
 
     setErrorMessage(null);
     setIsDeleting(true);
-    const supabase = createBrowserSupabaseClient();
-    const { error } = await supabase.from("projects").delete().eq("project_id", projectId);
-    if (error) {
-      setErrorMessage(error.message);
-      setIsDeleting(false);
-      return;
-    }
+    try {
+      const { supabase } = await requireVerifiedBrowserUser("deleting projects");
+      const { error } = await supabase.from("projects").delete().eq("project_id", projectId);
+      if (error) {
+        setErrorMessage(error.message);
+        return;
+      }
 
-    router.refresh();
-    setIsDeleting(false);
+      router.refresh();
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Failed to delete project.");
+    } finally {
+      setIsDeleting(false);
+    }
   }
 
   return (
     <>
+      <Link href={`/projects/${projectId}`}>
+        <Button variant="secondary">View</Button>
+      </Link>
       <Link href={`/projects/${projectId}/edit`}>
         <Button variant="secondary">Edit</Button>
       </Link>

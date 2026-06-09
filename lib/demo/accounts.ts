@@ -8,9 +8,13 @@ export type DemoArtifact = {
 
 export type DemoProject = {
   title: string;
+  hook?: string;
   problemSolved: string;
   whatWasBuilt: string;
   category: string;
+  projectType?: "web" | "design" | "document" | "other";
+  coverImageUrl?: string;
+  isFeatured?: boolean;
   impact: string;
   skills: string[];
   artifacts: DemoArtifact[];

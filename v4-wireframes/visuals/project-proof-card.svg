@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="920" viewBox="0 0 760 920">
+  <rect width="760" height="920" fill="#f8f7f3"/>
+  <rect x="56" y="54" width="648" height="810" fill="#fff" stroke="#d8d4ca"/>
+  <rect x="88" y="86" width="584" height="300" fill="#ebe7dc" stroke="#cfcac0"/>
+  <text x="294" y="244" font-family="Arial" font-size="18" fill="#555">artifact preview</text>
+  <text x="88" y="448" font-family="Arial" font-size="14" fill="#666">PROVES</text>
+  <text x="88" y="482" font-family="Georgia" font-size="34" fill="#111">React UI implementation</text>
+  <text x="88" y="532" font-family="Arial" font-size="17" fill="#333">Admin dashboard for student review operations.</text>
+  <text x="88" y="586" font-family="Arial" font-size="16" font-weight="700" fill="#111">Contribution</text>
+  <text x="220" y="586" font-family="Arial" font-size="16" fill="#333">Solo frontend build</text>
+  <text x="88" y="632" font-family="Arial" font-size="16" font-weight="700" fill="#111">Skills</text>
+  <text x="220" y="632" font-family="Arial" font-size="16" fill="#333">React, forms, data tables</text>
+  <text x="88" y="678" font-family="Arial" font-size="16" font-weight="700" fill="#111">Evidence</text>
+  <text x="220" y="678" font-family="Arial" font-size="16" fill="#333">Live demo + screenshots</text>
+  <text x="88" y="724" font-family="Arial" font-size="16" font-weight="700" fill="#111">Outcome</text>
+  <text x="220" y="724" font-family="Arial" font-size="16" fill="#333">Used in demo review</text>
+  <text x="88" y="770" font-family="Arial" font-size="16" font-weight="700" fill="#8a5a00">Missing</text>
+  <text x="220" y="770" font-family="Arial" font-size="16" fill="#8a5a00">Usage metrics</text>
+  <rect x="88" y="812" width="150" height="42" fill="#111" rx="4"/>
+  <text x="122" y="838" font-family="Arial" font-size="14" fill="#fff">Inspect proof</text>
+</svg>
+

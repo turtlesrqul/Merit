@@ -34,9 +34,9 @@ export function RecruiterDashboard({
 
   return (
     <section className="space-y-6">
-      <Card className="space-y-3 border-sun-200 bg-gradient-to-r from-sun-50 to-white">
-        <h1 className="text-2xl font-semibold text-ink-950">Recruiter Dashboard</h1>
-        <p className="text-sm text-ink-700">
+      <Card className="space-y-3 border-[#ddcfac] bg-gradient-to-r from-[#f7f1e2] to-[#fdfbf7]">
+        <h1 className="text-3xl font-semibold tracking-tight text-[#171512]">Recruiter Dashboard</h1>
+        <p className="text-sm text-[#5e574c]">
           Post roles, discover candidate proof profiles, and run the rules-based match engine.
         </p>
         <MatchEngineControls />

@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Merit Passport Proof Gallery Concept</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="side-rail left">Passport / Proof Card / Match Signal</div>
+    <div class="side-rail right">Merit / Proof over pedigree / Student work</div>
+
+    <header class="top-strip" aria-label="Prototype navigation">
+      <button class="wordmark" data-route="landing" aria-label="Merit proof gallery home">
+        <span class="mark">M</span>
+        <span>Merit / Passport Lab</span>
+      </button>
+      <nav>
+        <button class="nav-pill is-active" data-route="landing">Proof <strong>01</strong></button>
+        <button class="nav-pill" data-route="browse">Gallery <strong>06</strong></button>
+        <button class="nav-pill" data-route="passport">Passport <strong>AR</strong></button>
+        <button class="nav-pill" data-route="recruiter">Recruiter <strong>84</strong></button>
+      </nav>
+      <button class="nav-pill primary-nav" data-route="create">Build Passport</button>
+    </header>
+
+    <main>
+      <section id="landing" class="view is-visible hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow">Proof-of-ability platform / V4 concept</p>
+          <h1 id="hero-title">Proven <em>by work</em><span>.</span></h1>
+          <p class="lead">
+            A Merit Passport should feel like a credible proof layer: student-native enough to be
+            expressive, structured enough for recruiters to inspect, and curated enough to make work
+            feel worth browsing.
+          </p>
+          <div class="hero-actions">
+            <button class="button" data-route="browse">Browse proof gallery</button>
+            <button class="button secondary" data-route="create">Create Passport</button>
+          </div>
+          <div class="proof-stats" aria-label="Merit proof summary">
+            <div class="stat solid"><b>4</b><span>proof cards</span></div>
+            <div class="stat dashed"><b>84</b><span>match signal</span></div>
+            <div class="stat clay"><b>2-sided</b><span>students + recruiters</span></div>
+          </div>
+        </div>
+
+        <div class="hero-board" aria-label="Merit passport proof board">
+          <div class="board-label">FIG. 01 / Passport proof layer</div>
+          <article class="passport-object">
+            <div class="passport-topline">Merit Passport</div>
+            <div class="student-lockup">
+              <span class="avatar">AR</span>
+              <div>
+                <strong>Ari Ramos</strong>
+                <small>Climate tools / CS / Singapore</small>
+              </div>
+            </div>
+            <div class="proof-bars">
+              <span class="blue"></span>
+              <span class="green"></span>
+              <span class="gold"></span>
+            </div>
+          </article>
+          <article class="signal-panel">
+            <span>Recruiter signal</span>
+            <strong>Strong fit</strong>
+            <p>Evidence maps to product intern role intent.</p>
+          </article>
+          <button class="artifact-chip map" data-project="floodline">
+            <span></span>
+            <strong>Floodline Commons</strong>
+          </button>
+          <button class="artifact-chip zine" data-project="zine">
+            <span></span>
+            <strong>Finance Zine</strong>
+          </button>
+        </div>
+      </section>
+
+      <section id="browse" class="view browse" aria-labelledby="browse-title">
+        <div class="rule"><span>II.</span><span>Proof gallery</span><span>002 / 006</span></div>
+        <div class="split-heading">
+          <h2 id="browse-title">Student work as <em>inspectable proof</em><span>.</span></h2>
+          <p>
+            Museum influence shows up as browsing modes and artifact pacing. Merit owns the system:
+            proof cards, skills in context, outcomes, and recruiter-readable signals.
+          </p>
+        </div>
+
+        <div class="browse-modes" aria-label="Gallery modes">
+          <button class="mode is-selected" data-gallery-mode="exhibits">Exhibits</button>
+          <button class="mode" data-gallery-mode="index">Proof index</button>
+          <button class="mode" data-gallery-mode="timeline">Timeline</button>
+          <button class="mode" data-route="passport">Featured Passport</button>
+        </div>
+
+        <div id="exhibitStage" class="exhibit-stage">
+          <div class="exhibit-copy">
+            <h3>Builder Evidence</h3>
+            <p>
+              The first view is intentionally spacious: students are not resume rows. Each object
+              leads into proof, role, skills, and outcome.
+            </p>
+          </div>
+          <div class="exhibit-row" id="exhibitRow"></div>
+        </div>
+
+        <div id="artifactIndex" class="proof-grid" hidden></div>
+
+        <div id="timelineNote" class="timeline-panel" hidden>
+          <h3>Proof Sequence</h3>
+          <div class="timeline-track">
+            <button data-project="soil"><span>01</span>Research log</button>
+            <button data-project="floodline"><span>02</span>Prototype shipped</button>
+            <button data-project="sensor"><span>03</span>Hardware study</button>
+            <button data-project="studio"><span>04</span>Community rollout</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="passport" class="view passport-view" aria-labelledby="passport-title">
+        <div class="rule"><span>III.</span><span>Student Passport</span><span>003 / 006</span></div>
+        <div class="passport-shell">
+          <aside class="passport-cover">
+            <span class="passport-stamp">PROOF OVER PEDIGREE</span>
+            <div class="avatar large">AR</div>
+            <h2 id="passport-title">Ari Ramos</h2>
+            <p>Product-minded computer science student building tools for climate adaptation.</p>
+            <button class="button" data-route="create">Create your own Passport</button>
+          </aside>
+          <div class="passport-body">
+            <article class="evidence-summary">
+              <span>Match signal</span>
+              <strong>84</strong>
+              <p>Strong product thinking, civic data, and front-end implementation evidence.</p>
+            </article>
+            <section>
+              <h3>What this Passport proves</h3>
+              <div class="proof-list">
+                <span>Product thinking</span>
+                <span>Data storytelling</span>
+                <span>Research synthesis</span>
+                <span>Shipping discipline</span>
+              </div>
+            </section>
+            <section>
+              <h3>Selected proof cards</h3>
+              <div id="passportProjects" class="passport-projects"></div>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <section id="recruiter" class="view recruiter-view" aria-labelledby="recruiter-title">
+        <div class="rule"><span>IV.</span><span>Recruiter workspace</span><span>004 / 006</span></div>
+        <div class="recruiter-grid">
+          <div>
+            <h2 id="recruiter-title">Recruiters need <em>confidence</em><span>.</span></h2>
+            <p class="lead compact">
+              The gallery has to resolve into a useful hiring surface: evidence quality, missing
+              signal, and shortlist action.
+            </p>
+          </div>
+          <aside class="match-card">
+            <div class="match-score">84</div>
+            <h3>Product Intern / Strong fit</h3>
+            <div class="match-row ok"><span></span>Project artifact supports role intent<strong>High</strong></div>
+            <div class="match-row ok"><span></span>Skills backed by visible work<strong>High</strong></div>
+            <div class="match-row warn"><span></span>Availability signal missing<strong>Med</strong></div>
+            <button class="button">Shortlist Ari</button>
+          </aside>
+        </div>
+      </section>
+
+      <section id="create" class="view create-view" aria-labelledby="create-title">
+        <div class="rule"><span>V.</span><span>Create Passport</span><span>005 / 006</span></div>
+        <div class="create-grid">
+          <div>
+            <h2 id="create-title">Turn work into <em>proof</em><span>.</span></h2>
+            <p class="lead compact">
+              This rough flow focuses on the button and first inputs only. The prototype is visual,
+              but the action is product-real: start a Passport from project evidence.
+            </p>
+          </div>
+          <form class="fake-form">
+            <label>
+              Student name
+              <input type="text" value="Jordan Lee" />
+            </label>
+            <label>
+              First proof card
+              <input type="text" value="Campus Food Rescue Map" />
+            </label>
+            <label>
+              Skill demonstrated
+              <input type="text" value="Operations research" />
+            </label>
+            <button type="button" class="button" id="fakeSuccess">Generate draft Passport</button>
+            <p class="success-note" hidden>Draft Passport created in this concept flow.</p>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <div class="modal-backdrop" id="projectModal" hidden>
+      <article class="project-drawer" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <aside class="drawer-rail">
+          <button class="back-link" id="closeModal">Back to gallery</button>
+          <div class="rail-label">Proof cards</div>
+          <div id="detailList" class="detail-list"></div>
+        </aside>
+        <div class="drawer-art" id="modalArt"></div>
+        <div class="drawer-copy">
+          <span class="proof-label" id="modalCreator"></span>
+          <h2 id="modalTitle"></h2>
+          <dl class="metadata">
+            <div>
+              <dt>Proves</dt>
+              <dd id="modalType"></dd>
+            </div>
+            <div>
+              <dt>Outcome</dt>
+              <dd id="modalOutcome"></dd>
+            </div>
+          </dl>
+          <p id="modalDescription"></p>
+          <div id="modalSkills" class="skill-row"></div>
+          <a href="#" id="modalLink" class="button" target="_blank" rel="noreferrer">Open project link</a>
+        </div>
+      </article>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

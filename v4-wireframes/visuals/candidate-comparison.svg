@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820">
+  <rect width="1280" height="820" fill="#f8f7f3"/>
+  <text x="48" y="70" font-family="Georgia" font-size="44" fill="#111">Candidate Comparison</text>
+  <rect x="48" y="118" width="1184" height="640" fill="#fff" stroke="#d8d4ca"/>
+  <g font-family="Arial" font-size="15" fill="#111">
+    <line x1="48" y1="190" x2="1232" y2="190" stroke="#d8d4ca"/>
+    <line x1="260" y1="118" x2="260" y2="758" stroke="#d8d4ca"/>
+    <line x1="560" y1="118" x2="560" y2="758" stroke="#d8d4ca"/>
+    <line x1="860" y1="118" x2="860" y2="758" stroke="#d8d4ca"/>
+    <text x="300" y="160" font-size="20" font-weight="700">Amira Tan</text>
+    <text x="600" y="160" font-size="20" font-weight="700">Dev Malik</text>
+    <text x="900" y="160" font-size="20" font-weight="700">Priya Rao</text>
+    <text x="78" y="236">Role fit</text><text x="300" y="236">Strong</text><text x="600" y="236">Partial</text><text x="900" y="236">Strong</text>
+    <text x="78" y="312">Strongest proof</text><text x="300" y="312">Dashboard</text><text x="600" y="312">API prototype</text><text x="900" y="312">Design system</text>
+    <text x="78" y="388">Evidence level</text><text x="300" y="388">Level 3</text><text x="600" y="388">Level 2</text><text x="900" y="388">Level 4</text>
+    <text x="78" y="464">Outcome</text><text x="300" y="464">Demo shipped</text><text x="600" y="464">Screenshot only</text><text x="900" y="464">Client quote</text>
+    <text x="78" y="540">Gaps</text><text x="300" y="540">Usage metrics</text><text x="600" y="540">Repo missing</text><text x="900" y="540">None major</text>
+  </g>
+  <rect x="300" y="654" width="120" height="38" fill="#111" rx="4"/>
+  <text x="332" y="678" font-family="Arial" font-size="14" fill="#fff">Shortlist</text>
+  <rect x="600" y="654" width="92" height="38" fill="#fff" stroke="#111" rx="4"/>
+  <text x="628" y="678" font-family="Arial" font-size="14" fill="#111">Save</text>
+  <rect x="900" y="654" width="120" height="38" fill="#111" rx="4"/>
+  <text x="932" y="678" font-family="Arial" font-size="14" fill="#fff">Shortlist</text>
+</svg>
+

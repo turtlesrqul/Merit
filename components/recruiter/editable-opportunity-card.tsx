@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
+import { requireVerifiedBrowserUser } from "@/lib/auth/browser-verified-user";
 import type {
   RecruiterMatchedCandidate,
   RecruiterOpportunity
@@ -61,7 +61,7 @@ export function EditableOpportunityCard({
     setIsSaving(true);
 
     try {
-      const supabase = createBrowserSupabaseClient();
+      const { supabase } = await requireVerifiedBrowserUser("updating opportunities");
       const parsedSkills = parseSkills(skillsSought);
       const { error } = await supabase
         .from("opportunities")
@@ -103,7 +103,7 @@ export function EditableOpportunityCard({
     setSuccessMessage(null);
     setIsDeleting(true);
     try {
-      const supabase = createBrowserSupabaseClient();
+      const { supabase } = await requireVerifiedBrowserUser("deleting opportunities");
       const { error } = await supabase
         .from("opportunities")
         .delete()

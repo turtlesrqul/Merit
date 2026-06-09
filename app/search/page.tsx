@@ -25,9 +25,11 @@ function matchesProject(project: ProjectCardData, normalizedQuery: string) {
 
   const searchableText = [
     project.title,
+    project.hook,
     project.problemSolved,
     project.whatWasBuilt,
     project.category,
+    project.projectType,
     project.impact ?? "",
     project.authorName ?? "",
     project.authorHeadline ?? "",
@@ -89,14 +91,14 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   return (
     <AppShell roleType={viewerProfile?.roleType} userEmail={user.email}>
       <section className="space-y-5">
-        <Card className="space-y-2 border-sun-200 bg-gradient-to-r from-sun-50 to-white">
-          <h1 className="text-2xl font-semibold text-ink-950">Global search</h1>
-          <p className="text-sm text-ink-700">
+        <Card className="space-y-2 border-[#ddcfac] bg-gradient-to-r from-[#f7f1e2] to-[#fdfbf7]">
+          <h1 className="text-3xl font-semibold tracking-tight text-[#171512]">Global search</h1>
+          <p className="text-sm text-[#5e574c]">
             {normalizedQuery
               ? `Showing results for "${query}".`
               : "Search people and projects from the top bar on any page."}
           </p>
-          <p className="text-sm text-ink-700">
+          <p className="text-sm text-[#5e574c]">
             {matchedMembers.length} people, {matchedProjects.length} projects
           </p>
         </Card>
