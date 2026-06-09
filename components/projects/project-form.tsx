@@ -512,19 +512,17 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
   };
 
   return (
-    <div className="mx-auto w-full max-w-[1680px] space-y-6">
-      <Card className="border-sun-200 bg-gradient-to-r from-sun-100 via-sun-50 to-white">
+    <div className="editorial-container space-y-10 py-12">
+      <Card className="bg-transparent">
         <div className="flex flex-wrap items-end justify-between gap-4">
-          <div className="space-y-1.5">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-600">
-              V2 Project Publisher
-            </p>
-            <h1 className="text-3xl font-semibold text-ink-950">{heading}</h1>
-            <p className="text-sm text-ink-700">
-              Create a visual-first project card recruiters can understand in one glance.
+          <div className="max-w-3xl space-y-4">
+            <p className="label-caps">Project editor</p>
+            <h1 className="font-serif text-6xl leading-none text-[#16130f]">{heading}</h1>
+            <p className="text-lg leading-8 text-[#7b705f]">
+              Shape this project into a clear case study with strong visuals, proof links, and concise context.
             </p>
           </div>
-          <div className="rounded-xl border border-sun-300 bg-white px-3 py-2 text-sm text-ink-700">
+          <div className="border border-[#d7cebd] bg-[#eee8dd] px-4 py-3 text-sm text-[#7b705f]">
             {preparedArtifacts.length} artifact{preparedArtifacts.length === 1 ? "" : "s"} attached
           </div>
         </div>
@@ -532,16 +530,16 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
 
       <form className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]" onSubmit={handleSubmit}>
         <div className="space-y-5">
-          <Card className="space-y-4 border-ink-100">
+          <Card className="space-y-5">
             <div>
-              <h2 className="text-lg font-semibold text-ink-950">1) Choose project type</h2>
-              <p className="text-sm text-ink-600">Pick the format that best describes your main deliverable.</p>
+              <h2 className="font-serif text-3xl text-[#16130f]">Choose project type</h2>
+              <p className="mt-2 text-sm text-[#7b705f]">Pick the format that best describes your main deliverable.</p>
             </div>
             <div className="grid gap-2 sm:grid-cols-2">
               {(["web", "design", "document", "other"] as const).map((type) => (
                 <label
-                  className={`flex cursor-pointer items-center justify-between rounded-xl border px-3 py-2 text-sm ${
-                    projectType === type ? "border-sun-400 bg-sun-50 text-ink-900" : "border-ink-200 text-ink-700"
+                  className={`flex cursor-pointer items-center justify-between border px-4 py-3 text-sm ${
+                    projectType === type ? "border-[#f3c945] bg-[#f3c945] text-[#16130f]" : "border-[#16130f] text-[#16130f]"
                   }`}
                   key={type}
                 >
@@ -559,16 +557,16 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
             </div>
           </Card>
 
-          <Card className="space-y-4 border-ink-100">
+          <Card className="space-y-5">
             <div>
-              <h2 className="text-lg font-semibold text-ink-950">2) Add main content</h2>
-              <p className="text-sm text-ink-600">
+              <h2 className="font-serif text-3xl text-[#16130f]">Add main content</h2>
+              <p className="mt-2 text-sm text-[#7b705f]">
                 Upload files, paste links, and ensure at least one visual preview source.
               </p>
             </div>
-            <div className="rounded-xl border border-sun-200 bg-sun-50/70 px-4 py-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.1em] text-ink-700">In-Merit viewer tips</p>
-              <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-ink-700">
+            <div className="border border-[#d7cebd] bg-[#f4f0e8] px-4 py-3">
+              <p className="label-caps">In-Merit viewer tips</p>
+              <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-[#7b705f]">
                 {artifactTips(projectType).map((tip) => (
                   <li key={tip}>{tip}</li>
                 ))}
@@ -582,10 +580,10 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
               type="file"
             />
             <div
-              className={`rounded-2xl border border-dashed p-5 transition-all ${
+              className={`border border-dashed p-5 transition-all ${
                 isDragActive
-                  ? "border-sun-400 bg-[radial-gradient(circle_at_22%_18%,rgba(244,207,89,0.22),transparent_43%),linear-gradient(180deg,#fff7de_0%,#fbf4e8_100%)] shadow-[0_10px_22px_rgba(127,97,34,0.12)]"
-                  : "border-ink-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.9)_0%,rgba(246,244,239,0.86)_100%)]"
+                  ? "border-[#f3c945] bg-[#f7edcf]"
+                  : "border-[#d7cebd] bg-[#f4f0e8]"
               }`}
               onDragEnter={(event) => {
                 event.preventDefault();
@@ -615,8 +613,8 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
                     </svg>
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-ink-900">Drop project files here</p>
-                    <p className="text-xs text-ink-600">
+                    <p className="text-sm font-medium text-[#16130f]">Drop project files here</p>
+                    <p className="text-xs text-[#7b705f]">
                       Drag files or click Choose files. Max 50MB each (media, CAD, PDFs, decks).
                     </p>
                   </div>
@@ -786,10 +784,10 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
             </div>
           </Card>
 
-          <Card className="space-y-4 border-ink-100">
+          <Card className="space-y-5">
             <div>
-              <h2 className="text-lg font-semibold text-ink-950">3) Title and story</h2>
-              <p className="text-sm text-ink-600">Keep this concise and scannable for discovery feed browsing.</p>
+              <h2 className="font-serif text-3xl text-[#16130f]">Title and story</h2>
+              <p className="mt-2 text-sm text-[#7b705f]">Keep this concise and scannable for discovery feed browsing.</p>
             </div>
             <label className="block space-y-2 text-sm text-ink-900">
               Project title
@@ -816,10 +814,10 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
             </label>
           </Card>
 
-          <Card className="space-y-4 border-ink-100">
+          <Card className="space-y-5">
             <div>
-              <h2 className="text-lg font-semibold text-ink-950">Skills and impact</h2>
-              <p className="text-sm text-ink-600">These improve filtering, search, and recruiter context.</p>
+              <h2 className="font-serif text-3xl text-[#16130f]">Skills and impact</h2>
+              <p className="mt-2 text-sm text-[#7b705f]">These improve filtering, search, and recruiter context.</p>
             </div>
             <label className="block space-y-2 text-sm text-ink-900">
               Skill tags (comma separated)
@@ -852,7 +850,7 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
             </label>
           </Card>
 
-          <Card className="space-y-3 border-ink-100">
+          <Card className="space-y-3">
             {errorMessage ? <p className="text-sm text-red-700">{errorMessage}</p> : null}
             <Button className="w-full sm:w-auto" disabled={isSubmitting || isUploadingFiles || isUploadingThumbnail} type="submit">
               {isUploadingFiles

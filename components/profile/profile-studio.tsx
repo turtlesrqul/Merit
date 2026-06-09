@@ -1282,12 +1282,31 @@ export function ProfileStudio({
   };
 
   return (
-    <section className="space-y-6">
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
-        <Card className="space-y-4 border-[#ddcfac] bg-gradient-to-r from-[#f7f1e2] to-[#fdfbf7]">
+    <section className="editorial-container py-12">
+      <div className="grid gap-6 lg:grid-cols-[180px_minmax(0,1fr)]">
+        <aside className="hidden pt-3 lg:block">
+          <nav className="sticky top-24 space-y-5 text-sm">
+            {sections.map((section) => (
+              <button
+                className={`block text-left transition-colors ${
+                  activeSection === section.id ? "text-[#16130f]" : "text-[#7b705f] hover:text-[#16130f]"
+                }`}
+                key={section.id}
+                onClick={() => setActiveSection(section.id)}
+                type="button"
+              >
+                {section.label}
+              </button>
+            ))}
+          </nav>
+        </aside>
+
+        <div className="space-y-10">
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+            <Card className="space-y-6 bg-transparent">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="space-y-2">
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#6d6455]">Passport</p>
+              <p className="label-caps">Dashboard</p>
               {isInlineNameEditing ? (
                 <div className="space-y-2">
                   <Input
@@ -1318,7 +1337,7 @@ export function ProfileStudio({
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
-                  <h1 className="text-5xl font-semibold tracking-tight text-[#171512]">{profile.name || "Merit Builder"}</h1>
+                  <h1 className="font-serif text-6xl leading-none text-[#16130f]">{profile.name || "Merit Builder"}</h1>
                   <PencilEditButton
                     label="Edit name"
                     onClick={() => {
@@ -1361,7 +1380,7 @@ export function ProfileStudio({
               ) : (
                 <div className="flex items-center gap-2">
                   <button
-                    className="max-w-xl text-left text-sm text-[#5e574c] underline-offset-2 hover:text-[#3d372f] hover:underline"
+                    className="max-w-xl text-left text-lg leading-8 text-[#7b705f] underline-offset-4 hover:text-[#16130f] hover:underline"
                     onClick={() => {
                       setInlineHeadlineDraft(profile.headline);
                       setInlineHeadlineError(null);
@@ -1381,7 +1400,7 @@ export function ProfileStudio({
                   />
                 </div>
               )}
-              <div className="luxury-rule w-44" />
+              <div className="h-px w-44 bg-[#d7cebd]" />
               <div className="flex flex-wrap gap-2">
                 <Badge className="capitalize">{profile.roleType}</Badge>
                 <Badge>{ownProjects.length} projects</Badge>
@@ -1390,8 +1409,8 @@ export function ProfileStudio({
           </div>
 
           {featuredProject ? (
-            <div className="grid gap-3 rounded-2xl border border-[#e6dccd] bg-[#fffdf9] p-3 md:grid-cols-[240px_minmax(0,1fr)]">
-              <div className="overflow-hidden rounded-xl border border-[#e8dece]">
+            <div className="grid gap-4 border border-[#d7cebd] bg-[#eee8dd] p-4 md:grid-cols-[240px_minmax(0,1fr)]">
+              <div className="overflow-hidden border border-[#d7cebd]">
                 <div className="aspect-[4/3] bg-[#ece4d4]">
                   {featuredVisual?.previewUrl ? (
                     <img
@@ -1407,9 +1426,9 @@ export function ProfileStudio({
                 </div>
               </div>
               <div className="space-y-2">
-                <p className="text-xs uppercase tracking-[0.1em] text-[#6d6455]">Featured build</p>
-                <h2 className="text-2xl font-semibold tracking-tight text-[#171512]">{featuredProject.title}</h2>
-                <p className="text-sm text-[#5e574c]">{featuredProject.hook || featuredProject.problemSolved}</p>
+                <p className="label-caps">Featured build</p>
+                <h2 className="font-serif text-3xl leading-tight text-[#16130f]">{featuredProject.title}</h2>
+                <p className="text-sm leading-6 text-[#7b705f]">{featuredProject.hook || featuredProject.problemSolved}</p>
                 <div className="flex flex-wrap gap-2">
                   <Link href={`/projects/${featuredProject.projectId}`}>
                     <Button variant="secondary">Open project</Button>
@@ -1421,18 +1440,18 @@ export function ProfileStudio({
               </div>
             </div>
           ) : (
-            <div className="rounded-2xl border border-dashed border-[#e2d7c4] bg-[#fdf8ef] p-4">
-              <p className="text-sm text-[#5e574c]">
+            <div className="border border-dashed border-[#d7cebd] p-5">
+              <p className="text-sm text-[#7b705f]">
                 Publish your first project to activate the featured proof section.
               </p>
             </div>
           )}
         </Card>
 
-        <Card className="space-y-3 border-[#e5dccd] bg-[#fdfbf7]">
-          <p className="text-xs uppercase tracking-[0.12em] text-[#6d6455]">Readiness snapshot</p>
-          <p className="text-5xl font-semibold tracking-tight text-[#171512]">{profile.profileCompletionScore}%</p>
-          <p className="text-sm text-[#5e574c]">
+        <Card className="space-y-4">
+          <p className="label-caps">Readiness snapshot</p>
+          <p className="font-serif text-6xl text-[#16130f]">{profile.profileCompletionScore}%</p>
+          <p className="text-sm leading-6 text-[#7b705f]">
             Profile readiness is based on identity, contact, role intent, portfolio links, and project evidence.
           </p>
           <Link href={`/c/${userId}`}>
@@ -1441,17 +1460,17 @@ export function ProfileStudio({
             </Button>
           </Link>
         </Card>
-      </div>
+          </div>
 
-      <Card className="sticky top-24 z-20 border-[#e5dccd] bg-[#fdfbf7]/95 p-3 backdrop-blur">
+      <Card className="sticky top-16 z-20 border-[#d7cebd] bg-[#f4f0e8]/95 p-3 backdrop-blur lg:hidden">
         <nav className="overflow-x-auto">
           <div className="flex min-w-max gap-2">
             {sections.map((section) => (
               <button
-                className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
+                className={`rounded-none border px-4 py-2 text-sm transition ${
                   activeSection === section.id
-                    ? "bg-[#efe2c6] text-[#171512] shadow-[inset_0_-2px_0_0_rgba(155,124,57,0.75)]"
-                    : "bg-[#fffdf9] text-[#665d50] hover:bg-[#f6efdf] hover:text-[#1e1a14]"
+                    ? "border-[#f3c945] bg-[#f3c945] text-[#16130f]"
+                    : "border-[#16130f] bg-transparent text-[#16130f]"
                 }`}
                 key={section.id}
                 onClick={() => setActiveSection(section.id)}
@@ -1656,6 +1675,8 @@ export function ProfileStudio({
           </div>
         </form>
       </ProfileModal>
+        </div>
+      </div>
     </section>
   );
 }

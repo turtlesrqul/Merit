@@ -98,11 +98,11 @@ export default function ResetPasswordPage() {
   };
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-[1680px] items-center px-4 py-10">
-      <Card className="mx-auto w-full max-w-lg space-y-5 border-[#ddcfac] bg-gradient-to-b from-[#fffdf9] to-[#f9f4ea]">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-semibold tracking-tight text-[#171512]">Set a new password</h1>
-          <p className="text-sm text-[#5e574c]">Choose a new password for your account.</p>
+    <main className="editorial-container flex min-h-[calc(100vh-4rem)] items-center py-16">
+      <Card className="mx-auto w-full max-w-xl space-y-8 bg-transparent">
+        <div className="space-y-5 text-center">
+          <h1 className="font-serif text-5xl leading-tight text-[#16130f]">Set a new password</h1>
+          <p className="mx-auto max-w-md text-lg leading-8 text-[#7b705f]">Choose a new password for your account.</p>
         </div>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
@@ -138,9 +138,9 @@ export default function ResetPasswordPage() {
           </Button>
         </form>
 
-        <p className="text-sm text-ink-700">
+        <p className="text-sm text-[#7b705f]">
           Back to{" "}
-          <Link className="font-semibold text-[#171512] underline decoration-[#c5a65a] underline-offset-4" href="/sign-in">
+          <Link className="text-[#16130f] underline decoration-[#f3c945] underline-offset-4" href="/sign-in">
             sign in
           </Link>
           .

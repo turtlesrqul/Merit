@@ -90,44 +90,47 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   return (
     <AppShell roleType={viewerProfile?.roleType} userEmail={user.email}>
-      <section className="space-y-5">
-        <Card className="space-y-2 border-[#ddcfac] bg-gradient-to-r from-[#f7f1e2] to-[#fdfbf7]">
-          <h1 className="text-3xl font-semibold tracking-tight text-[#171512]">Global search</h1>
-          <p className="text-sm text-[#5e574c]">
+      <section className="editorial-container py-16">
+        <header className="mb-14 border-b border-[#d7cebd] pb-10">
+          <h1 className="font-serif text-6xl leading-none text-[#16130f]">Search</h1>
+          <p className="mt-6 max-w-2xl text-lg leading-8 text-[#7b705f]">
             {normalizedQuery
               ? `Showing results for "${query}".`
-              : "Search people and projects from the top bar on any page."}
+              : "Search people and projects from the dashboard header, then browse the matching archive."}
           </p>
-          <p className="text-sm text-[#5e574c]">
+          <p className="mt-6 text-sm uppercase tracking-[0.12em] text-[#7b705f]">
             {matchedMembers.length} people, {matchedProjects.length} projects
           </p>
-        </Card>
+        </header>
 
         {showNoMatches ? (
-          <Card>
-            <p className="text-sm text-ink-700">No users or projects matched that search yet.</p>
+          <Card className="border-dashed bg-transparent text-center">
+            <p className="text-sm text-[#7b705f]">No users or projects matched that search yet.</p>
           </Card>
         ) : null}
 
-        <div className="space-y-3">
-          <h2 className="text-xl font-semibold text-ink-950">People</h2>
+        <div className="space-y-6">
+          <div className="flex items-end justify-between border-b border-[#d7cebd] pb-4">
+            <h2 className="font-serif text-4xl text-[#16130f]">People</h2>
+            <p className="text-sm text-[#7b705f]">{matchedMembers.length}</p>
+          </div>
           {matchedMembers.length === 0 ? (
-            <Card>
-              <p className="text-sm text-ink-700">No people matched.</p>
+            <Card className="border-dashed bg-transparent">
+              <p className="text-sm text-[#7b705f]">No people matched.</p>
             </Card>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {matchedMembers.map((member) => (
-                <Card className="space-y-3 border-ink-100" key={member.userId}>
-                  <div className="flex items-start justify-between gap-3">
+                <Card className="space-y-4" key={member.userId}>
+                  <div className="flex items-start justify-between gap-3 border-b border-[#d7cebd] pb-4">
                     <div>
-                      <p className="text-lg font-semibold text-ink-950">{member.name ?? "Merit User"}</p>
-                      {member.headline ? <p className="text-sm text-ink-700">{member.headline}</p> : null}
+                      <p className="font-serif text-2xl text-[#16130f]">{member.name ?? "Merit User"}</p>
+                      {member.headline ? <p className="mt-1 text-sm leading-6 text-[#7b705f]">{member.headline}</p> : null}
                     </div>
                     <Badge className="capitalize">{member.roleType ?? "candidate"}</Badge>
                   </div>
 
-                  <p className="text-sm text-ink-700">
+                  <p className="text-sm text-[#7b705f]">
                     {member.projectCount} project{member.projectCount === 1 ? "" : "s"}
                   </p>
 
@@ -139,8 +142,8 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                     </div>
                   ) : null}
 
-                  <Link className="text-sm font-semibold text-ink-900 underline underline-offset-2" href={`/c/${member.userId}`}>
-                    View Passport
+                  <Link className="text-sm text-[#16130f] underline underline-offset-4" href={`/c/${member.userId}`}>
+                    View profile
                   </Link>
                 </Card>
               ))}
@@ -148,14 +151,17 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
           )}
         </div>
 
-        <div className="space-y-3">
-          <h2 className="text-xl font-semibold text-ink-950">Projects</h2>
+        <div className="mt-20 space-y-6">
+          <div className="flex items-end justify-between border-b border-[#d7cebd] pb-4">
+            <h2 className="font-serif text-4xl text-[#16130f]">Projects</h2>
+            <p className="text-sm text-[#7b705f]">{matchedProjects.length}</p>
+          </div>
           {matchedProjects.length === 0 ? (
-            <Card>
-              <p className="text-sm text-ink-700">No projects matched.</p>
+            <Card className="border-dashed bg-transparent">
+              <p className="text-sm text-[#7b705f]">No projects matched.</p>
             </Card>
           ) : (
-            <div className="space-y-4">
+            <div className="grid gap-x-12 gap-y-16 md:grid-cols-2 xl:grid-cols-3">
               {matchedProjects.map((project) => (
                 <ProjectCard key={project.projectId} project={project} />
               ))}

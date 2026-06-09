@@ -333,16 +333,14 @@ export function AuthForm({ mode }: AuthFormProps) {
   };
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-[1680px] items-center px-4 py-10">
-      <Card className="mx-auto w-full max-w-lg space-y-5 border-[#ddcfac] bg-gradient-to-b from-[#fffdf9] to-[#f9f4ea]">
-        <div className="space-y-2">
-          <p className="inline-flex rounded-full border border-[#e0d3b6] bg-[#f6eddc] px-3 py-1 text-xs font-semibold uppercase tracking-[0.1em] text-[#5f574b]">
-            Merit Access
-          </p>
-          <h1 className="text-3xl font-semibold tracking-tight text-[#171512]">
+    <main className="editorial-container flex min-h-[calc(100vh-4rem)] items-center py-16">
+      <Card className="mx-auto w-full max-w-xl space-y-8 bg-transparent">
+        <div className="space-y-5 text-center">
+          <p className="label-caps mx-auto">Merit Access</p>
+          <h1 className="font-serif text-5xl leading-tight text-[#16130f]">
             {isSignUp ? "Create your Merit account" : "Welcome back"}
           </h1>
-          <p className="text-sm text-[#5e574c]">
+          <p className="mx-auto max-w-md text-lg leading-8 text-[#7b705f]">
             {isSignUp
               ? "Start building a profile around proof of work."
               : "Sign in to continue building your proof profile."}
@@ -387,7 +385,7 @@ export function AuthForm({ mode }: AuthFormProps) {
             />
           </label>
           {isSignUp ? (
-            <label className="flex items-start gap-2 text-sm text-ink-800">
+            <label className="flex items-start gap-2 text-sm text-[#4b4439]">
               <input
                 checked={acceptedTerms}
                 className="mt-0.5 h-4 w-4"
@@ -396,11 +394,11 @@ export function AuthForm({ mode }: AuthFormProps) {
               />
               <span>
                 I agree to the{" "}
-                <Link className="underline decoration-sun-400 underline-offset-4" href="/terms">
+                <Link className="underline decoration-[#f3c945] underline-offset-4" href="/terms">
                   Terms
                 </Link>{" "}
                 and{" "}
-                <Link className="underline decoration-sun-400 underline-offset-4" href="/privacy">
+                <Link className="underline decoration-[#f3c945] underline-offset-4" href="/privacy">
                   Privacy Policy
                 </Link>
                 .
@@ -423,16 +421,16 @@ export function AuthForm({ mode }: AuthFormProps) {
         </form>
 
         {!isSignUp ? (
-          <p className="text-sm text-ink-700">
-            <Link className="font-semibold text-[#171512] underline decoration-[#c5a65a] underline-offset-4" href="/forgot-password">
+          <p className="text-sm text-[#7b705f]">
+            <Link className="text-[#16130f] underline decoration-[#f3c945] underline-offset-4" href="/forgot-password">
               Forgot password?
             </Link>
           </p>
         ) : null}
 
         {pendingVerificationEmail ? (
-          <div className="rounded-xl border border-[#e2d8c8] bg-[#f6efdf] p-3">
-            <p className="text-sm text-[#5e574c]">
+          <div className="border border-[#d7cebd] bg-[#eee8dd] p-4">
+            <p className="text-sm text-[#7b705f]">
               Pending verification email: <strong>{pendingVerificationEmail}</strong>
             </p>
             <div className="mt-2 flex flex-wrap gap-2">
@@ -452,19 +450,19 @@ export function AuthForm({ mode }: AuthFormProps) {
           </div>
         ) : null}
 
-        <p className="text-sm text-ink-700">
+        <p className="text-sm text-[#7b705f]">
           {isSignUp ? "Already have an account?" : "Need an account?"}{" "}
           <Link
-            className="font-semibold text-[#171512] underline decoration-[#c5a65a] underline-offset-4"
+            className="text-[#16130f] underline decoration-[#f3c945] underline-offset-4"
             href={isSignUp ? "/sign-in" : "/sign-up"}
           >
             {isSignUp ? "Sign in" : "Sign up"}
           </Link>
         </p>
-        <p className="text-xs text-[#6b6356]">
+        <p className="text-xs text-[#7b705f]">
           Need help? Contact{" "}
           <a
-            className="font-semibold text-[#25211b] underline decoration-[#c5a65a] underline-offset-4"
+            className="text-[#16130f] underline decoration-[#f3c945] underline-offset-4"
             href={supportUrl}
             rel="noreferrer"
             target="_blank"
