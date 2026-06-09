@@ -5,10 +5,10 @@ type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 
 const variantMap: Record<ButtonVariant, string> = {
   primary:
-    "border border-[#e4bb35] bg-[#f4cf59] text-[#171512] shadow-sm hover:border-[#dbb12a] hover:bg-[#f7d66f]",
+    "border border-[#d9ae19] bg-[#f3c945] text-[#11100e] hover:bg-[#f6d45d]",
   secondary:
-    "border border-[#ddd4c6] bg-[#fdfbf6] text-[#27231c] shadow-sm hover:border-[#e4bb35] hover:bg-[#fff7dd]",
-  ghost: "bg-transparent text-[#4a4337] hover:bg-[#fff3cf]",
+    "border border-[#16130f] bg-transparent text-[#11100e] hover:bg-[#ebe3d6]",
+  ghost: "border border-transparent bg-transparent text-[#4a4337] hover:border-[#d7cebd]",
   danger: "bg-red-600 text-white hover:bg-red-700"
 };
 
@@ -26,7 +26,7 @@ export function Button({
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60",
+        "inline-flex min-h-11 items-center justify-center gap-2 rounded-none px-5 py-2.5 text-sm font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-60",
         variantMap[variant],
         className
       )}

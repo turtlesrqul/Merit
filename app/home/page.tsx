@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
-import { ProfileCompletionPrompt } from "@/components/profile/profile-completion-prompt";
 import { DiscoveryFeed } from "@/components/projects/discovery-feed";
+import { ProfileCompletionPrompt } from "@/components/profile/profile-completion-prompt";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -29,25 +29,7 @@ export default async function HomePage() {
   if (!user) {
     return (
       <AppShell>
-        <section className="space-y-5">
-          <Card className="space-y-3 border-[#ddcfac] bg-gradient-to-r from-[#f7f1e2] to-[#fdfbf7]">
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#6d6455]">Guest mode</p>
-            <h1 className="text-3xl font-semibold tracking-tight text-[#171512]">Discover proof-of-work without signing in</h1>
-            <p className="text-sm text-[#5b5448]">
-              Browse builders, open projects, and explore passports now. Sign in when you want to save or like.
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <Link href="/sign-in">
-                <Button variant="secondary">Sign in</Button>
-              </Link>
-              <Link href="/sign-up">
-                <Button>Create account</Button>
-              </Link>
-            </div>
-          </Card>
-
-          <DiscoveryFeed inspiredProjectIds={[]} projects={discoveryProjects} savedProjectIds={[]} />
-        </section>
+        <DiscoveryFeed inspiredProjectIds={[]} projects={discoveryProjects} savedProjectIds={[]} />
       </AppShell>
     );
   }
@@ -74,6 +56,7 @@ export default async function HomePage() {
           inspiredProjectIds={interactionState.inspiredProjectIds}
           projects={discoveryProjects}
           savedProjectIds={interactionState.savedProjectIds}
+          showInteractions
         />
 
         {isRecruiter ? (

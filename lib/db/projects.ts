@@ -70,6 +70,7 @@ export type PublicCandidateData = {
   roleType: "candidate" | "recruiter" | null;
   bio: string | null;
   contactEmail: string | null;
+  targetRoles: string[];
   portfolioLinks: string[];
   projects: ProjectCardData[];
 };
@@ -642,7 +643,7 @@ export async function fetchPublicCandidateData(
   const [userResult, profileResult, projects] = await Promise.all([
     supabase
       .from("users")
-      .select("user_id, name, headline, role_type")
+      .select("user_id, name, headline, role_type, target_roles")
       .eq("user_id", userId)
       .maybeSingle(),
     supabase
@@ -673,6 +674,7 @@ export async function fetchPublicCandidateData(
     roleType: safeRoleType(user.role_type),
     bio: safeNullableString(profile.bio),
     contactEmail: safeNullableString(profile.contact_email),
+    targetRoles: safeStringArray(user.target_roles),
     portfolioLinks: safeStringArray(profile.portfolio_links),
     projects
   };

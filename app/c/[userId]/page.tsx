@@ -1,11 +1,12 @@
 import { notFound } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
-import { ProjectCard } from "@/components/projects/project-card";
+import { PublicProfileActions } from "@/components/profile/public-profile-actions";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { fetchPublicRecruiterOpportunities } from "@/lib/db/opportunities";
 import { getViewerProfile } from "@/lib/db/profile";
-import { fetchPublicCandidateData } from "@/lib/db/projects";
+import { fetchPublicCandidateData, type ProjectCardData } from "@/lib/db/projects";
+import { resolveProjectVisualPreview } from "@/lib/artifacts";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 type PublicProfilePageProps = {
@@ -40,6 +41,54 @@ function isValidCvLink(link: string) {
   );
 }
 
+function initialsForName(name: string) {
+  return name
+    .split(/\s+/)
+    .map((part) => part[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
+
+function ProjectArchiveItem({ project }: { project: ProjectCardData }) {
+  const visual = resolveProjectVisualPreview({
+    artifacts: project.artifacts,
+    coverImageUrl: project.coverImageUrl,
+    projectType: project.projectType
+  });
+
+  return (
+    <article className="group">
+      <a className="block" href={`/projects/${project.projectId}`}>
+        <div className="relative aspect-[4/3] overflow-hidden bg-[#e5ded1]">
+          {visual.previewUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              alt={`${project.title} preview`}
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+              src={visual.previewUrl}
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center px-6 text-center text-sm text-[#7b705f]">
+              Preview coming soon
+            </div>
+          )}
+          {project.category ? (
+            <span className="absolute bottom-4 left-4 bg-[#fbf8f0] px-3 py-1 text-sm text-[#16130f]">
+              {project.category}
+            </span>
+          ) : null}
+        </div>
+        <div className="mt-5 space-y-1">
+          <h3 className="font-serif text-2xl leading-tight text-[#16130f]">{project.title}</h3>
+          <p className="line-clamp-2 text-sm leading-6 text-[#7b705f]">{project.hook}</p>
+        </div>
+      </a>
+    </article>
+  );
+}
+
 export default async function PublicProfilePage({ params }: PublicProfilePageProps) {
   const { userId } = await params;
   const supabase = await createServerSupabaseClient();
@@ -57,50 +106,109 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
       ? await fetchPublicRecruiterOpportunities(supabase, candidate.userId)
       : [];
   const cvLink = candidate.portfolioLinks.find((link) => isValidCvLink(link)) ?? null;
+  const displayName = candidate.name ?? "Merit User";
+  const featuredProject = candidate.projects.find((project) => project.isFeatured) ?? candidate.projects[0] ?? null;
+  const archiveProjects = candidate.projects.filter((project) => project.projectId !== featuredProject?.projectId);
+  const featuredVisual = featuredProject
+    ? resolveProjectVisualPreview({
+        artifacts: featuredProject.artifacts,
+        coverImageUrl: featuredProject.coverImageUrl,
+        projectType: featuredProject.projectType
+      })
+    : null;
+  const skillList = Array.from(new Set(candidate.projects.flatMap((project) => project.skills))).slice(0, 12);
 
   return (
     <AppShell roleType={viewerProfile?.roleType} userEmail={user?.email}>
-      <section className="space-y-6">
-        <Card className="space-y-2 border-[#ddcfac] bg-gradient-to-r from-[#f7f1e2] to-[#fdfbf7]">
-          <h1 className="text-4xl font-semibold tracking-tight text-[#171512]">{candidate.name ?? "Merit User"}</h1>
-          {candidate.headline ? <p className="text-sm text-[#5e574c]">{candidate.headline}</p> : null}
-          <div className="flex flex-wrap gap-2">
-            <Badge className="capitalize">{candidate.roleType ?? "candidate"}</Badge>
-            <Badge>{candidate.projects.length} project{candidate.projects.length === 1 ? "" : "s"}</Badge>
+      <section className="editorial-container pt-28">
+        <div className="grid gap-10 border-b border-[#d7cebd] pb-16 lg:grid-cols-[1fr_auto] lg:items-end">
+          <div className="space-y-8">
+            <div className="flex h-36 w-36 items-center justify-center bg-[#dfd6c6] font-serif text-5xl text-[#7b705f]">
+              {initialsForName(displayName)}
+            </div>
+            <div className="max-w-4xl space-y-5">
+              <h1 className="font-serif text-6xl leading-[0.96] text-[#16130f] sm:text-7xl lg:text-8xl">
+                {displayName}
+              </h1>
+              {candidate.headline ? (
+                <p className="max-w-3xl text-2xl leading-snug text-[#7b705f]">{candidate.headline}</p>
+              ) : null}
+              <div className="space-y-2 pt-2 text-sm uppercase tracking-[0.12em] text-[#7b705f]">
+                <p>{candidate.roleType === "recruiter" ? "Recruiter" : "Builder portfolio"}</p>
+                {candidate.targetRoles.length > 0 ? (
+                  <p className="text-[#d8aa14]">Open to {candidate.targetRoles.slice(0, 2).join(" / ")}</p>
+                ) : null}
+              </div>
+            </div>
           </div>
-        </Card>
+          <PublicProfileActions contactEmail={candidate.contactEmail} profileName={displayName} />
+        </div>
 
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold text-ink-950">Projects</h2>
-          {candidate.projects.length === 0 ? (
-            <Card>
-              <p className="text-sm text-ink-700">No public projects yet.</p>
-            </Card>
+        <div className="pt-24">
+          <p className="label-caps mb-8">Featured work</p>
+          {featuredProject ? (
+            <article className="space-y-8">
+              <a className="block" href={`/projects/${featuredProject.projectId}`}>
+                <div className="aspect-[16/7] overflow-hidden bg-[#e5ded1]">
+                  {featuredVisual?.previewUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      alt={`${featuredProject.title} preview`}
+                      className="h-full w-full object-cover"
+                      src={featuredVisual.previewUrl}
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-[#7b705f]">Preview coming soon</div>
+                  )}
+                </div>
+              </a>
+              <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_auto] md:items-start">
+                <div className="max-w-3xl space-y-3">
+                  <h2 className="font-serif text-4xl leading-tight text-[#16130f]">{featuredProject.title}</h2>
+                  <p className="text-xl leading-8 text-[#7b705f]">{featuredProject.hook}</p>
+                </div>
+                <a href={`/projects/${featuredProject.projectId}`}>
+                  <Button variant="secondary">View case study</Button>
+                </a>
+              </div>
+            </article>
           ) : (
-            <div className="space-y-4">
-              {candidate.projects.map((project) => (
-                <ProjectCard key={project.projectId} project={project} showAuthor={false} />
-              ))}
+            <div className="border border-dashed border-[#d7cebd] px-8 py-16 text-center text-[#7b705f]">
+              No public projects yet.
             </div>
           )}
         </div>
 
+        {archiveProjects.length > 0 ? (
+          <div className="pt-24">
+            <div className="mb-8 flex items-center justify-between border-b border-[#d7cebd] pb-4">
+              <p className="label-caps">Selected works</p>
+              <p className="text-sm text-[#7b705f]">
+                {candidate.projects.length} project{candidate.projects.length === 1 ? "" : "s"}
+              </p>
+            </div>
+            <div className="grid gap-x-12 gap-y-16 md:grid-cols-2">
+              {archiveProjects.map((project) => (
+                <ProjectArchiveItem key={project.projectId} project={project} />
+              ))}
+            </div>
+          </div>
+        ) : null}
+
         {candidate.roleType === "recruiter" ? (
-          <div className="space-y-4">
-            <h2 className="text-xl font-semibold text-ink-950">Posted opportunities</h2>
+          <div className="pt-24">
+            <h2 className="mb-6 font-serif text-3xl text-[#16130f]">Posted opportunities</h2>
             {recruiterOpportunities.length === 0 ? (
-              <Card>
-                <p className="text-sm text-ink-700">No opportunities posted yet.</p>
-              </Card>
+              <p className="text-sm text-[#7b705f]">No opportunities posted yet.</p>
             ) : (
-              <div className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
                 {recruiterOpportunities.map((opportunity) => (
-                <Card className="space-y-3 border-[#e5dccd] bg-[#fdfbf7]" key={opportunity.opportunityId}>
+                  <article className="space-y-3 border border-[#d7cebd] bg-[#eee8dd] p-5" key={opportunity.opportunityId}>
                     <div className="space-y-1">
-                      <h3 className="text-lg font-semibold text-ink-950">{opportunity.title}</h3>
-                      <p className="text-sm text-ink-700">{opportunity.company}</p>
+                      <h3 className="font-serif text-2xl text-[#16130f]">{opportunity.title}</h3>
+                      <p className="text-sm text-[#7b705f]">{opportunity.company}</p>
                     </div>
-                    <p className="text-sm text-ink-700">{opportunity.description}</p>
+                    <p className="text-sm leading-6 text-[#7b705f]">{opportunity.description}</p>
                     {opportunity.skillsSought.length > 0 ? (
                       <div className="flex flex-wrap gap-2">
                         {opportunity.skillsSought.map((skill) => (
@@ -108,61 +216,67 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
                         ))}
                       </div>
                     ) : null}
-                  </Card>
+                  </article>
                 ))}
               </div>
             )}
           </div>
         ) : null}
 
-        <Card className="space-y-3 border-[#e5dccd] bg-[#fdfbf7]">
-          <h2 className="text-lg font-semibold text-[#171512]">CV / Resume</h2>
-          {cvLink ? (
-            <>
-              <a
-                className="block truncate text-sm font-semibold text-ink-900 underline underline-offset-2"
-                href={cvLink}
-                rel="noreferrer"
-                target="_blank"
-              >
-                Open in new tab
+        <div className="grid gap-12 border-t border-[#d7cebd] pt-20 md:grid-cols-[1fr_1fr]">
+          <section className="space-y-4">
+            <p className="label-caps">About</p>
+            {candidate.bio ? (
+              <p className="max-w-xl text-lg leading-8 text-[#7b705f]">{candidate.bio}</p>
+            ) : (
+              <p className="text-lg leading-8 text-[#7b705f]">No biography has been added yet.</p>
+            )}
+            {cvLink ? (
+              <a className="inline-flex text-sm text-[#16130f] underline underline-offset-4" href={cvLink} rel="noreferrer" target="_blank">
+                Open CV / resume
               </a>
-              <div className="aspect-[4/3] overflow-hidden rounded-xl border border-ink-100 bg-ink-100">
-                <iframe
-                  className="h-full w-full bg-white"
-                  loading="lazy"
-                  sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
-                  src={cvLink}
-                  title="Public CV preview"
-                />
-              </div>
-            </>
-          ) : (
-            <p className="text-sm text-[#5e574c]">No CV or resume has been added yet.</p>
-          )}
-        </Card>
+            ) : null}
+          </section>
 
-        <Card className="space-y-3 border-[#e5dccd] bg-[#fdfbf7]">
-          <h2 className="text-lg font-semibold text-[#171512]">About</h2>
-          {candidate.bio ? <p className="text-sm text-[#5e574c]">{candidate.bio}</p> : null}
-          {candidate.contactEmail ? <p className="text-sm text-[#5e574c]">Contact: {candidate.contactEmail}</p> : null}
-          {candidate.portfolioLinks.length > 0 ? (
-            <div className="space-y-1">
-              <p className="text-sm font-semibold text-ink-900">Portfolio links</p>
-              {candidate.portfolioLinks.map((link) => (
-                <a
-                  className="block truncate text-sm text-ink-900 underline underline-offset-2"
-                  href={link}
-                  key={link}
-                  rel="noreferrer"
-                  target="_blank"
-                >
-                  {link}
+          <section className="space-y-8">
+            {skillList.length > 0 ? (
+              <div className="space-y-4">
+                <p className="label-caps">Capabilities</p>
+                <div className="flex flex-wrap gap-2">
+                  {skillList.map((skill) => (
+                    <Badge key={skill}>{skill}</Badge>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+            {candidate.portfolioLinks.length > 0 ? (
+              <div className="space-y-4">
+                <p className="label-caps">Links</p>
+                <div className="space-y-2">
+                  {candidate.portfolioLinks.map((link) => (
+                    <a
+                      className="block truncate text-sm text-[#16130f] underline underline-offset-4"
+                      href={link}
+                      key={link}
+                      rel="noreferrer"
+                      target="_blank"
+                    >
+                      {link}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+            {candidate.contactEmail ? (
+              <div className="space-y-2">
+                <p className="label-caps">Contact</p>
+                <a className="text-sm text-[#16130f] underline underline-offset-4" href={`mailto:${candidate.contactEmail}`}>
+                  {candidate.contactEmail}
                 </a>
-              ))}
-            </div>
-          ) : null}
-        </Card>
+              </div>
+            ) : null}
+          </section>
+        </div>
       </section>
     </AppShell>
   );

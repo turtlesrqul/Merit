@@ -7,7 +7,7 @@ import { ProjectPreviewPlayer } from "@/components/projects/project-preview-play
 import { ProjectReportButton } from "@/components/projects/project-report-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { resolveProjectVisualPreview } from "@/lib/artifacts";
 import { getViewerProfile } from "@/lib/db/profile";
 import {
   fetchProjectById,
@@ -74,163 +74,173 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   }
   const project = user ? (await fetchProjectById(supabase, projectId)) ?? initialProject : initialProject;
   const primaryLink = getPrimaryLink(project.artifacts);
+  const visual = resolveProjectVisualPreview({
+    artifacts: project.artifacts,
+    coverImageUrl: project.coverImageUrl,
+    projectType: project.projectType
+  });
 
   return (
     <AppShell roleType={viewerProfile?.roleType} userEmail={user?.email}>
-      <section className="space-y-6">
-        <Card className="space-y-3 border-[#ddcfac] bg-gradient-to-r from-[#f7f1e2] to-[#fdfbf7]">
-          <div className="flex flex-wrap items-center justify-between gap-3">
+      <article className="editorial-container pt-28">
+        <Link className="text-sm text-[#16130f] hover:text-[#7b705f]" href={`/c/${project.userId}`}>
+          Back to {project.authorName ?? "builder"}'s profile
+        </Link>
+
+        <header className="mt-20 space-y-10">
+          <div className="max-w-5xl space-y-8">
+            <h1 className="font-serif text-6xl leading-[0.96] text-[#16130f] sm:text-7xl lg:text-8xl">
+              {project.title}
+            </h1>
+            <p className="max-w-4xl text-2xl leading-snug text-[#7b705f]">{project.hook}</p>
+          </div>
+
+          <div className="grid gap-8 border-y border-[#d7cebd] py-8 sm:grid-cols-2 lg:grid-cols-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#6d6455]">Project</p>
-              <h1 className="text-4xl font-semibold tracking-tight text-[#171512]">{project.title}</h1>
+              <p className="label-caps">Category</p>
+              <p className="mt-3 text-lg text-[#16130f]">{project.category || projectTypeLabel(project.projectType)}</p>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <Badge>{projectTypeLabel(project.projectType)}</Badge>
-              <Badge>{project.category || "Project"}</Badge>
-              {project.feedLabel ? <Badge className="bg-[#1a1814] text-[#f7f4ec]">{project.feedLabel}</Badge> : null}
+            <div>
+              <p className="label-caps">Year</p>
+              <p className="mt-3 text-lg text-[#16130f]">{new Date(project.createdAt).getFullYear()}</p>
+            </div>
+            <div>
+              <p className="label-caps">Role</p>
+              <p className="mt-3 text-lg text-[#16130f]">{project.authorName ? `Built by ${project.authorName}` : "Builder"}</p>
+            </div>
+            <div>
+              <p className="label-caps">Proof</p>
+              <p className="mt-3 text-lg text-[#16130f]">{project.artifacts.length} asset{project.artifacts.length === 1 ? "" : "s"}</p>
             </div>
           </div>
-          <p className="max-w-4xl text-base text-[#3a352b]">{project.hook}</p>
-        </Card>
+        </header>
 
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
-          <div className="space-y-5">
-            <ProjectPreviewPlayer
-              artifacts={project.artifacts}
-              coverImageUrl={project.coverImageUrl}
-              mode="inline"
-              projectType={project.projectType}
-              title={project.title}
-            />
+        <div className="mt-20 aspect-[16/7] overflow-hidden bg-[#e5ded1]">
+          {visual.previewUrl ? (
+            <img alt={`${project.title} preview`} className="h-full w-full object-cover" src={visual.previewUrl} />
+          ) : (
+            <div className="flex h-full items-center justify-center text-[#7b705f]">Preview coming soon</div>
+          )}
+        </div>
 
-            <Card className="space-y-4 border-[#e5dccd] bg-[#fdfbf7]">
-              <div className="grid gap-4 sm:grid-cols-3">
-                <div className="rounded-xl border border-[#e7dece] bg-[#f7f2e7] px-3 py-2">
-                  <p className="text-xs uppercase tracking-wide text-[#756d60]">Views</p>
-                  <p className="text-xl font-semibold text-[#171512]">{project.engagement.views}</p>
-                </div>
-                <div className="rounded-xl border border-[#e7dece] bg-[#f7f2e7] px-3 py-2">
-                  <p className="text-xs uppercase tracking-wide text-[#756d60]">Likes</p>
-                  <p className="text-xl font-semibold text-[#171512]">{project.engagement.likes}</p>
-                </div>
-                <div className="rounded-xl border border-[#e7dece] bg-[#f7f2e7] px-3 py-2">
-                  <p className="text-xs uppercase tracking-wide text-[#756d60]">Saves</p>
-                  <p className="text-xl font-semibold text-[#171512]">{project.engagement.saves}</p>
-                </div>
-              </div>
-              {user ? (
-                <ProjectInteractions
-                  initialInspired={interactionState.inspiredProjectIds.includes(project.projectId)}
-                  initialSaved={interactionState.savedProjectIds.includes(project.projectId)}
-                  projectId={project.projectId}
-                />
-              ) : (
-                <div className="space-y-2">
-                  <p className="text-sm text-[#5d564a]">Sign in to like or save this project.</p>
-                  <div className="flex flex-wrap gap-2">
-                    <Link href="/sign-in">
-                      <Button variant="secondary">Sign in</Button>
-                    </Link>
-                    <Link href="/sign-up">
-                      <Button>Create account</Button>
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </Card>
-
-            <Card className="space-y-3 border-[#e5dccd] bg-[#fdfbf7]">
-              <h2 className="text-lg font-semibold text-[#171512]">Overview</h2>
-              <p className="text-sm text-[#5e574c]">{project.whatWasBuilt || "No short description added yet."}</p>
+        <div className="mt-16 grid gap-12 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="space-y-16">
+            <section className="max-w-3xl space-y-5">
+              <p className="label-caps">Overview</p>
+              <p className="text-xl leading-9 text-[#4b4439]">{project.whatWasBuilt || "No detailed overview has been added yet."}</p>
               {project.problemSolved ? (
-                <p className="text-sm text-[#5e574c]">
-                  <span className="font-semibold text-[#25211b]">Problem solved:</span> {project.problemSolved}
+                <p className="text-lg leading-8 text-[#7b705f]">
+                  <span className="text-[#16130f]">Problem: </span>
+                  {project.problemSolved}
                 </p>
               ) : null}
               {project.impact ? (
-                <p className="text-sm text-[#5e574c]">
-                  <span className="font-semibold text-[#25211b]">Impact:</span> {project.impact}
+                <p className="text-lg leading-8 text-[#7b705f]">
+                  <span className="text-[#16130f]">Outcome: </span>
+                  {project.impact}
                 </p>
               ) : null}
-              {project.skills.length > 0 ? (
+            </section>
+
+            {project.skills.length > 0 ? (
+              <section className="space-y-5">
+                <p className="label-caps">Tools and skills</p>
                 <div className="flex flex-wrap gap-2">
                   {project.skills.map((skill) => (
                     <Badge key={`${project.projectId}-${skill}`}>{skill}</Badge>
                   ))}
                 </div>
-              ) : null}
-            </Card>
+              </section>
+            ) : null}
 
             {project.artifacts.length > 0 ? (
-              <Card className="space-y-3 border-[#e5dccd] bg-[#fdfbf7]">
-                <h2 className="text-lg font-semibold text-[#171512]">Project assets</h2>
+              <section className="space-y-6">
+                <p className="label-caps">Gallery and assets</p>
+                <ProjectPreviewPlayer
+                  artifacts={project.artifacts}
+                  coverImageUrl={project.coverImageUrl}
+                  mode="inline"
+                  projectType={project.projectType}
+                  title={project.title}
+                />
                 <div className="grid gap-3 sm:grid-cols-2">
                   {project.artifacts.map((artifact) => (
                     <a
-                      className="flex items-center gap-3 rounded-xl border border-[#e7dece] p-3 hover:bg-[#f5ede0]"
+                      className="border border-[#d7cebd] bg-[#eee8dd] p-4 text-sm text-[#16130f] hover:bg-[#ebe3d6]"
                       href={artifact.url}
                       key={`${project.projectId}-${artifact.url}`}
                       rel="noreferrer"
                       target="_blank"
                     >
-                      <div className="h-14 w-20 flex-shrink-0 overflow-hidden rounded-md bg-[#ece4d4]">
-                        {artifact.previewUrl ? (
-                          <img alt={artifact.label} className="h-full w-full object-cover" src={artifact.previewUrl} />
-                        ) : (
-                          <div className="flex h-full items-center justify-center text-[10px] text-[#7a7265]">No preview</div>
-                        )}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-[#25211b]">{artifact.label}</p>
-                        <p className="text-xs capitalize text-[#6a6257]">{artifact.type}</p>
-                      </div>
+                      <span className="block truncate">{artifact.label}</span>
+                      <span className="mt-1 block text-xs capitalize text-[#7b705f]">{artifact.type}</span>
                     </a>
                   ))}
                 </div>
-              </Card>
+              </section>
             ) : null}
           </div>
 
-          <aside className="space-y-4">
-            <Card className="space-y-3 border-[#e5dccd] bg-[#fdfbf7]">
-              <h2 className="text-base font-semibold text-[#171512]">Creator</h2>
-              <p className="text-sm font-semibold text-[#25211b]">{project.authorName ?? "Merit User"}</p>
-              {project.authorHeadline ? <p className="text-sm text-[#5e574c]">{project.authorHeadline}</p> : null}
+          <aside className="space-y-5 border-t border-[#d7cebd] pt-6 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
+            <div className="space-y-2">
+              <p className="label-caps">Creator</p>
+              <p className="text-lg text-[#16130f]">{project.authorName ?? "Merit User"}</p>
+              {project.authorHeadline ? <p className="text-sm leading-6 text-[#7b705f]">{project.authorHeadline}</p> : null}
               <Link href={`/c/${project.userId}`}>
-                <Button className="w-full" variant="secondary">
-                  View Passport
-                </Button>
+                <Button className="mt-3 w-full" variant="secondary">View profile</Button>
               </Link>
-            </Card>
+            </div>
 
             {primaryLink ? (
-              <Card className="space-y-3 border-[#e5dccd] bg-[#fdfbf7]">
-                <h2 className="text-base font-semibold text-[#171512]">Visit project</h2>
-                <a href={primaryLink} rel="noreferrer" target="_blank">
-                  <Button className="w-full">Open external link</Button>
-                </a>
-              </Card>
+              <a href={primaryLink} rel="noreferrer" target="_blank">
+                <Button className="w-full">Open external link</Button>
+              </a>
             ) : null}
 
+            {user ? (
+              <ProjectInteractions
+                initialInspired={interactionState.inspiredProjectIds.includes(project.projectId)}
+                initialSaved={interactionState.savedProjectIds.includes(project.projectId)}
+                projectId={project.projectId}
+              />
+            ) : (
+              <div className="space-y-3 border border-[#d7cebd] bg-[#eee8dd] p-4">
+                <p className="text-sm text-[#7b705f]">Sign in to save or mark this project as inspiring.</p>
+                <div className="flex flex-wrap gap-2">
+                  <Link href="/sign-in">
+                    <Button variant="secondary">Sign in</Button>
+                  </Link>
+                  <Link href="/sign-up">
+                    <Button>Create account</Button>
+                  </Link>
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-3 border border-[#d7cebd] text-center text-sm">
+              <div className="border-r border-[#d7cebd] p-3">
+                <p className="label-caps">Views</p>
+                <p className="mt-2 font-serif text-2xl">{project.engagement.views}</p>
+              </div>
+              <div className="border-r border-[#d7cebd] p-3">
+                <p className="label-caps">Likes</p>
+                <p className="mt-2 font-serif text-2xl">{project.engagement.likes}</p>
+              </div>
+              <div className="p-3">
+                <p className="label-caps">Saves</p>
+                <p className="mt-2 font-serif text-2xl">{project.engagement.saves}</p>
+              </div>
+            </div>
+
             {user && project.userId === user.id ? (
-              <Card className="space-y-3 border-[#e5dccd] bg-[#fdfbf7]">
-                <h2 className="text-base font-semibold text-[#171512]">Owner actions</h2>
-                <Link href={`/projects/${project.projectId}/edit`}>
-                  <Button className="w-full" variant="secondary">
-                    Edit project
-                  </Button>
-                </Link>
-              </Card>
+              <Link href={`/projects/${project.projectId}/edit`}>
+                <Button className="w-full" variant="secondary">Edit project</Button>
+              </Link>
             ) : null}
-            {user && project.userId !== user.id ? (
-              <Card className="space-y-3 border-[#e5dccd] bg-[#fdfbf7]">
-                <h2 className="text-base font-semibold text-[#171512]">Safety</h2>
-                <ProjectReportButton projectId={project.projectId} />
-              </Card>
-            ) : null}
+            {user && project.userId !== user.id ? <ProjectReportButton projectId={project.projectId} /> : null}
           </aside>
         </div>
-      </section>
+      </article>
     </AppShell>
   );
 }
