@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
-import { Button } from "@/components/ui/button";
+import { ActionIcon, iconControlClassName } from "@/components/ui/action-icon";
 import { getSupportEmail, getSupportUrl } from "@/lib/public-config";
 import { cn } from "@/lib/utils";
 
@@ -75,11 +75,13 @@ export function AppShell({ children, userEmail, roleType }: AppShellProps) {
           <div className="ml-auto flex items-center gap-3 text-sm">
             {isSignedIn ? (
               <>
-                <Link className="hidden text-[#6f6658] hover:text-[#16130f] sm:inline-flex" href="/home">
-                  View Site
-                </Link>
-                <Link className="hidden sm:inline-flex" href="/projects/new">
-                  <Button>Add project</Button>
+                <Link
+                  aria-label="Add project"
+                  className={iconControlClassName({ className: "h-12 w-12", variant: "primary" })}
+                  href="/projects/new"
+                  title="Add project"
+                >
+                  <ActionIcon name="plus" />
                 </Link>
                 <button className="text-[#16130f] hover:text-[#6f6658]" onClick={handleSignOut} type="button">
                   Sign Out

@@ -1,3 +1,5 @@
+const DEFAULT_ADMIN_EMAILS = ["turtlesrqul@gmail.com"];
+
 function parseBooleanFlag(value: string | undefined, defaultValue: boolean) {
   if (!value) {
     return defaultValue;
@@ -18,10 +20,11 @@ export function isCareerCoachEnabled() {
 
 export function getAdminEmailAllowlist() {
   const raw = process.env.MERIT_ADMIN_EMAIL_ALLOWLIST ?? "";
-  return raw
+  const configuredEmails = raw
     .split(",")
     .map((value) => value.trim().toLowerCase())
     .filter(Boolean);
+  return Array.from(new Set([...DEFAULT_ADMIN_EMAILS, ...configuredEmails]));
 }
 
 export function isAdminEmail(email: string | null | undefined) {

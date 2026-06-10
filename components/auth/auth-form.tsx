@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { resolveSignupEmailCallbackUrl } from "@/lib/auth/auth-urls";
+import { resolveSafeAuthNext, resolveSignupEmailCallbackUrl } from "@/lib/auth/auth-urls";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 import { isRateLimitedAuthError, mapSupabaseAuthError } from "@/lib/auth/auth-errors";
 import {
@@ -42,6 +42,7 @@ export function AuthForm({ mode }: AuthFormProps) {
   const supportInstagramHandle = getSupportInstagramHandle();
   const supportInstagramUrl = getSupportInstagramUrl();
   const supportUrl = getSupportUrl();
+  const nextPath = resolveSafeAuthNext(searchParams.get("next"));
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -55,16 +56,16 @@ export function AuthForm({ mode }: AuthFormProps) {
   const [resendSecondsRemaining, setResendSecondsRemaining] = useState(0);
 
   const isSignUp = mode === "sign-up";
-  const emailCallbackUrl = resolveSignupEmailCallbackUrl();
+  const emailCallbackUrl = resolveSignupEmailCallbackUrl(nextPath);
 
-  const redirectToHome = useCallback(() => {
+  const redirectAfterAuth = useCallback(() => {
     if (typeof window !== "undefined") {
-      window.location.assign("/home");
+      window.location.assign(nextPath);
       return;
     }
-    router.replace("/home");
+    router.replace(nextPath);
     router.refresh();
-  }, [router]);
+  }, [nextPath, router]);
 
   const savePendingSignupState = (pendingEmail: string) => {
     const normalizedEmail = normalizeEmailAddress(pendingEmail);
@@ -106,7 +107,7 @@ export function AuthForm({ mode }: AuthFormProps) {
       }
 
       clearPendingSignupState();
-      redirectToHome();
+      redirectAfterAuth();
     };
 
     void restoreSession();
@@ -114,7 +115,7 @@ export function AuthForm({ mode }: AuthFormProps) {
     return () => {
       isMounted = false;
     };
-  }, [redirectToHome]);
+  }, [redirectAfterAuth]);
 
   useEffect(() => {
     if (!isSignUp) {
@@ -192,7 +193,7 @@ export function AuthForm({ mode }: AuthFormProps) {
     }
 
     clearPendingSignupState();
-    redirectToHome();
+    redirectAfterAuth();
     setIsSubmitting(false);
   };
 
@@ -320,7 +321,7 @@ export function AuthForm({ mode }: AuthFormProps) {
       }
 
       clearPendingSignupState();
-      redirectToHome();
+      redirectAfterAuth();
       setIsSubmitting(false);
       return;
     }

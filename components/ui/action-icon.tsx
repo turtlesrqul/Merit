@@ -2,6 +2,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 export type ActionIconName =
+  | "arrow-left"
   | "bookmark"
   | "check"
   | "chevron-down"
@@ -28,10 +29,10 @@ type ActionIconProps = {
 type IconControlVariant = "primary" | "secondary" | "ghost" | "danger";
 
 const iconControlVariants: Record<IconControlVariant, string> = {
-  primary: "border-[#d9ae19] bg-[#f3c945] text-[#11100e] hover:bg-[#f6d45d]",
-  secondary: "border-[#16130f] bg-transparent text-[#11100e] hover:bg-[#ebe3d6]",
-  ghost: "border-transparent bg-transparent text-[#4a4337] hover:border-[#d7cebd]",
-  danger: "border-red-600 bg-red-600 text-white hover:bg-red-700"
+  primary: "text-[#c79a00] hover:text-[#16130f]",
+  secondary: "text-[#16130f] hover:text-[#8c6d00]",
+  ghost: "text-[#6f6658] hover:text-[#16130f]",
+  danger: "text-red-700 hover:text-red-900"
 };
 
 export function iconControlClassName({
@@ -44,9 +45,9 @@ export function iconControlClassName({
   variant?: IconControlVariant;
 } = {}) {
   return cn(
-    "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-none border transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-60",
+    "inline-flex h-11 w-11 shrink-0 items-center justify-center border-0 bg-transparent p-0 transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-45",
     iconControlVariants[variant],
-    active ? "border-[#d9ae19] bg-[#f3c945] text-[#11100e]" : null,
+    active ? "text-[#c79a00]" : null,
     className
   );
 }
@@ -84,10 +85,18 @@ export function IconButton({
 export function ActionIcon({ className, filled = false, name }: ActionIconProps) {
   const common = {
     "aria-hidden": true,
-    className: cn("h-4 w-4", className),
+    className: cn("h-6 w-6", className),
     fill: "none",
     viewBox: "0 0 24 24"
   } as const;
+
+  if (name === "arrow-left") {
+    return (
+      <svg {...common}>
+        <path d="M19 12H5m0 0 6-6m-6 6 6 6" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.9" />
+      </svg>
+    );
+  }
 
   if (name === "bookmark") {
     return (

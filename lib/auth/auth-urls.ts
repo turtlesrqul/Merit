@@ -2,6 +2,13 @@ import { getPublicAppUrl } from "@/lib/public-config";
 
 const PROD_FALLBACK_APP_URL = "https://meritsg.com";
 
+export function resolveSafeAuthNext(nextValue: string | null | undefined) {
+  if (!nextValue || !nextValue.startsWith("/") || nextValue.startsWith("//")) {
+    return "/home";
+  }
+  return nextValue;
+}
+
 function resolveAuthBaseUrl() {
   const configuredBaseUrl = getPublicAppUrl();
   if (configuredBaseUrl) {
@@ -19,8 +26,8 @@ function resolveAuthBaseUrl() {
   return PROD_FALLBACK_APP_URL;
 }
 
-export function resolveSignupEmailCallbackUrl() {
-  return `${resolveAuthBaseUrl()}/auth/callback?next=/home&from=signup`;
+export function resolveSignupEmailCallbackUrl(nextPath = "/home") {
+  return `${resolveAuthBaseUrl()}/auth/callback?next=${encodeURIComponent(resolveSafeAuthNext(nextPath))}&from=signup`;
 }
 
 export function resolvePasswordResetRedirectUrl() {

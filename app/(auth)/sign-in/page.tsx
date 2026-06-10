@@ -1,8 +1,21 @@
 import { redirect } from "next/navigation";
 import { AuthForm } from "@/components/auth/auth-form";
+import { resolveSafeAuthNext } from "@/lib/auth/auth-urls";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
-export default async function SignInPage() {
+type SignInPageProps = {
+  searchParams?: Promise<{
+    next?: string | string[];
+  }>;
+};
+
+function getNextPath(value: string | string[] | undefined) {
+  return resolveSafeAuthNext(Array.isArray(value) ? value[0] : value);
+}
+
+export default async function SignInPage({ searchParams }: SignInPageProps) {
+  const resolvedSearchParams = await searchParams;
+  const nextPath = getNextPath(resolvedSearchParams?.next);
   const supabase = await createServerSupabaseClient();
   let user: Awaited<ReturnType<typeof supabase.auth.getUser>>["data"]["user"] = null;
   try {
@@ -15,7 +28,7 @@ export default async function SignInPage() {
   }
 
   if (user) {
-    redirect("/home");
+    redirect(nextPath);
   }
 
   return <AuthForm mode="sign-in" />;

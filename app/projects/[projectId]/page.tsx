@@ -21,6 +21,9 @@ type ProjectDetailPageProps = {
   params: Promise<{
     projectId: string;
   }>;
+  searchParams?: Promise<{
+    from?: string;
+  }>;
 };
 
 function projectTypeLabel(value: "web" | "design" | "document" | "other") {
@@ -38,8 +41,9 @@ function getPrimaryLink(projectArtifacts: Array<{ type: string; url: string }>) 
   return projectArtifacts[0]?.url ?? null;
 }
 
-export default async function ProjectDetailPage({ params }: ProjectDetailPageProps) {
+export default async function ProjectDetailPage({ params, searchParams }: ProjectDetailPageProps) {
   const { projectId } = await params;
+  const source = await searchParams;
   const supabase = await createServerSupabaseClient();
   let user: Awaited<ReturnType<typeof supabase.auth.getUser>>["data"]["user"] = null;
   try {
@@ -80,12 +84,20 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
     coverImageUrl: project.coverImageUrl,
     projectType: project.projectType
   });
+  const backHref = source?.from === "explore" ? "/home" : `/c/${project.userId}`;
+  const backLabel = source?.from === "explore" ? "Back to Explore" : `Back to ${project.authorName ?? "builder"}'s profile`;
 
   return (
     <AppShell roleType={viewerProfile?.roleType} userEmail={user?.email}>
       <article className="editorial-container pt-12">
-        <Link className="text-sm text-[#16130f] hover:text-[#7b705f]" href={`/c/${project.userId}`}>
-          Back to {project.authorName ?? "builder"}'s profile
+        <Link
+          aria-label={backLabel}
+          className="inline-flex items-center gap-2 text-sm text-[#16130f] hover:text-[#7b705f]"
+          href={backHref}
+          title={backLabel}
+        >
+          <ActionIcon name="arrow-left" />
+          <span>{backLabel}</span>
         </Link>
 
         <header className="mt-8 space-y-5">
@@ -116,11 +128,15 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
           </div>
         </header>
 
-        <div className="mt-8 h-64 overflow-hidden bg-[#e5ded1] md:h-[420px]">
+        <div className="mt-8 overflow-hidden">
           {visual.previewUrl ? (
-            <img alt={`${project.title} preview`} className="h-full w-full object-contain p-2" src={visual.previewUrl} />
+            <img
+              alt={`${project.title} preview`}
+              className="mx-auto max-h-[520px] max-w-full object-contain"
+              src={visual.previewUrl}
+            />
           ) : (
-            <div className="flex h-full items-center justify-center text-[#7b705f]">Preview coming soon</div>
+            <div className="flex min-h-64 items-center justify-center bg-[#e5ded1] text-[#7b705f]">Preview coming soon</div>
           )}
         </div>
 

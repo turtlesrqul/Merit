@@ -15,8 +15,7 @@ export function ProfileCompletionPrompt({ score }: ProfileCompletionPromptProps)
     <Card className="space-y-4 border-sun-200 bg-gradient-to-br from-sun-50 to-white">
       <h3 className="text-base font-semibold text-ink-950">Complete your profile</h3>
       <p className="text-sm text-ink-700">
-        Recruiters trust complete, evidence-rich profiles. Your current completion:{" "}
-        <strong>{score}%</strong>.
+        Recruiters trust complete, evidence-rich profiles. Add your profile details, resume, portfolio links, and project proof.
       </p>
       <div className="pt-1">
         <Link href="/profile">

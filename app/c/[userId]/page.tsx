@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
 import { PublicProfileActions } from "@/components/profile/public-profile-actions";
+import { SkillTagsToggle } from "@/components/profile/skill-tags-toggle";
 import { Badge } from "@/components/ui/badge";
 import { ActionIcon, iconControlClassName } from "@/components/ui/action-icon";
 import { fetchPublicRecruiterOpportunities } from "@/lib/db/opportunities";
@@ -106,6 +107,7 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
       ? await fetchPublicRecruiterOpportunities(supabase, candidate.userId)
       : [];
   const cvLink = candidate.portfolioLinks.find((link) => isValidCvLink(link)) ?? null;
+  const portfolioLinks = candidate.portfolioLinks.filter((link) => !isValidCvLink(link));
   const displayName = candidate.name ?? "Merit User";
   const featuredProject = candidate.projects.find((project) => project.isFeatured) ?? candidate.projects[0] ?? null;
   const archiveProjects = candidate.projects.filter((project) => project.projectId !== featuredProject?.projectId);
@@ -116,7 +118,7 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
         projectType: featuredProject.projectType
       })
     : null;
-  const skillList = Array.from(new Set(candidate.projects.flatMap((project) => project.skills))).slice(0, 12);
+  const skillList = Array.from(new Set(candidate.projects.flatMap((project) => project.skills)));
 
   return (
     <AppShell roleType={viewerProfile?.roleType} userEmail={user?.email}>
@@ -134,7 +136,7 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
                 <p className="max-w-3xl text-base leading-7 text-[#7b705f]">{candidate.headline}</p>
               ) : null}
               <div className="space-y-2 pt-2 text-sm uppercase tracking-[0.12em] text-[#7b705f]">
-                <p>{candidate.roleType === "recruiter" ? "Recruiter" : "Builder portfolio"}</p>
+                <p>{candidate.roleType === "recruiter" ? "Recruiter Passport" : "Passport"}</p>
                 {candidate.targetRoles.length > 0 ? (
                   <p className="text-[#d8aa14]">Open to {candidate.targetRoles.slice(0, 2).join(" / ")}</p>
                 ) : null}
@@ -168,6 +170,9 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
                 <div className="max-w-3xl space-y-3">
                   <h2 className="font-serif text-2xl leading-tight text-[#16130f]">{featuredProject.title}</h2>
                   <p className="text-base leading-7 text-[#7b705f]">{featuredProject.hook}</p>
+                  <p className="max-w-3xl text-base leading-7 text-[#4b4439]">
+                    {featuredProject.whatWasBuilt || featuredProject.problemSolved || "No project description has been added yet."}
+                  </p>
                 </div>
                 <a
                   aria-label="View featured case study"
@@ -243,7 +248,7 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
             )}
             {cvLink ? (
               <a className="inline-flex text-sm text-[#16130f] underline underline-offset-4" href={cvLink} rel="noreferrer" target="_blank">
-                Open CV / resume
+                Open Resume
               </a>
             ) : null}
           </section>
@@ -252,26 +257,22 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
             {skillList.length > 0 ? (
               <div className="space-y-4">
                 <p className="label-caps">Capabilities</p>
-                <div className="flex flex-wrap gap-2">
-                  {skillList.map((skill) => (
-                    <Badge key={skill}>{skill}</Badge>
-                  ))}
-                </div>
+                <SkillTagsToggle limit={8} skills={skillList} />
               </div>
             ) : null}
-            {candidate.portfolioLinks.length > 0 ? (
+            {portfolioLinks.length > 0 ? (
               <div className="space-y-4">
                 <p className="label-caps">Links</p>
-                <div className="space-y-2">
-                  {candidate.portfolioLinks.map((link) => (
+                <div className="flex flex-wrap gap-3">
+                  {portfolioLinks.map((link, index) => (
                     <a
-                      className="block truncate text-sm text-[#16130f] underline underline-offset-4"
+                      className="inline-flex text-sm text-[#16130f] underline underline-offset-4"
                       href={link}
                       key={link}
                       rel="noreferrer"
                       target="_blank"
                     >
-                      {link}
+                      {portfolioLinks.length === 1 ? "Open Portfolio" : `Open Portfolio ${index + 1}`}
                     </a>
                   ))}
                 </div>

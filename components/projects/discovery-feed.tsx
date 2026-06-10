@@ -111,6 +111,7 @@ export function DiscoveryFeed({
               }
               key={project.projectId}
               project={project}
+              source="explore"
             />
           ))}
         </div>

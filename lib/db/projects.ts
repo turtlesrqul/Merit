@@ -73,6 +73,7 @@ export type PublicCandidateData = {
   contactEmail: string | null;
   targetRoles: string[];
   portfolioLinks: string[];
+  passportSlug: string | null;
   projects: ProjectCardData[];
 };
 
@@ -172,6 +173,11 @@ function isMissingColumnError(errorMessage: string) {
     message.includes("column projects.cover_image_url does not exist") ||
     message.includes("column projects.is_featured does not exist")
   );
+}
+
+function isMissingPassportSlugColumn(errorMessage: string) {
+  const message = errorMessage.toLowerCase();
+  return message.includes("candidate_profiles.passport_slug") || message.includes("passport_slug");
 }
 
 function isMissingTableError(errorMessage: string, tableName: string) {
@@ -643,7 +649,7 @@ export async function fetchPublicCandidateData(
   supabase: DbClient,
   userId: string
 ): Promise<PublicCandidateData | null> {
-  const [userResult, profileResult, projects] = await Promise.all([
+  const [userResult, initialProfileResult, projects] = await Promise.all([
     supabase
       .from("users")
       .select("user_id, name, headline, role_type, target_roles")
@@ -651,11 +657,19 @@ export async function fetchPublicCandidateData(
       .maybeSingle(),
     supabase
       .from("candidate_profiles")
-      .select("bio, contact_email, portfolio_links")
+      .select("bio, contact_email, portfolio_links, passport_slug")
       .eq("user_id", userId)
       .maybeSingle(),
     fetchProjectsByUser(supabase, userId)
   ]);
+  let profileResult = initialProfileResult;
+  if (profileResult.error && isMissingPassportSlugColumn(profileResult.error.message)) {
+    profileResult = await supabase
+      .from("candidate_profiles")
+      .select("bio, contact_email, portfolio_links")
+      .eq("user_id", userId)
+      .maybeSingle();
+  }
 
   if (userResult.error) {
     throw new Error(`Failed to fetch public user: ${userResult.error.message}`);
@@ -679,8 +693,34 @@ export async function fetchPublicCandidateData(
     contactEmail: safeNullableString(profile.contact_email),
     targetRoles: safeStringArray(user.target_roles),
     portfolioLinks: safeStringArray(profile.portfolio_links),
+    passportSlug: safeNullableString(profile.passport_slug),
     projects
   };
+}
+
+export async function fetchPublicCandidateDataByPassportSlug(
+  supabase: DbClient,
+  passportSlug: string
+): Promise<PublicCandidateData | null> {
+  const { data, error } = await supabase
+    .from("candidate_profiles")
+    .select("user_id")
+    .eq("passport_slug", passportSlug)
+    .maybeSingle();
+
+  if (error) {
+    if (isMissingPassportSlugColumn(error.message)) {
+      return null;
+    }
+    throw new Error(`Failed to fetch public passport slug: ${error.message}`);
+  }
+
+  const userId = safeString((data as Record<string, unknown> | null)?.user_id);
+  if (!userId) {
+    return null;
+  }
+
+  return fetchPublicCandidateData(supabase, userId);
 }
 
 export async function recordProjectView(

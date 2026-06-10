@@ -67,6 +67,7 @@ export default async function ProfilePage() {
     bio: "",
     contactEmail: user.email ?? "",
     portfolioLinks: [] as string[],
+    passportSlug: null,
     profileCompletionScore: 0
   };
 
@@ -83,6 +84,7 @@ export default async function ProfilePage() {
           portfolioLinks: Array.isArray(resolvedProfile.portfolioLinks)
             ? resolvedProfile.portfolioLinks
             : [],
+          passportSlug: resolvedProfile.passportSlug,
           profileCompletionScore: resolvedProfile.profileCompletionScore
         }}
         inspiredProjectIds={interactionState.inspiredProjectIds}

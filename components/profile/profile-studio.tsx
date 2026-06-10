@@ -11,6 +11,7 @@ import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 import { ProjectCard } from "@/components/projects/project-card";
 import { ProjectInteractions } from "@/components/projects/project-interactions";
 import { ProjectOwnerActions } from "@/components/projects/project-owner-actions";
+import { SkillTagsToggle } from "@/components/profile/skill-tags-toggle";
 import { ActionIcon, IconButton, iconControlClassName } from "@/components/ui/action-icon";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -23,6 +24,8 @@ const ALLOWED_CV_EXTENSIONS = [".pdf", ".doc", ".docx"];
 
 type ProfileRoleType = "candidate" | "recruiter";
 type ProfileSectionId =
+  | "dashboard"
+  | "passport"
   | "overview"
   | "profile"
   | "projects"
@@ -43,6 +46,7 @@ type ProfileStudioProps = {
     contactEmail: string;
     targetRoles: string[];
     portfolioLinks: string[];
+    passportSlug: string | null;
     profileCompletionScore: number;
   };
   ownProjects: ProjectCardData[];
@@ -52,11 +56,20 @@ type ProfileStudioProps = {
 };
 
 const sections: Array<{ id: ProfileSectionId; label: string }> = [
-  { id: "overview", label: "Overview" },
-  { id: "profile", label: "Edit Profile" },
-  { id: "projects", label: "Projects" },
-  { id: "saved", label: "Saved" }
+  { id: "dashboard", label: "Dashboard" },
+  { id: "passport", label: "Passport" }
 ];
+
+const PASSPORT_SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+function normalizePassportSlug(value: string) {
+  return value.trim().toLowerCase();
+}
+
+function isMissingPassportSlugColumn(message: string) {
+  const normalized = message.toLowerCase();
+  return normalized.includes("candidate_profiles.passport_slug") || normalized.includes("passport_slug");
+}
 
 function parseCommaSeparatedInput(value: string): string[] {
   return value
@@ -287,7 +300,7 @@ export function ProfileStudio({
 }: ProfileStudioProps) {
   const router = useRouter();
   const [profile, setProfile] = useState(initialProfile);
-  const [activeSection, setActiveSection] = useState<ProfileSectionId>("overview");
+  const [activeSection, setActiveSection] = useState<ProfileSectionId>("dashboard");
   const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "error">("idle");
   const [identityModalOpen, setIdentityModalOpen] = useState(false);
   const [passportModalOpen, setPassportModalOpen] = useState(false);
@@ -309,6 +322,10 @@ export function ProfileStudio({
     initialProfile.portfolioLinks.join("\n")
   );
   const [cvLinkDraft, setCvLinkDraft] = useState(findCvLink(initialProfile.portfolioLinks));
+  const [passportSlugDraft, setPassportSlugDraft] = useState(initialProfile.passportSlug ?? "");
+  const [passportSlugError, setPassportSlugError] = useState<string | null>(null);
+  const [passportSlugSuccess, setPassportSlugSuccess] = useState<string | null>(null);
+  const [isPassportSlugEditing, setIsPassportSlugEditing] = useState(false);
   const [selectedPortfolioLink, setSelectedPortfolioLink] = useState(
     initialProfile.portfolioLinks[0] ?? ""
   );
@@ -332,6 +349,8 @@ export function ProfileStudio({
   const [isInlineContactEditing, setIsInlineContactEditing] = useState(false);
   const [isInlineRoleEditing, setIsInlineRoleEditing] = useState(false);
   const [isInlineRolesEditing, setIsInlineRolesEditing] = useState(false);
+  const [isInlineIdentityEditing, setIsInlineIdentityEditing] = useState(false);
+  const [isInlinePassportEditing, setIsInlinePassportEditing] = useState(false);
   const [isInlinePortfolioEditing, setIsInlinePortfolioEditing] = useState(false);
   const [isInlineCvEditing, setIsInlineCvEditing] = useState(false);
   const inlinePortfolioInputRef = useRef<HTMLInputElement | null>(null);
@@ -341,7 +360,8 @@ export function ProfileStudio({
 
   const savedIdSet = useMemo(() => new Set(savedProjectIds), [savedProjectIds]);
   const inspiredIdSet = useMemo(() => new Set(inspiredProjectIds), [inspiredProjectIds]);
-  const passportPath = `/c/${userId}`;
+  const fallbackPassportPath = `/c/${userId}`;
+  const passportPath = profile.passportSlug ? `/passport/${profile.passportSlug}` : fallbackPassportPath;
 
   const featuredProject = useMemo(
     () =>
@@ -416,6 +436,14 @@ export function ProfileStudio({
     }
   }, [isInlineNameEditing, profile.name]);
 
+  useEffect(() => {
+    if (!isPassportSlugEditing) {
+      setPassportSlugDraft(profile.passportSlug ?? "");
+      setPassportSlugError(null);
+      setPassportSlugSuccess(null);
+    }
+  }, [isPassportSlugEditing, profile.passportSlug]);
+
   const copyPassportLink = async () => {
     setCopyStatus("idle");
     const passportUrl =
@@ -459,16 +487,30 @@ export function ProfileStudio({
       throw new Error(userResult.error.message);
     }
 
-    const profileResult = await supabase.from("candidate_profiles").upsert(
-      {
-        user_id: userId,
-        bio: nextProfile.bio,
-        contact_email: nextProfile.contactEmail || null,
-        portfolio_links: nextProfile.portfolioLinks,
-        profile_completion_score: parsedScore
-      },
-      { onConflict: "user_id" }
-    );
+    const profilePayload = {
+      user_id: userId,
+      bio: nextProfile.bio,
+      contact_email: nextProfile.contactEmail || null,
+      portfolio_links: nextProfile.portfolioLinks,
+      passport_slug: nextProfile.passportSlug,
+      profile_completion_score: parsedScore
+    };
+
+    let profileResult = await supabase.from("candidate_profiles").upsert(profilePayload, { onConflict: "user_id" });
+    if (profileResult.error && isMissingPassportSlugColumn(profileResult.error.message)) {
+      if ("passportSlug" in patch) {
+        throw new Error("Apply the passport_slug migration before saving a custom passport path.");
+      }
+
+      const legacyProfilePayload = {
+        user_id: profilePayload.user_id,
+        bio: profilePayload.bio,
+        contact_email: profilePayload.contact_email,
+        portfolio_links: profilePayload.portfolio_links,
+        profile_completion_score: profilePayload.profile_completion_score
+      };
+      profileResult = await supabase.from("candidate_profiles").upsert(legacyProfilePayload, { onConflict: "user_id" });
+    }
 
     if (profileResult.error) {
       throw new Error(profileResult.error.message);
@@ -672,6 +714,7 @@ export function ProfileStudio({
         bio: bioDraft
       });
       setIdentitySuccess("Identity updated.");
+      setIsInlineIdentityEditing(false);
     } catch (error) {
       setIdentityError(error instanceof Error ? error.message : "Unable to save identity.");
     } finally {
@@ -708,8 +751,52 @@ export function ProfileStudio({
         portfolioLinks: dedupedPortfolioLinks
       });
       setPassportSuccess("Passport updated.");
+      setIsInlinePassportEditing(false);
     } catch (error) {
       setPassportError(error instanceof Error ? error.message : "Unable to save passport.");
+    } finally {
+      setPassportSaving(false);
+    }
+  };
+
+  const savePassportSlug = async () => {
+    const normalizedSlug = normalizePassportSlug(passportSlugDraft);
+    setPassportSlugError(null);
+    setPassportSlugSuccess(null);
+
+    if (normalizedSlug && !PASSPORT_SLUG_PATTERN.test(normalizedSlug)) {
+      setPassportSlugError("Use lowercase letters, numbers, and hyphens only. No spaces or symbols.");
+      return;
+    }
+
+    setPassportSaving(true);
+    try {
+      const supabase = createBrowserSupabaseClient();
+      if (normalizedSlug) {
+        const { data: existingRows, error: existingError } = await supabase
+          .from("candidate_profiles")
+          .select("user_id")
+          .eq("passport_slug", normalizedSlug)
+          .limit(1);
+
+        if (existingError) {
+          throw new Error(existingError.message);
+        }
+
+        const existingUserId = (existingRows?.[0] as Record<string, unknown> | undefined)?.user_id;
+        const existingOwnerId = typeof existingUserId === "string" ? existingUserId : "";
+        if (existingOwnerId && existingOwnerId !== userId) {
+          setPassportSlugError("That passport path is already taken.");
+          return;
+        }
+      }
+
+      await persistProfilePatch({ passportSlug: normalizedSlug || null });
+      setPassportSlugDraft(normalizedSlug);
+      setPassportSlugSuccess(normalizedSlug ? "Passport path updated." : "Custom path removed.");
+      setIsPassportSlugEditing(false);
+    } catch (error) {
+      setPassportSlugError(error instanceof Error ? error.message : "Unable to update passport path.");
     } finally {
       setPassportSaving(false);
     }
@@ -804,6 +891,421 @@ export function ProfileStudio({
   };
 
   const renderSection = () => {
+    if (activeSection === "dashboard") {
+      const cvLink = findCvLink(profile.portfolioLinks);
+      const portfolioOnlyLinks = profile.portfolioLinks.filter((link) => !isValidCvLink(link));
+
+      return (
+        <section className="space-y-8" id="section-dashboard">
+          <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(320px,0.72fr)]">
+            <Card className="space-y-5 bg-transparent">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="label-caps mb-2">Profile information</p>
+                  <h2 className="font-serif text-2xl text-[#16130f]">Identity</h2>
+                </div>
+                <IconButton
+                  icon={isInlineIdentityEditing ? "x" : "pencil"}
+                  label={isInlineIdentityEditing ? "Cancel profile edits" : "Edit profile information"}
+                  onClick={() => {
+                    if (isInlineIdentityEditing) {
+                      setNameDraft(profile.name);
+                      setRoleTypeDraft(profile.roleType);
+                      setHeadlineDraft(profile.headline);
+                      setBioDraft(profile.bio);
+                      setIdentityError(null);
+                      setIdentitySuccess(null);
+                    }
+                    setIsInlineIdentityEditing((current) => !current);
+                  }}
+                />
+              </div>
+
+              {isInlineIdentityEditing ? (
+                <form className="space-y-4" onSubmit={saveIdentity}>
+                  <label className="block space-y-2 text-sm text-ink-900">
+                    Name
+                    <Input onChange={(event) => setNameDraft(event.target.value)} required value={nameDraft} />
+                  </label>
+                  <label className="block space-y-2 text-sm text-ink-900">
+                    Role
+                    <select
+                      className="w-full border border-[#d7cebd] bg-transparent px-3.5 py-2.5 text-sm text-[#16130f] outline-none focus:border-[#f3c945]"
+                      onChange={(event) => setRoleTypeDraft(event.target.value as ProfileRoleType)}
+                      value={roleTypeDraft}
+                    >
+                      <option value="candidate">Candidate</option>
+                      <option value="recruiter">Recruiter</option>
+                    </select>
+                  </label>
+                  <label className="block space-y-2 text-sm text-ink-900">
+                    Headline
+                    <Input
+                      onChange={(event) => setHeadlineDraft(event.target.value)}
+                      placeholder="Builder identity in one sentence"
+                      value={headlineDraft}
+                    />
+                  </label>
+                  <label className="block space-y-2 text-sm text-ink-900">
+                    Bio
+                    <Textarea
+                      className="min-h-[120px]"
+                      onChange={(event) => setBioDraft(event.target.value)}
+                      placeholder="Tell us about yourself. Include your background, role, and interests."
+                      value={bioDraft}
+                    />
+                  </label>
+                  {identityError ? <p className="text-sm text-red-700">{identityError}</p> : null}
+                  {identitySuccess ? <p className="text-sm text-green-700">{identitySuccess}</p> : null}
+                  <div className="flex justify-end">
+                    <IconButton
+                      disabled={identitySaving}
+                      icon="check"
+                      label={identitySaving ? "Saving profile information" : "Save profile information"}
+                      type="submit"
+                      variant="primary"
+                    />
+                  </div>
+                </form>
+              ) : (
+                <div className="space-y-5">
+                  <div>
+                    <h3 className="font-serif text-3xl leading-tight text-[#16130f]">
+                      {profile.name || "Merit Builder"}
+                    </h3>
+                    <p className="mt-2 text-base leading-7 text-[#7b705f]">
+                      {profile.headline || "Add a headline so people understand what you build and where you are headed."}
+                    </p>
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <p className="label-caps">Role</p>
+                      <p className="mt-1 capitalize text-sm text-[#16130f]">{profile.roleType}</p>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="label-caps mb-2">Bio</p>
+                    <p className="max-w-3xl text-base leading-7 text-[#7b705f]">
+                      {profile.bio || "No bio added yet."}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </Card>
+
+            <Card className="space-y-5 bg-transparent">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="label-caps mb-2">Links and signals</p>
+                  <h2 className="font-serif text-2xl text-[#16130f]">Contact</h2>
+                </div>
+                <IconButton
+                  icon={isInlinePassportEditing ? "x" : "pencil"}
+                  label={isInlinePassportEditing ? "Cancel link edits" : "Edit links and signals"}
+                  onClick={() => {
+                    if (isInlinePassportEditing) {
+                      setContactEmailDraft(profile.contactEmail);
+                      setTargetRolesDraft(profile.targetRoles.join(", "));
+                      setPortfolioLinksDraft(profile.portfolioLinks.filter((link) => !isValidCvLink(link)).join("\n"));
+                      setCvLinkDraft(findCvLink(profile.portfolioLinks));
+                      setPassportError(null);
+                      setPassportSuccess(null);
+                    }
+                    setIsInlinePassportEditing((current) => !current);
+                  }}
+                />
+              </div>
+
+              {isInlinePassportEditing ? (
+                <form className="space-y-4" onSubmit={savePassport}>
+                  <label className="block space-y-2 text-sm text-ink-900">
+                    Contact email
+                    <Input
+                      onChange={(event) => setContactEmailDraft(event.target.value)}
+                      type="email"
+                      value={contactEmailDraft}
+                    />
+                  </label>
+                  <label className="block space-y-2 text-sm text-ink-900">
+                    Target roles
+                    <Input
+                      onChange={(event) => setTargetRolesDraft(event.target.value)}
+                      placeholder="Frontend Engineer Intern, Product Designer"
+                      value={targetRolesDraft}
+                    />
+                  </label>
+                  <label className="block space-y-2 text-sm text-ink-900">
+                    Resume link
+                    <Input
+                      onChange={(event) => setCvLinkDraft(event.target.value)}
+                      placeholder="https://your-site.com/resume.pdf"
+                      value={cvLinkDraft}
+                    />
+                  </label>
+                  <label className="block space-y-2 text-sm text-ink-900">
+                    Social / portfolio links
+                    <Textarea
+                      className="min-h-[120px]"
+                      onChange={(event) => setPortfolioLinksDraft(event.target.value)}
+                      placeholder={"https://your-site.com\nhttps://behance.net/you"}
+                      value={portfolioLinksDraft}
+                    />
+                  </label>
+                  {passportError ? <p className="text-sm text-red-700">{passportError}</p> : null}
+                  {passportSuccess ? <p className="text-sm text-green-700">{passportSuccess}</p> : null}
+                  <div className="flex justify-end">
+                    <IconButton
+                      disabled={passportSaving || isUploadingCv || isUploadingPortfolioFiles}
+                      icon="check"
+                      label={passportSaving ? "Saving links and signals" : "Save links and signals"}
+                      type="submit"
+                      variant="primary"
+                    />
+                  </div>
+                </form>
+              ) : (
+                <div className="space-y-5 text-sm">
+                  <div>
+                    <p className="label-caps mb-2">Open to</p>
+                    {profile.targetRoles.length > 0 ? (
+                      <div className="flex flex-wrap gap-2">
+                        {profile.targetRoles.map((role) => (
+                          <Badge key={role}>{role}</Badge>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-[#7b705f]">Not set yet.</p>
+                    )}
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <p className="label-caps">Email</p>
+                      <p className="mt-1 text-[#16130f]">{profile.contactEmail || "Not set"}</p>
+                    </div>
+                    <div>
+                      <p className="label-caps">Resume</p>
+                      {cvLink ? (
+                        <a className="mt-1 inline-flex text-[#16130f] underline underline-offset-4" href={cvLink} rel="noreferrer" target="_blank">
+                          Open Resume
+                        </a>
+                      ) : (
+                        <p className="mt-1 text-[#7b705f]">Not set</p>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="label-caps mb-2">Social / portfolio links</p>
+                    {portfolioOnlyLinks.length > 0 ? (
+                      <div className="flex flex-wrap gap-3">
+                        {portfolioOnlyLinks.map((link, index) => (
+                          <a
+                            className="inline-flex text-[#16130f] underline underline-offset-4"
+                            href={link}
+                            key={link}
+                            rel="noreferrer"
+                            target="_blank"
+                          >
+                            {portfolioOnlyLinks.length === 1 ? "Open Portfolio" : `Open Portfolio ${index + 1}`}
+                          </a>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-[#7b705f]">No portfolio links added yet.</p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </Card>
+          </div>
+
+          <section className="space-y-4">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="label-caps mb-2">Projects</p>
+                <h2 className="font-serif text-2xl text-[#16130f]">Published work</h2>
+              </div>
+              <Link
+                aria-label="Add project"
+                className={iconControlClassName({ variant: "primary" })}
+                href="/projects/new"
+                title="Add project"
+              >
+                <ActionIcon name="plus" />
+              </Link>
+            </div>
+            <ProjectRail
+              emptyText="You do not have projects yet. Publish one to activate your passport."
+              projectActions={(project) => <ProjectOwnerActions projectId={project.projectId} />}
+              projects={ownProjects}
+            />
+          </section>
+
+          <section className="space-y-4">
+            <div>
+              <p className="label-caps mb-2">Saved projects</p>
+              <h2 className="font-serif text-2xl text-[#16130f]">Reference shelf</h2>
+            </div>
+            <ProjectRail
+              emptyText="You have not saved any projects yet."
+              projectActions={(project) => (
+                <ProjectInteractions
+                  display="icons"
+                  initialInspired={inspiredIdSet.has(project.projectId)}
+                  initialSaved={savedIdSet.has(project.projectId)}
+                  projectId={project.projectId}
+                />
+              )}
+              projects={savedProjects}
+            />
+          </section>
+        </section>
+      );
+    }
+
+    if (activeSection === "passport") {
+      return (
+        <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]" id="section-passport">
+          <Card className="space-y-5 bg-transparent">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <p className="label-caps mb-2">Passport</p>
+                <h2 className="font-serif text-3xl leading-tight text-[#16130f]">Public profile preview</h2>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-[#7b705f]">
+                  This is the dedicated passport surface for sharing and checking how your public profile reads.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <IconButton
+                  active={copyStatus === "copied"}
+                  icon={copyStatus === "copied" ? "check" : "copy"}
+                  label={copyStatus === "copied" ? "Passport link copied" : "Copy passport link"}
+                  onClick={copyPassportLink}
+                />
+                <Link
+                  aria-label="View public passport"
+                  className={iconControlClassName({ variant: "primary" })}
+                  href={passportPath}
+                  title="View public passport"
+                >
+                  <ActionIcon name="eye" />
+                </Link>
+              </div>
+            </div>
+            {copyStatus === "error" ? (
+              <p className="text-sm text-red-700">Could not copy automatically. Open the passport and copy the URL.</p>
+            ) : null}
+
+            <div className="grid gap-4 md:grid-cols-[180px_minmax(0,1fr)]">
+              <div className="border border-[#d7cebd] bg-[#eee8dd] p-3">
+                <p className="label-caps">Projects</p>
+                <p className="mt-1 text-xl font-semibold text-[#16130f]">{ownProjects.length}</p>
+              </div>
+              <div className="border border-[#d7cebd] bg-[#eee8dd] p-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="label-caps">Public path</p>
+                    <p className="mt-2 truncate text-sm font-semibold text-[#16130f]">{passportPath}</p>
+                    {!profile.passportSlug ? (
+                      <p className="mt-1 text-xs text-[#7b705f]">Set a custom slug to replace the generated path.</p>
+                    ) : null}
+                  </div>
+                  <IconButton
+                    icon={isPassportSlugEditing ? "x" : "pencil"}
+                    label={isPassportSlugEditing ? "Cancel public path edits" : "Edit public path"}
+                    onClick={() => setIsPassportSlugEditing((current) => !current)}
+                  />
+                </div>
+                {isPassportSlugEditing ? (
+                  <div className="mt-4 space-y-3">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-sm text-[#7b705f]">/passport/</span>
+                      <Input
+                        className="min-w-[220px] flex-1"
+                        onChange={(event) => setPassportSlugDraft(normalizePassportSlug(event.target.value))}
+                        placeholder="ryan-flaneur"
+                        value={passportSlugDraft}
+                      />
+                      <IconButton
+                        disabled={passportSaving}
+                        icon="check"
+                        label={passportSaving ? "Saving public path" : "Save public path"}
+                        onClick={savePassportSlug}
+                        variant="primary"
+                      />
+                    </div>
+                    <p className="text-xs text-[#7b705f]">Lowercase letters, numbers, and hyphens only.</p>
+                  </div>
+                ) : null}
+                {passportSlugError ? <p className="mt-3 text-sm text-red-700">{passportSlugError}</p> : null}
+                {passportSlugSuccess ? <p className="mt-3 text-sm text-green-700">{passportSlugSuccess}</p> : null}
+              </div>
+            </div>
+
+            {featuredProject ? (
+              <div className="space-y-4 border-t border-[#d7cebd] pt-5">
+                <p className="label-caps">Featured work</p>
+                {featuredVisual?.previewUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    alt={`${featuredProject.title} preview`}
+                    className="max-h-[360px] max-w-full object-contain"
+                    src={featuredVisual.previewUrl}
+                  />
+                ) : null}
+                <div className="max-w-3xl space-y-2">
+                  <h3 className="font-serif text-2xl leading-tight text-[#16130f]">{featuredProject.title}</h3>
+                  <p className="text-sm leading-6 text-[#7b705f]">{featuredProject.hook || featuredProject.problemSolved}</p>
+                  <p className="text-sm leading-6 text-[#4b4439]">
+                    {featuredProject.whatWasBuilt || "Add a detailed project description so passport visitors get context."}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <p className="border-t border-[#d7cebd] pt-5 text-sm text-[#7b705f]">
+                Add a project to make the public passport preview feel complete.
+              </p>
+            )}
+
+            <div className="space-y-4 border-t border-[#d7cebd] pt-5">
+              <p className="label-caps">Skill tags</p>
+              <SkillTagsToggle limit={8} skills={skillStats.map(({ skill }) => skill)} />
+            </div>
+          </Card>
+
+          <Card className="space-y-4 bg-[#eee8dd]">
+            <p className="label-caps">Passport card</p>
+            <div className="flex h-16 w-16 items-center justify-center bg-[#dfd6c6] font-serif text-xl text-[#7b705f]">
+              {(profile.name || "M")
+                .split(" ")
+                .map((part) => part[0])
+                .join("")
+                .slice(0, 2)
+                .toUpperCase()}
+            </div>
+            <div>
+              <h3 className="font-serif text-2xl leading-tight text-[#16130f]">{profile.name || "Merit Builder"}</h3>
+              <p className="mt-2 text-sm leading-6 text-[#7b705f]">{profile.headline || "No headline added yet."}</p>
+            </div>
+            <div className="space-y-3 border-y border-[#d7cebd] py-4">
+              <p className="label-caps">Open to</p>
+              {profile.targetRoles.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {profile.targetRoles.slice(0, 4).map((role) => (
+                    <Badge key={role}>{role}</Badge>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-[#7b705f]">Add target roles on Dashboard.</p>
+              )}
+            </div>
+            <p className="text-sm leading-6 text-[#7b705f]">
+              Edit profile details, resume, portfolio links, projects, and saved work from Dashboard.
+            </p>
+          </Card>
+        </section>
+      );
+    }
+
     if (activeSection === "overview") {
       return (
         <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px]" id="section-overview">
@@ -1458,10 +1960,14 @@ export function ProfileStudio({
         <div className="space-y-6">
           <header className="flex flex-wrap items-end justify-between gap-4 border-b border-[#d7cebd] pb-5">
             <div className="space-y-2">
-              <p className="label-caps">Dashboard</p>
-              <h1 className="font-serif text-3xl leading-none text-[#16130f]">Merit workspace</h1>
+              <p className="label-caps">{activeSection === "passport" ? "Passport" : "Dashboard"}</p>
+              <h1 className="font-serif text-3xl leading-none text-[#16130f]">
+                {activeSection === "passport" ? "Public passport" : "Merit workspace"}
+              </h1>
               <p className="max-w-2xl text-sm leading-6 text-[#7b705f]">
-                Edit your profile, manage project proof, preview your public passport, and copy the link when it is ready.
+                {activeSection === "passport"
+                  ? "Preview and share the public-facing version of your Merit profile."
+                  : "Manage your profile, project proof, resume, portfolio links, and saved references in one place."}
               </p>
             </div>
             <div className="flex flex-wrap gap-2">

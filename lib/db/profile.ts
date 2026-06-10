@@ -130,6 +130,7 @@ export type ViewerProfile = {
   bio: string | null;
   contactEmail: string | null;
   portfolioLinks: string[];
+  passportSlug: string | null;
   profileCompletionScore: number;
 };
 
@@ -186,6 +187,7 @@ export async function getViewerProfile(
     bio: safeNullableString(profile.bio),
     contactEmail: safeNullableString(profile.contact_email),
     portfolioLinks: safeStringArray(profile.portfolio_links),
+    passportSlug: safeNullableString(profile.passport_slug),
     profileCompletionScore:
       typeof profile.profile_completion_score === "number" ? profile.profile_completion_score : 0
   };
