@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { CandidateDirectoryItem } from "@/lib/db/opportunities";
+import { ActionIcon, iconControlClassName } from "@/components/ui/action-icon";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -66,10 +67,12 @@ export function CandidateExplorer({ candidates }: CandidateExplorerProps) {
                   <p className="text-xs text-ink-500">{candidate.projectCount} projects</p>
                 </div>
                 <Link
-                  className="text-sm font-semibold text-ink-900 underline underline-offset-2"
+                  aria-label={`View ${candidate.name ?? "candidate"} passport`}
+                  className={iconControlClassName()}
                   href={`/c/${candidate.userId}`}
+                  title={`View ${candidate.name ?? "candidate"} passport`}
                 >
-                  View
+                  <ActionIcon name="eye" />
                 </Link>
               </div>
 

@@ -58,6 +58,7 @@ export type ProjectFormData = {
   category: string;
   projectType: ProjectType;
   coverImageUrl: string;
+  isFeatured: boolean;
   impact: string;
   skills: string[];
   artifactLinks: string[];
@@ -549,6 +550,7 @@ export async function fetchProjectFormData(
       category,
       project_type,
       cover_image_url,
+      is_featured,
       impact
     `
     )
@@ -630,6 +632,7 @@ export async function fetchProjectFormData(
     category: safeString(row.category),
     projectType: safeProjectType(row.project_type),
     coverImageUrl: safeString(row.cover_image_url),
+    isFeatured: Boolean(row.is_featured),
     impact: safeString(row.impact),
     skills,
     artifactLinks

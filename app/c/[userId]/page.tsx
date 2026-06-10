@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
 import { PublicProfileActions } from "@/components/profile/public-profile-actions";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { ActionIcon, iconControlClassName } from "@/components/ui/action-icon";
 import { fetchPublicRecruiterOpportunities } from "@/lib/db/opportunities";
 import { getViewerProfile } from "@/lib/db/profile";
 import { fetchPublicCandidateData, type ProjectCardData } from "@/lib/db/projects";
@@ -66,7 +66,7 @@ function ProjectArchiveItem({ project }: { project: ProjectCardData }) {
             // eslint-disable-next-line @next/next/no-img-element
             <img
               alt={`${project.title} preview`}
-              className="h-full w-full object-contain p-2"
+              className="h-full w-full object-cover"
               src={visual.previewUrl}
             />
           ) : (
@@ -149,16 +149,18 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
           {featuredProject ? (
             <article className="space-y-5">
               <a className="block" href={`/projects/${featuredProject.projectId}`}>
-                <div className="h-60 overflow-hidden bg-[#e5ded1] md:h-[420px]">
+                <div className="overflow-hidden">
                   {featuredVisual?.previewUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       alt={`${featuredProject.title} preview`}
-                      className="h-full w-full object-contain p-2"
+                      className="mx-auto max-h-[420px] max-w-full object-contain"
                       src={featuredVisual.previewUrl}
                     />
                   ) : (
-                    <div className="flex h-full items-center justify-center text-[#7b705f]">Preview coming soon</div>
+                    <div className="flex min-h-60 items-center justify-center bg-[#e5ded1] text-[#7b705f]">
+                      Preview coming soon
+                    </div>
                   )}
                 </div>
               </a>
@@ -167,8 +169,13 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
                   <h2 className="font-serif text-2xl leading-tight text-[#16130f]">{featuredProject.title}</h2>
                   <p className="text-base leading-7 text-[#7b705f]">{featuredProject.hook}</p>
                 </div>
-                <a href={`/projects/${featuredProject.projectId}`}>
-                  <Button variant="secondary">View case study</Button>
+                <a
+                  aria-label="View featured case study"
+                  className={iconControlClassName()}
+                  href={`/projects/${featuredProject.projectId}`}
+                  title="View featured case study"
+                >
+                  <ActionIcon name="eye" />
                 </a>
               </div>
             </article>
@@ -180,19 +187,22 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
         </div>
 
         {archiveProjects.length > 0 ? (
-          <div className="pt-12">
-            <div className="mb-5 flex items-center justify-between border-b border-[#d7cebd] pb-4">
+          <details className="group pt-12">
+            <summary className="mb-5 flex cursor-pointer list-none items-center justify-between border-b border-[#d7cebd] pb-4">
               <p className="label-caps">Selected works</p>
-              <p className="text-sm text-[#7b705f]">
-                {candidate.projects.length} project{candidate.projects.length === 1 ? "" : "s"}
-              </p>
-            </div>
+              <span className="flex items-center gap-2 text-sm text-[#7b705f]">
+                {archiveProjects.length} more
+                <span className={iconControlClassName({ className: "h-8 w-8 transition-transform group-open:rotate-180", variant: "ghost" })}>
+                  <ActionIcon name="chevron-down" />
+                </span>
+              </span>
+            </summary>
             <div className="grid gap-x-8 gap-y-10 md:grid-cols-2">
               {archiveProjects.map((project) => (
                 <ProjectArchiveItem key={project.projectId} project={project} />
               ))}
             </div>
-          </div>
+          </details>
         ) : null}
 
         {candidate.roleType === "recruiter" ? (

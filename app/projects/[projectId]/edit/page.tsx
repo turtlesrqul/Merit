@@ -41,6 +41,7 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
           category: project.category,
           projectType: project.projectType,
           coverImageUrl: project.coverImageUrl,
+          isFeatured: project.isFeatured,
           impact: project.impact,
           skills: project.skills,
           artifactLinks: project.artifactLinks

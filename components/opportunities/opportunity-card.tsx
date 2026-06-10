@@ -1,6 +1,6 @@
 import Link from "next/link";
+import { ActionIcon, iconControlClassName } from "@/components/ui/action-icon";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import type { OpportunityRecord, RecruiterOpportunity } from "@/lib/db/opportunities";
 
@@ -66,10 +66,13 @@ export function OpportunityCard(props: OpportunityCardProps) {
             </span>
           </p>
           {props.opportunity.recruiterId ? (
-            <Link href={`/c/${props.opportunity.recruiterId}`}>
-              <Button className="mt-1" variant="secondary">
-                View recruiter passport
-              </Button>
+            <Link
+              aria-label="View recruiter passport"
+              className={iconControlClassName({ className: "mt-1" })}
+              href={`/c/${props.opportunity.recruiterId}`}
+              title="View recruiter passport"
+            >
+              <ActionIcon name="eye" />
             </Link>
           ) : null}
           {props.opportunity.matchRationale.length > 0 ? (

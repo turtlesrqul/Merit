@@ -11,8 +11,8 @@ import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 import { ProjectCard } from "@/components/projects/project-card";
 import { ProjectInteractions } from "@/components/projects/project-interactions";
 import { ProjectOwnerActions } from "@/components/projects/project-owner-actions";
+import { ActionIcon, IconButton, iconControlClassName } from "@/components/ui/action-icon";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -26,7 +26,6 @@ type ProfileSectionId =
   | "overview"
   | "profile"
   | "projects"
-  | "passport"
   | "portfolio"
   | "cv"
   | "activity"
@@ -56,7 +55,6 @@ const sections: Array<{ id: ProfileSectionId; label: string }> = [
   { id: "overview", label: "Overview" },
   { id: "profile", label: "Edit Profile" },
   { id: "projects", label: "Projects" },
-  { id: "passport", label: "Passport" },
   { id: "saved", label: "Saved" }
 ];
 
@@ -161,9 +159,7 @@ function ProfileModal({
       <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-ink-200 bg-white p-6 shadow-2xl">
         <div className="mb-4 flex items-center justify-between gap-3">
           <h3 className="text-lg font-semibold text-ink-950">{title}</h3>
-          <Button onClick={onClose} variant="ghost">
-            Close
-          </Button>
+          <IconButton icon="x" label="Close modal" onClick={onClose} variant="ghost" />
         </div>
         {children}
       </div>
@@ -192,7 +188,7 @@ function ProjectRail({
     <div className="-mx-1 overflow-x-auto pb-2">
       <div className="flex min-w-max gap-4 px-1">
         {projects.map((project) => (
-          <div className="w-[min(450px,90vw)] shrink-0" key={project.projectId}>
+          <div className="w-[min(340px,86vw)] shrink-0" key={project.projectId}>
             <ProjectCard actions={projectActions(project)} project={project} showAuthor={false} />
           </div>
         ))}
@@ -215,16 +211,7 @@ function PencilEditButton({
       onClick={onClick}
       type="button"
     >
-      <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24">
-        <path
-          d="M4 20h4l10-10a2.12 2.12 0 0 0-3-3L5 17v3z"
-          stroke="currentColor"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="1.8"
-        />
-        <path d="m14 6 4 4" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
-      </svg>
+      <ActionIcon name="pencil" />
     </button>
   );
 }
@@ -284,9 +271,7 @@ function UploadDropCard({
             <p className="text-xs text-ink-600">{description}</p>
           </div>
         </div>
-        <Button disabled={isBusy} onClick={onChoose} type="button" variant="secondary">
-          {isBusy ? busyLabel : chooseLabel}
-        </Button>
+        <IconButton disabled={isBusy} icon="upload" label={isBusy ? busyLabel : chooseLabel} onClick={onChoose} />
       </div>
     </div>
   );
@@ -359,7 +344,10 @@ export function ProfileStudio({
   const passportPath = `/c/${userId}`;
 
   const featuredProject = useMemo(
-    () => [...ownProjects].sort((a, b) => toProjectEngagementScore(b) - toProjectEngagementScore(a))[0] ?? null,
+    () =>
+      ownProjects.find((project) => project.isFeatured) ??
+      [...ownProjects].sort((a, b) => toProjectEngagementScore(b) - toProjectEngagementScore(a))[0] ??
+      null,
     [ownProjects]
   );
   const featuredVisual = featuredProject
@@ -831,11 +819,20 @@ export function ProfileStudio({
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
-                <Button onClick={copyPassportLink} type="button">
-                  {copyStatus === "copied" ? "Copied" : "Copy passport link"}
-                </Button>
-                <Link href={passportPath}>
-                  <Button variant="secondary">View as recruiter</Button>
+                <IconButton
+                  active={copyStatus === "copied"}
+                  icon={copyStatus === "copied" ? "check" : "copy"}
+                  label={copyStatus === "copied" ? "Passport link copied" : "Copy passport link"}
+                  onClick={copyPassportLink}
+                  variant="primary"
+                />
+                <Link
+                  aria-label="View as recruiter"
+                  className={iconControlClassName()}
+                  href={passportPath}
+                  title="View as recruiter"
+                >
+                  <ActionIcon name="eye" />
                 </Link>
               </div>
             </div>
@@ -863,14 +860,15 @@ export function ProfileStudio({
             </div>
 
             <div className="flex flex-wrap gap-2 border-t border-[#d7cebd] pt-4">
-              <Button onClick={() => setActiveSection("profile")} type="button" variant="secondary">
-                Edit profile basics
-              </Button>
-              <Button onClick={() => setActiveSection("projects")} type="button" variant="secondary">
-                Manage projects
-              </Button>
-              <Link href="/projects/new">
-                <Button>Add project</Button>
+              <IconButton icon="pencil" label="Edit profile basics" onClick={() => setActiveSection("profile")} />
+              <IconButton icon="folder" label="Manage projects" onClick={() => setActiveSection("projects")} />
+              <Link
+                aria-label="Add project"
+                className={iconControlClassName({ variant: "primary" })}
+                href="/projects/new"
+                title="Add project"
+              >
+                <ActionIcon name="plus" />
               </Link>
             </div>
           </Card>
@@ -964,9 +962,13 @@ export function ProfileStudio({
               </label>
               {identityError ? <p className="text-sm text-red-700">{identityError}</p> : null}
               {identitySuccess ? <p className="text-sm text-green-700">{identitySuccess}</p> : null}
-              <Button disabled={identitySaving} type="submit">
-                {identitySaving ? "Saving..." : "Save profile basics"}
-              </Button>
+              <IconButton
+                disabled={identitySaving}
+                icon="check"
+                label={identitySaving ? "Saving profile basics" : "Save profile basics"}
+                type="submit"
+                variant="primary"
+              />
             </form>
           </Card>
 
@@ -974,6 +976,40 @@ export function ProfileStudio({
             <div>
               <p className="label-caps mb-2">Passport details</p>
               <h2 className="font-serif text-2xl text-[#16130f]">Contact and evidence</h2>
+            </div>
+            <div className="grid gap-3 border border-[#d7cebd] bg-[#eee8dd] p-3 text-sm sm:grid-cols-[1fr_auto]">
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div>
+                  <p className="label-caps">Readiness</p>
+                  <p className="mt-1 font-semibold text-[#16130f]">{profile.profileCompletionScore}%</p>
+                </div>
+                <div>
+                  <p className="label-caps">Role</p>
+                  <p className="mt-1 capitalize text-[#16130f]">{profile.roleType}</p>
+                </div>
+                <div>
+                  <p className="label-caps">Open to</p>
+                  <p className="mt-1 truncate text-[#16130f]">
+                    {profile.targetRoles.length > 0 ? profile.targetRoles.slice(0, 2).join(" / ") : "Not set"}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <IconButton
+                  active={copyStatus === "copied"}
+                  icon={copyStatus === "copied" ? "check" : "copy"}
+                  label={copyStatus === "copied" ? "Passport link copied" : "Copy passport link"}
+                  onClick={copyPassportLink}
+                />
+                <Link
+                  aria-label="View public passport"
+                  className={iconControlClassName()}
+                  href={passportPath}
+                  title="View public passport"
+                >
+                  <ActionIcon name="eye" />
+                </Link>
+              </div>
             </div>
             <form className="space-y-4" onSubmit={savePassport}>
               <label className="block space-y-2 text-sm text-ink-900">
@@ -1012,15 +1048,15 @@ export function ProfileStudio({
               {passportError ? <p className="text-sm text-red-700">{passportError}</p> : null}
               {passportSuccess ? <p className="text-sm text-green-700">{passportSuccess}</p> : null}
               <div className="flex flex-wrap gap-2">
-                <Button disabled={passportSaving || isUploadingCv || isUploadingPortfolioFiles} type="submit">
-                  {passportSaving ? "Saving..." : "Save passport details"}
-                </Button>
-                <Button onClick={() => setActiveSection("portfolio")} type="button" variant="secondary">
-                  Portfolio uploads
-                </Button>
-                <Button onClick={() => setActiveSection("cv")} type="button" variant="secondary">
-                  CV uploads
-                </Button>
+                <IconButton
+                  disabled={passportSaving || isUploadingCv || isUploadingPortfolioFiles}
+                  icon="check"
+                  label={passportSaving ? "Saving passport details" : "Save passport details"}
+                  type="submit"
+                  variant="primary"
+                />
+                <IconButton icon="upload" label="Portfolio uploads" onClick={() => setActiveSection("portfolio")} />
+                <IconButton icon="upload" label="CV uploads" onClick={() => setActiveSection("cv")} />
               </div>
             </form>
           </Card>
@@ -1033,8 +1069,13 @@ export function ProfileStudio({
         <section className="space-y-4" id="section-projects">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-xl font-semibold text-ink-950">Published projects</h2>
-            <Link href="/projects/new">
-              <Button>Add project</Button>
+            <Link
+              aria-label="Add project"
+              className={iconControlClassName({ variant: "primary" })}
+              href="/projects/new"
+              title="Add project"
+            >
+              <ActionIcon name="plus" />
             </Link>
           </div>
           <ProjectRail
@@ -1042,137 +1083,6 @@ export function ProfileStudio({
             projectActions={(project) => <ProjectOwnerActions projectId={project.projectId} />}
             projects={ownProjects}
           />
-        </section>
-      );
-    }
-
-    if (activeSection === "passport") {
-      return (
-        <section className="space-y-4" id="section-passport">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-xl font-semibold text-ink-950">Passport snapshot</h2>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <Card className="space-y-2 border-sun-200">
-              <p className="text-xs uppercase tracking-[0.1em] text-ink-600">Readiness</p>
-              <p className="text-3xl font-semibold text-ink-950">{profile.profileCompletionScore}%</p>
-            </Card>
-            <Card className="space-y-2">
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-xs uppercase tracking-[0.1em] text-ink-600">Identity</p>
-                <PencilEditButton
-                  label="Edit role type"
-                  onClick={() => {
-                    setRoleTypeDraft(profile.roleType);
-                    setIsInlineRoleEditing((current) => !current);
-                    setPassportError(null);
-                    setPassportSuccess(null);
-                  }}
-                />
-              </div>
-              {isInlineRoleEditing ? (
-                <div className="space-y-2">
-                  <select
-                    className="w-full rounded-xl border border-ink-200 bg-white px-3.5 py-2.5 text-sm text-ink-900 outline-none ring-offset-white focus:border-sun-400 focus:ring-4 focus:ring-sun-100"
-                    onChange={(event) => setRoleTypeDraft(event.target.value as ProfileRoleType)}
-                    value={roleTypeDraft}
-                  >
-                    <option value="candidate">Candidate</option>
-                    <option value="recruiter">Recruiter</option>
-                  </select>
-                  <div className="flex flex-wrap gap-2">
-                    <Button disabled={passportSaving} onClick={saveInlineRoleType}>
-                      {passportSaving ? "Saving..." : "Save role"}
-                    </Button>
-                    <Button onClick={() => setIsInlineRoleEditing(false)} variant="secondary">
-                      Cancel
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-base font-semibold text-ink-950 capitalize">{profile.roleType}</p>
-              )}
-              <p className="text-sm text-ink-700">{profile.headline || "Add a headline with the pencil icon."}</p>
-            </Card>
-            <Card className="space-y-2">
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-xs uppercase tracking-[0.1em] text-ink-600">Target roles</p>
-                <PencilEditButton
-                  label="Edit target roles"
-                  onClick={() => {
-                    setTargetRolesDraft(profile.targetRoles.join(", "));
-                    setIsInlineRolesEditing((current) => !current);
-                    setPassportError(null);
-                    setPassportSuccess(null);
-                  }}
-                />
-              </div>
-              {isInlineRolesEditing ? (
-                <div className="space-y-2">
-                  <Input
-                    onChange={(event) => setTargetRolesDraft(event.target.value)}
-                    placeholder="Frontend Engineer Intern, Product Designer"
-                    value={targetRolesDraft}
-                  />
-                  <div className="flex flex-wrap gap-2">
-                    <Button disabled={passportSaving} onClick={saveInlineTargetRoles}>
-                      {passportSaving ? "Saving..." : "Save roles"}
-                    </Button>
-                    <Button onClick={() => setIsInlineRolesEditing(false)} variant="secondary">
-                      Cancel
-                    </Button>
-                  </div>
-                </div>
-              ) : profile.targetRoles.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {profile.targetRoles.map((role) => (
-                    <Badge key={role}>{role}</Badge>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-ink-700">No target roles added yet.</p>
-              )}
-            </Card>
-            <Card className="space-y-2">
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-xs uppercase tracking-[0.1em] text-ink-600">Contact</p>
-                <PencilEditButton
-                  label="Edit contact email"
-                  onClick={() => {
-                    setContactEmailDraft(profile.contactEmail);
-                    setIsInlineContactEditing((current) => !current);
-                    setPassportError(null);
-                    setPassportSuccess(null);
-                  }}
-                />
-              </div>
-              {isInlineContactEditing ? (
-                <div className="space-y-2">
-                  <Input
-                    onChange={(event) => setContactEmailDraft(event.target.value)}
-                    placeholder="name@email.com"
-                    type="email"
-                    value={contactEmailDraft}
-                  />
-                  <div className="flex flex-wrap gap-2">
-                    <Button disabled={passportSaving} onClick={saveInlineContact}>
-                      {passportSaving ? "Saving..." : "Save email"}
-                    </Button>
-                    <Button onClick={() => setIsInlineContactEditing(false)} variant="secondary">
-                      Cancel
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-sm text-ink-800">{profile.contactEmail || "No contact email set."}</p>
-              )}
-              <Link className="text-sm font-semibold text-ink-900 underline underline-offset-2" href={`/c/${userId}`}>
-                View public passport
-              </Link>
-            </Card>
-          </div>
-          {passportError ? <p className="text-sm text-red-700">{passportError}</p> : null}
-          {passportSuccess ? <p className="text-sm text-green-700">{passportSuccess}</p> : null}
         </section>
       );
     }
@@ -1238,18 +1148,21 @@ export function ProfileStudio({
                 />
               </label>
               <div className="flex flex-wrap gap-2">
-                <Button disabled={passportSaving || isUploadingPortfolioFiles} onClick={saveInlinePortfolioLinks}>
-                  {passportSaving ? "Saving..." : "Save links"}
-                </Button>
-                <Button
+                <IconButton
+                  disabled={passportSaving || isUploadingPortfolioFiles}
+                  icon="check"
+                  label={passportSaving ? "Saving links" : "Save links"}
+                  onClick={saveInlinePortfolioLinks}
+                  variant="primary"
+                />
+                <IconButton
+                  icon="x"
+                  label="Cancel portfolio edits"
                   onClick={() => {
                     setIsInlinePortfolioEditing(false);
                     setPortfolioLinksDraft(profile.portfolioLinks.filter((link) => !isValidCvLink(link)).join("\n"));
                   }}
-                  variant="secondary"
-                >
-                  Cancel
-                </Button>
+                />
               </div>
             </Card>
           ) : null}
@@ -1284,12 +1197,14 @@ export function ProfileStudio({
                 <div className="flex items-center justify-between border-b border-ink-100 px-5 py-3">
                   <p className="text-sm font-semibold text-ink-900">{toPortfolioLabel(selectedPortfolioLink)}</p>
                   <a
-                    className="text-sm font-semibold text-ink-900 underline underline-offset-2"
+                    aria-label="Open portfolio in new tab"
+                    className={iconControlClassName()}
                     href={selectedPortfolioLink}
                     rel="noreferrer"
                     target="_blank"
+                    title="Open portfolio in new tab"
                   >
-                    Open in new tab
+                    <ActionIcon name="external" />
                   </a>
                 </div>
                 <div className="aspect-[16/9] bg-ink-100">
@@ -1379,12 +1294,14 @@ export function ProfileStudio({
                 />
               </label>
               <div className="flex flex-wrap gap-2">
-                <Button disabled={passportSaving || isUploadingCv} onClick={saveInlineCv}>
-                  {passportSaving ? "Saving..." : "Save CV / Resume"}
-                </Button>
-                <Button onClick={() => setIsInlineCvEditing(false)} variant="secondary">
-                  Cancel
-                </Button>
+                <IconButton
+                  disabled={passportSaving || isUploadingCv}
+                  icon="check"
+                  label={passportSaving ? "Saving CV or resume" : "Save CV or resume"}
+                  onClick={saveInlineCv}
+                  variant="primary"
+                />
+                <IconButton icon="x" label="Cancel CV edits" onClick={() => setIsInlineCvEditing(false)} />
               </div>
             </Card>
           ) : null}
@@ -1399,12 +1316,14 @@ export function ProfileStudio({
               <div className="flex items-center justify-between border-b border-ink-100 px-5 py-3">
                 <p className="text-sm font-semibold text-ink-900">Current CV</p>
                 <a
-                  className="text-sm font-semibold text-ink-900 underline underline-offset-2"
+                  aria-label="Open CV in new tab"
+                  className={iconControlClassName()}
                   href={cvLink}
                   rel="noreferrer"
                   target="_blank"
+                  title="Open CV in new tab"
                 >
-                  Open in new tab
+                  <ActionIcon name="external" />
                 </a>
               </div>
               <div className="aspect-[4/3] bg-ink-100">
@@ -1546,11 +1465,19 @@ export function ProfileStudio({
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button onClick={copyPassportLink} type="button" variant="secondary">
-                {copyStatus === "copied" ? "Copied" : "Copy passport link"}
-              </Button>
-              <Link href={passportPath}>
-                <Button>View passport</Button>
+              <IconButton
+                active={copyStatus === "copied"}
+                icon={copyStatus === "copied" ? "check" : "copy"}
+                label={copyStatus === "copied" ? "Passport link copied" : "Copy passport link"}
+                onClick={copyPassportLink}
+              />
+              <Link
+                aria-label="View passport"
+                className={iconControlClassName({ variant: "primary" })}
+                href={passportPath}
+                title="View passport"
+              >
+                <ActionIcon name="eye" />
               </Link>
             </div>
           </header>
@@ -1617,12 +1544,14 @@ export function ProfileStudio({
           {identityError ? <p className="text-sm text-red-700">{identityError}</p> : null}
           {identitySuccess ? <p className="text-sm text-green-700">{identitySuccess}</p> : null}
           <div className="flex flex-wrap justify-end gap-2">
-            <Button onClick={() => setIdentityModalOpen(false)} type="button" variant="ghost">
-              Cancel
-            </Button>
-            <Button disabled={identitySaving} type="submit">
-              {identitySaving ? "Saving..." : "Save identity"}
-            </Button>
+            <IconButton icon="x" label="Cancel identity edits" onClick={() => setIdentityModalOpen(false)} variant="ghost" />
+            <IconButton
+              disabled={identitySaving}
+              icon="check"
+              label={identitySaving ? "Saving identity" : "Save identity"}
+              type="submit"
+              variant="primary"
+            />
           </div>
         </form>
       </ProfileModal>
@@ -1755,16 +1684,14 @@ export function ProfileStudio({
           {passportError ? <p className="text-sm text-red-700">{passportError}</p> : null}
           {passportSuccess ? <p className="text-sm text-green-700">{passportSuccess}</p> : null}
           <div className="flex flex-wrap items-center justify-end gap-2 border-t border-ink-100 pt-2">
-            <Button onClick={() => setPassportModalOpen(false)} type="button" variant="secondary">
-              Cancel
-            </Button>
-            <Button
-              className="min-w-[160px]"
+            <IconButton icon="x" label="Cancel passport edits" onClick={() => setPassportModalOpen(false)} />
+            <IconButton
               disabled={passportSaving || isUploadingCv || isUploadingPortfolioFiles}
+              icon="check"
+              label={passportSaving ? "Saving passport" : "Save passport"}
               type="submit"
-            >
-              {passportSaving ? "Saving..." : "Save passport"}
-            </Button>
+              variant="primary"
+            />
           </div>
         </form>
       </ProfileModal>

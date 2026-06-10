@@ -7,6 +7,7 @@ import { ProjectPreviewPlayer } from "@/components/projects/project-preview-play
 import { ProjectReportButton } from "@/components/projects/project-report-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ActionIcon, iconControlClassName } from "@/components/ui/action-icon";
 import { resolveProjectVisualPreview } from "@/lib/artifacts";
 import { getViewerProfile } from "@/lib/db/profile";
 import {
@@ -186,14 +187,26 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
               <p className="label-caps">Creator</p>
               <p className="text-base text-[#16130f]">{project.authorName ?? "Merit User"}</p>
               {project.authorHeadline ? <p className="text-sm leading-6 text-[#7b705f]">{project.authorHeadline}</p> : null}
-              <Link href={`/c/${project.userId}`}>
-                <Button className="mt-3 w-full" variant="secondary">View profile</Button>
+              <Link
+                aria-label="View creator profile"
+                className={iconControlClassName({ className: "mt-3" })}
+                href={`/c/${project.userId}`}
+                title="View creator profile"
+              >
+                <ActionIcon name="eye" />
               </Link>
             </div>
 
             {primaryLink ? (
-              <a href={primaryLink} rel="noreferrer" target="_blank">
-                <Button className="w-full">Open external link</Button>
+              <a
+                aria-label="Open external project link"
+                className={iconControlClassName({ variant: "primary" })}
+                href={primaryLink}
+                rel="noreferrer"
+                target="_blank"
+                title="Open external project link"
+              >
+                <ActionIcon name="external" />
               </a>
             ) : null}
 
@@ -233,8 +246,13 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
             </div>
 
             {user && project.userId === user.id ? (
-              <Link href={`/projects/${project.projectId}/edit`}>
-                <Button className="w-full" variant="secondary">Edit project</Button>
+              <Link
+                aria-label="Edit project"
+                className={iconControlClassName()}
+                href={`/projects/${project.projectId}/edit`}
+                title="Edit project"
+              >
+                <ActionIcon name="pencil" />
               </Link>
             ) : null}
             {user && project.userId !== user.id ? <ProjectReportButton projectId={project.projectId} /> : null}

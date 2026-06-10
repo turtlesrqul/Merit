@@ -32,7 +32,7 @@ export function ProjectCard({ project, showAuthor = true, actions }: ProjectCard
           {visual.previewUrl ? (
             <img
               alt={`${project.title} preview`}
-              className="h-full w-full object-contain p-2"
+              className="h-full w-full object-cover"
               src={visual.previewUrl}
             />
           ) : (

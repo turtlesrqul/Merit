@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { OpportunityCard } from "@/components/opportunities/opportunity-card";
 import { MatchEngineControls } from "@/components/recruiter/match-engine-controls";
+import { IconButton } from "@/components/ui/action-icon";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -148,12 +149,8 @@ export function EditableOpportunityCard({
           </>
         ) : (
           <>
-            <Button disabled={isDeleting} onClick={() => setIsEditing(true)} type="button" variant="secondary">
-              Edit
-            </Button>
-            <Button disabled={isDeleting} onClick={handleDelete} type="button" variant="secondary">
-              {isDeleting ? "Deleting..." : "Delete"}
-            </Button>
+            <IconButton disabled={isDeleting} icon="pencil" label="Edit opportunity" onClick={() => setIsEditing(true)} />
+            <IconButton disabled={isDeleting} icon="trash" label={isDeleting ? "Deleting opportunity" : "Delete opportunity"} onClick={handleDelete} variant="danger" />
           </>
         )}
       </div>

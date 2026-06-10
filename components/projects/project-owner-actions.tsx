@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { requireVerifiedBrowserUser } from "@/lib/auth/browser-verified-user";
-import { Button } from "@/components/ui/button";
+import { ActionIcon, IconButton, iconControlClassName } from "@/components/ui/action-icon";
 
 type ProjectOwnerActionsProps = {
   projectId: string;
@@ -41,15 +41,23 @@ export function ProjectOwnerActions({ projectId }: ProjectOwnerActionsProps) {
 
   return (
     <>
-      <Link href={`/projects/${projectId}`}>
-        <Button variant="secondary">View</Button>
+      <Link
+        aria-label="View project"
+        className={iconControlClassName()}
+        href={`/projects/${projectId}`}
+        title="View project"
+      >
+        <ActionIcon name="eye" />
       </Link>
-      <Link href={`/projects/${projectId}/edit`}>
-        <Button variant="secondary">Edit</Button>
+      <Link
+        aria-label="Edit project"
+        className={iconControlClassName()}
+        href={`/projects/${projectId}/edit`}
+        title="Edit project"
+      >
+        <ActionIcon name="pencil" />
       </Link>
-      <Button disabled={isDeleting} onClick={handleDelete} variant="danger">
-        {isDeleting ? "Deleting..." : "Delete"}
-      </Button>
+      <IconButton disabled={isDeleting} icon="trash" label={isDeleting ? "Deleting project" : "Delete project"} onClick={handleDelete} variant="danger" />
       {errorMessage ? <p className="w-full text-sm text-red-700">{errorMessage}</p> : null}
     </>
   );

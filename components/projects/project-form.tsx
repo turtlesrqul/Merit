@@ -15,6 +15,7 @@ import {
   validateVisualRequirements
 } from "@/lib/projects/form-validation";
 import { Button } from "@/components/ui/button";
+import { IconButton } from "@/components/ui/action-icon";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,6 +31,7 @@ type ProjectFormProps = {
     category?: string;
     projectType?: "web" | "design" | "document" | "other";
     coverImageUrl?: string;
+    isFeatured?: boolean;
     impact?: string;
     skills?: string[];
     artifactLinks?: string[];
@@ -45,8 +47,10 @@ function isLegacyProjectSchemaError(errorMessage: string) {
     message.includes("column projects.cover_image_url does not exist") ||
     message.includes("column projects.hook does not exist") ||
     message.includes("column projects.project_type does not exist") ||
+    message.includes("column projects.is_featured does not exist") ||
     message.includes("could not find the 'cover_image_url' column of 'projects' in the schema cache") ||
     message.includes("could not find the 'hook' column of 'projects' in the schema cache") ||
+    message.includes("could not find the 'is_featured' column of 'projects' in the schema cache") ||
     message.includes("could not find the 'project_type' column of 'projects' in the schema cache")
   );
 }
@@ -112,6 +116,7 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
   const [skills, setSkills] = useState((initialData?.skills ?? []).join(", "));
   const [artifactLinks, setArtifactLinks] = useState((initialData?.artifactLinks ?? []).join("\n"));
   const [coverImageUrl, setCoverImageUrl] = useState(initialData?.coverImageUrl ?? "");
+  const [isFeatured, setIsFeatured] = useState(Boolean(initialData?.isFeatured));
   const [impact, setImpact] = useState(initialData?.impact ?? "");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingFiles, setIsUploadingFiles] = useState(false);
@@ -375,6 +380,7 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
         category,
         project_type: normalizedType,
         cover_image_url: normalizedCoverImage || null,
+        is_featured: isFeatured,
         impact: impact.trim() || null
       };
       const legacyProjectPayload = {
@@ -444,6 +450,28 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
 
       if (!projectId) {
         throw new Error("Project id was not resolved.");
+      }
+
+      if (isFeatured) {
+        const clearFeaturedResult = await supabase
+          .from("projects")
+          .update({ is_featured: false })
+          .eq("user_id", user.id)
+          .neq("project_id", projectId);
+
+        if (clearFeaturedResult.error && !isLegacyProjectSchemaError(clearFeaturedResult.error.message)) {
+          throw new Error(clearFeaturedResult.error.message);
+        }
+
+        const markFeaturedResult = await supabase
+          .from("projects")
+          .update({ is_featured: true })
+          .eq("project_id", projectId)
+          .eq("user_id", user.id);
+
+        if (markFeaturedResult.error && !isLegacyProjectSchemaError(markFeaturedResult.error.message)) {
+          throw new Error(markFeaturedResult.error.message);
+        }
       }
 
       const skillIds = await resolveSkillIds(normalizedSkills);
@@ -555,6 +583,23 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
                 </label>
               ))}
             </div>
+          </Card>
+
+          <Card className="space-y-3">
+            <label className="flex cursor-pointer items-start justify-between gap-4 border border-[#d7cebd] bg-[#f4f0e8] p-3 text-sm text-[#16130f]">
+              <span>
+                <span className="block font-semibold">Feature on public passport</span>
+                <span className="mt-1 block text-xs leading-5 text-[#7b705f]">
+                  Make this the first project recruiters see on your passport.
+                </span>
+              </span>
+              <input
+                checked={isFeatured}
+                className="mt-1 h-4 w-4"
+                onChange={(event) => setIsFeatured(event.target.checked)}
+                type="checkbox"
+              />
+            </label>
           </Card>
 
           <Card className="space-y-4">
@@ -852,17 +897,19 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
 
           <Card className="space-y-3">
             {errorMessage ? <p className="text-sm text-red-700">{errorMessage}</p> : null}
-            <Button className="w-full sm:w-auto" disabled={isSubmitting || isUploadingFiles || isUploadingThumbnail} type="submit">
-              {isUploadingFiles
-                ? "Uploading files..."
-                : isUploadingThumbnail
-                  ? "Uploading thumbnail..."
-                : isSubmitting
-                  ? "Saving..."
-                  : mode === "create"
-                    ? "Publish Project"
-                    : "Save Changes"}
-            </Button>
+            {mode === "edit" && !isUploadingFiles && !isUploadingThumbnail && !isSubmitting ? (
+              <IconButton icon="check" label="Save changes" type="submit" variant="primary" />
+            ) : (
+              <Button className="w-full sm:w-auto" disabled={isSubmitting || isUploadingFiles || isUploadingThumbnail} type="submit">
+                {isUploadingFiles
+                  ? "Uploading files..."
+                  : isUploadingThumbnail
+                    ? "Uploading thumbnail..."
+                    : isSubmitting
+                      ? "Saving..."
+                      : "Publish Project"}
+              </Button>
+            )}
           </Card>
         </div>
 
@@ -908,6 +955,7 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
             <p className="text-sm text-ink-700">
               {preparedArtifacts.length > 0 || coverImageUrl.trim() ? "Done" : "Missing"} visual source
             </p>
+            <p className="text-sm text-ink-700">{isFeatured ? "Done" : "Optional"} featured passport project</p>
           </Card>
         </aside>
       </form>

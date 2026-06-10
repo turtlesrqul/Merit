@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { ActionIcon, IconButton, iconControlClassName } from "@/components/ui/action-icon";
 
 type PublicProfileActionsProps = {
   contactEmail: string | null;
@@ -27,22 +27,20 @@ export function PublicProfileActions({ contactEmail, profileName }: PublicProfil
 
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <Button onClick={shareProfile} type="button" variant="secondary">
-        <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24">
-          <rect height="9" rx="1" stroke="currentColor" strokeWidth="1.8" width="9" x="9" y="9" />
-          <path d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1" stroke="currentColor" strokeWidth="1.8" />
-        </svg>
-        {copied ? "Copied" : "Share profile"}
-      </Button>
+      <IconButton
+        active={copied}
+        icon={copied ? "check" : "share"}
+        label={copied ? "Profile link copied" : "Share profile"}
+        onClick={shareProfile}
+      />
       {contactEmail ? (
-        <a href={`mailto:${contactEmail}`}>
-          <Button>
-            <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24">
-              <rect height="14" rx="1.5" stroke="currentColor" strokeWidth="1.8" width="18" x="3" y="5" />
-              <path d="m4 7 8 6 8-6" stroke="currentColor" strokeWidth="1.8" />
-            </svg>
-            Contact
-          </Button>
+        <a
+          aria-label="Contact profile owner"
+          className={iconControlClassName({ variant: "primary" })}
+          href={`mailto:${contactEmail}`}
+          title="Contact profile owner"
+        >
+          <ActionIcon name="mail" />
         </a>
       ) : null}
     </div>

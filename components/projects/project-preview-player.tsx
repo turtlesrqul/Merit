@@ -3,7 +3,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { ModelViewerCanvas } from "@/components/projects/model-viewer-canvas";
-import { Button } from "@/components/ui/button";
+import { ActionIcon, IconButton, iconControlClassName } from "@/components/ui/action-icon";
 import type { ProjectType } from "@/lib/artifacts";
 import {
   resolveArtifactViewer,
@@ -206,8 +206,16 @@ export function ProjectPreviewPlayer({
           <div className="rounded-xl border border-[#e4dbcb] bg-[#fffdf9] p-4 text-sm text-[#5e574c]">
             This site blocked in-app embedding. We switched to a safe fallback preview.
           </div>
-          <a href={selectedCandidate.viewer.directUrl} rel="noreferrer" target="_blank">
-            <Button variant="secondary">Open live site</Button>
+          <a
+            aria-label="Open live site"
+            href={selectedCandidate.viewer.directUrl}
+            rel="noreferrer"
+            target="_blank"
+            title="Open live site"
+          >
+            <span className={iconControlClassName()} title="Open live site">
+              <ActionIcon name="external" />
+            </span>
           </a>
           {selectedCandidate.previewUrl ? (
             <div className="overflow-hidden rounded-xl border border-[#e4dbcb]">
@@ -251,16 +259,12 @@ export function ProjectPreviewPlayer({
   return (
     <div className={className}>
       {mode === "launcher" ? (
-        <Button disabled={!canLaunch} onClick={() => setIsModalOpen(true)} variant="secondary">
-          {canLaunch ? launcherLabel : "Preview unavailable"}
-        </Button>
+        <IconButton disabled={!canLaunch} icon="eye" label={canLaunch ? launcherLabel : "Preview unavailable"} onClick={() => setIsModalOpen(true)} />
       ) : (
         <div className="space-y-3 rounded-2xl border border-[#e4dbcb] bg-[#fffdf9] p-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-sm font-semibold text-[#25211b]">Live project viewer</p>
-            <Button disabled={!canLaunch} onClick={() => setIsModalOpen(true)} variant="secondary">
-              Fullscreen
-            </Button>
+            <IconButton disabled={!canLaunch} icon="maximize" label="Open fullscreen preview" onClick={() => setIsModalOpen(true)} />
           </div>
           <div className="overflow-hidden rounded-xl border border-[#e4dbcb]">{renderSelectedViewer("inline")}</div>
           {candidates.length > 1 ? (
@@ -297,13 +301,18 @@ export function ProjectPreviewPlayer({
               </div>
               <div className="flex items-center gap-2">
                 {selectedCandidate?.viewer.directUrl ? (
-                  <a href={selectedCandidate.viewer.directUrl} rel="noreferrer" target="_blank">
-                    <Button variant="secondary">Open Source</Button>
+                  <a
+                    aria-label="Open source artifact"
+                    className={iconControlClassName()}
+                    href={selectedCandidate.viewer.directUrl}
+                    rel="noreferrer"
+                    target="_blank"
+                    title="Open source artifact"
+                  >
+                    <ActionIcon name="external" />
                   </a>
                 ) : null}
-                <Button onClick={() => setIsModalOpen(false)} variant="ghost">
-                  Close
-                </Button>
+                <IconButton icon="x" label="Close preview" onClick={() => setIsModalOpen(false)} variant="ghost" />
               </div>
             </div>
 

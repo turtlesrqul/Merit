@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { ActionIcon, iconControlClassName } from "@/components/ui/action-icon";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import type { DirectoryMember } from "@/lib/db/profile";
@@ -110,8 +110,13 @@ export function PeopleDirectory({ members }: PeopleDirectoryProps) {
               ) : null}
 
               <div className="pt-1">
-                <Link href={`/c/${member.userId}`}>
-                  <Button variant="secondary">View Passport</Button>
+                <Link
+                  aria-label={`View ${member.name ?? "member"} passport`}
+                  className={iconControlClassName()}
+                  href={`/c/${member.userId}`}
+                  title={`View ${member.name ?? "member"} passport`}
+                >
+                  <ActionIcon name="eye" />
                 </Link>
               </div>
             </Card>
