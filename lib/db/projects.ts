@@ -7,6 +7,7 @@ import {
 } from "@/lib/artifacts";
 import { rankProjectsForDiscovery, type FeedLabel } from "@/lib/projects/feed-ranking";
 import { isModerationEnabled } from "@/lib/runtime-config";
+import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 
 type DbClient = Awaited<ReturnType<typeof createServerSupabaseClient>>;
 
@@ -347,6 +348,59 @@ async function excludeHiddenProjects(supabase: DbClient, cards: ProjectCardData[
   return cards.filter((card) => !hiddenProjectIds.has(card.projectId));
 }
 
+function normalizeClaimableProjectText(value: string) {
+  return value.trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+async function excludeClaimablePassportPlaceholderProjects(cards: ProjectCardData[]) {
+  if (cards.length === 0) {
+    return cards;
+  }
+
+  try {
+    const adminClient = createAdminSupabaseClient();
+    const { data, error } = await adminClient
+      .from("unclaimed_passports")
+      .select("owner_user_id, projects")
+      .not("owner_user_id", "is", null);
+
+    if (error) {
+      if (isMissingTableError(error.message, "unclaimed_passports")) {
+        return cards;
+      }
+      throw new Error(`Failed to fetch claimable Passport project keys: ${error.message}`);
+    }
+
+    const claimableProjectKeys = new Set<string>();
+    ((data ?? []) as Array<Record<string, unknown>>).forEach((row) => {
+      const ownerUserId = safeString(row.owner_user_id);
+      if (!ownerUserId || !Array.isArray(row.projects)) {
+        return;
+      }
+
+      (row.projects as Array<Record<string, unknown>>).forEach((project) => {
+        const title = normalizeClaimableProjectText(safeString(project.title));
+        if (title) {
+          claimableProjectKeys.add(`${ownerUserId}:${title}`);
+        }
+      });
+    });
+
+    if (claimableProjectKeys.size === 0) {
+      return cards;
+    }
+
+    return cards.filter((card) => {
+      const title = normalizeClaimableProjectText(card.title);
+      return !claimableProjectKeys.has(`${card.userId}:${title}`);
+    });
+  } catch {
+    // Claimable Passport filtering is a discovery safeguard. If the admin client
+    // is unavailable in a local environment, keep Explore usable.
+    return cards;
+  }
+}
+
 function withResolvedFeedLabels(cards: ProjectCardData[]) {
   const ranked = rankProjectsForDiscovery(cards);
   const cardById = new Map(cards.map((card) => [card.projectId, card]));
@@ -413,7 +467,8 @@ export async function fetchDiscoveryProjects(supabase: DbClient): Promise<Projec
     throw new Error(`Failed to fetch discovery projects: ${error.message}`);
   }
 
-  const baseCards = await excludeHiddenProjects(supabase, mapProjectRows((data ?? []) as unknown[]));
+  const visibleCards = await excludeHiddenProjects(supabase, mapProjectRows((data ?? []) as unknown[]));
+  const baseCards = await excludeClaimablePassportPlaceholderProjects(visibleCards);
   const withEngagement = await attachEngagement(supabase, baseCards);
   return withResolvedFeedLabels(withEngagement);
 }

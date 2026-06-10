@@ -4,7 +4,9 @@ import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   createAdminPassportAction,
+  deleteAdminPassportAction,
   regenerateAdminPassportClaimLinkAction,
+  updateAdminPassportAction,
   type AdminPassportActionState
 } from "@/app/admin/passports/actions";
 import { ClaimablePassportPreview } from "@/components/passports/claimable-passport-preview";
@@ -48,6 +50,22 @@ function statusTone(status: ClaimablePassport["status"]) {
   return "border-[#16130f] text-[#16130f]";
 }
 
+function createEmptyProject(): ClaimablePassport["projects"][number] {
+  return {
+    title: "",
+    hook: "",
+    category: "Portfolio",
+    description: "",
+    skills: [],
+    artifactUrl: null,
+    imageUrl: null
+  };
+}
+
+function getEditableProjects(passport: ClaimablePassport) {
+  return passport.projects.length > 0 ? passport.projects : [createEmptyProject()];
+}
+
 export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
   const router = useRouter();
   const [createState, createFormAction, isCreating] = useActionState(
@@ -58,22 +76,46 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
     regenerateAdminPassportClaimLinkAction,
     initialActionState
   );
+  const [updateState, updateFormAction, isUpdating] = useActionState(
+    updateAdminPassportAction,
+    initialActionState
+  );
+  const [deleteState, deleteFormAction, isDeleting] = useActionState(
+    deleteAdminPassportAction,
+    initialActionState
+  );
   const [copiedLink, setCopiedLink] = useState<string | null>(null);
   const [projectRows, setProjectRows] = useState<ProjectDraftRow[]>([
     { id: "project-1", imageUrl: "" }
   ]);
+  const [editProjectImageUrls, setEditProjectImageUrls] = useState<Record<string, string>>({});
   const [uploadingProjectId, setUploadingProjectId] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const latestLink = regenerateState.claimLink ?? createState.claimLink;
-  const latestMessage = regenerateState.message ?? createState.message;
-  const latestStatus = regenerateState.status !== "idle" ? regenerateState.status : createState.status;
-  const latestPassportId = regenerateState.passportId ?? createState.passportId;
+  const latestActionState =
+    deleteState.status !== "idle"
+      ? deleteState
+      : updateState.status !== "idle"
+        ? updateState
+        : regenerateState.status !== "idle"
+          ? regenerateState
+          : createState.status !== "idle"
+            ? createState
+            : initialActionState;
+  const latestLink = latestActionState.claimLink;
+  const latestMessage = latestActionState.message;
+  const latestStatus = latestActionState.status;
+  const latestPassportId = latestActionState.passportId;
 
   useEffect(() => {
-    if (createState.status === "success" || regenerateState.status === "success") {
+    if (
+      createState.status === "success" ||
+      regenerateState.status === "success" ||
+      updateState.status === "success" ||
+      deleteState.status === "success"
+    ) {
       router.refresh();
     }
-  }, [createState.status, regenerateState.status, router]);
+  }, [createState.status, deleteState.status, regenerateState.status, router, updateState.status]);
 
   const copyLatestLink = async () => {
     if (!latestLink) {
@@ -101,6 +143,16 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
     setProjectRows((rows) => rows.map((row) => (row.id === id ? { ...row, imageUrl } : row)));
   };
 
+  const updateEditProjectImageUrl = (id: string, imageUrl: string) => {
+    setEditProjectImageUrls((urls) => ({
+      ...urls,
+      [id]: imageUrl
+    }));
+  };
+
+  const resolveEditProjectImageUrl = (id: string, fallback: string | null) =>
+    editProjectImageUrls[id] ?? fallback ?? "";
+
   const uploadProjectImage = async (id: string, file: File | null) => {
     if (!file) {
       return;
@@ -120,6 +172,32 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
         throw new Error(result.error ?? "Failed to upload project image.");
       }
       updateProjectImageUrl(id, result.url);
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : "Failed to upload project image.");
+    } finally {
+      setUploadingProjectId(null);
+    }
+  };
+
+  const uploadEditProjectImage = async (id: string, file: File | null) => {
+    if (!file) {
+      return;
+    }
+
+    setUploadError(null);
+    setUploadingProjectId(id);
+    try {
+      const formData = new FormData();
+      formData.set("file", file);
+      const response = await fetch("/api/admin/passports/project-image", {
+        method: "POST",
+        body: formData
+      });
+      const result = (await response.json().catch(() => ({}))) as { url?: string; error?: string };
+      if (!response.ok || !result.url) {
+        throw new Error(result.error ?? "Failed to upload project image.");
+      }
+      updateEditProjectImageUrl(id, result.url);
     } catch (error) {
       setUploadError(error instanceof Error ? error.message : "Failed to upload project image.");
     } finally {
@@ -325,6 +403,8 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
             <div className="space-y-4">
               {passports.map((passport) => {
                 const isLatest = latestPassportId === passport.passportId;
+                const canManage = passport.status !== "claimed";
+                const editableProjects = getEditableProjects(passport);
                 return (
                   <Card className="space-y-4" key={passport.passportId}>
                     <div className="flex flex-wrap items-start justify-between gap-3">
@@ -347,12 +427,181 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
                       </div>
                     </details>
 
+                    {canManage ? (
+                      <details className="group border-t border-[#d7cebd] pt-4">
+                        <summary className="cursor-pointer list-none text-sm text-[#16130f] underline underline-offset-4">
+                          Edit details
+                        </summary>
+                        <form action={updateFormAction} className="mt-4 space-y-4">
+                          <input name="passportId" type="hidden" value={passport.passportId} />
+                          <div className="grid gap-3 md:grid-cols-2">
+                            <label className="block space-y-2 text-sm text-[#16130f]">
+                              Full name
+                              <Input defaultValue={passport.fullName} name="fullName" required />
+                            </label>
+                            <label className="block space-y-2 text-sm text-[#16130f]">
+                              Email
+                              <Input defaultValue={passport.email ?? ""} name="email" type="email" />
+                            </label>
+                          </div>
+                          <label className="block space-y-2 text-sm text-[#16130f]">
+                            Headline
+                            <Input defaultValue={passport.headline ?? ""} name="headline" />
+                          </label>
+                          <label className="block space-y-2 text-sm text-[#16130f]">
+                            Bio
+                            <Textarea defaultValue={passport.bio ?? ""} name="bio" />
+                          </label>
+                          <label className="block space-y-2 text-sm text-[#16130f]">
+                            Passport skills
+                            <Input defaultValue={passport.skills.join(", ")} name="skills" />
+                          </label>
+
+                          <div className="space-y-3">
+                            <p className="label-caps">Projects</p>
+                            {editableProjects.map((project, index) => {
+                              const projectKey = `${passport.passportId}-${index}`;
+                              const imageUrl = resolveEditProjectImageUrl(projectKey, project.imageUrl);
+                              return (
+                                <fieldset
+                                  className="space-y-3 border border-[#d7cebd] bg-[#fbf8f0] p-4"
+                                  key={projectKey}
+                                >
+                                  <legend className="font-serif text-lg text-[#16130f]">
+                                    Project {index + 1}
+                                  </legend>
+                                  <label className="block space-y-2 text-sm text-[#16130f]">
+                                    Project title
+                                    <Input defaultValue={project.title} name="projectTitle" />
+                                  </label>
+                                  <label className="block space-y-2 text-sm text-[#16130f]">
+                                    One-liner
+                                    <Input defaultValue={project.hook} name="projectHook" />
+                                  </label>
+                                  <label className="block space-y-2 text-sm text-[#16130f]">
+                                    Description
+                                    <Textarea defaultValue={project.description} name="projectDescription" />
+                                  </label>
+                                  <div className="grid gap-3 md:grid-cols-2">
+                                    <label className="block space-y-2 text-sm text-[#16130f]">
+                                      Category
+                                      <Input defaultValue={project.category} name="projectCategory" />
+                                    </label>
+                                    <label className="block space-y-2 text-sm text-[#16130f]">
+                                      Skills/tags
+                                      <Input defaultValue={project.skills.join(", ")} name="projectSkills" />
+                                    </label>
+                                  </div>
+                                  <label className="block space-y-2 text-sm text-[#16130f]">
+                                    Project link
+                                    <Input defaultValue={project.artifactUrl ?? ""} name="projectLink" />
+                                  </label>
+                                  <div className="grid gap-3 md:grid-cols-2">
+                                    <label className="block space-y-2 text-sm text-[#16130f]">
+                                      Project image
+                                      <Input
+                                        accept="image/*"
+                                        disabled={uploadingProjectId === projectKey}
+                                        onChange={(event) => {
+                                          void uploadEditProjectImage(
+                                            projectKey,
+                                            event.currentTarget.files?.[0] ?? null
+                                          );
+                                        }}
+                                        type="file"
+                                      />
+                                    </label>
+                                    <label className="block space-y-2 text-sm text-[#16130f]">
+                                      Image URL
+                                      <Input
+                                        name="projectImageUrl"
+                                        onChange={(event) =>
+                                          updateEditProjectImageUrl(projectKey, event.target.value)
+                                        }
+                                        value={imageUrl}
+                                      />
+                                    </label>
+                                  </div>
+                                  {imageUrl ? (
+                                    <div className="overflow-hidden border border-[#d7cebd] bg-[#e5ded1]">
+                                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                                      <img alt="" className="h-40 w-full object-cover" src={imageUrl} />
+                                    </div>
+                                  ) : null}
+                                  {uploadingProjectId === projectKey ? (
+                                    <p className="text-sm text-[#7b705f]">Uploading image...</p>
+                                  ) : null}
+                                </fieldset>
+                              );
+                            })}
+                          </div>
+
+                          <div className="grid gap-3 md:grid-cols-2">
+                            <label className="block space-y-2 text-sm text-[#16130f]">
+                              Featured work title
+                              <Input
+                                defaultValue={passport.featuredWork?.title ?? ""}
+                                name="featuredWorkTitle"
+                              />
+                            </label>
+                            <label className="block space-y-2 text-sm text-[#16130f]">
+                              Public slug
+                              <Input defaultValue={passport.passportSlug ?? ""} name="passportSlug" />
+                            </label>
+                          </div>
+                          <label className="block space-y-2 text-sm text-[#16130f]">
+                            Featured work description
+                            <Textarea
+                              defaultValue={passport.featuredWork?.description ?? ""}
+                              name="featuredWorkDescription"
+                            />
+                          </label>
+                          <div className="grid gap-3 md:grid-cols-2">
+                            <label className="block space-y-2 text-sm text-[#16130f]">
+                              Resume link
+                              <Input defaultValue={passport.resumeUrl ?? ""} name="resumeUrl" />
+                            </label>
+                            <label className="block space-y-2 text-sm text-[#16130f]">
+                              Portfolio link
+                              <Input defaultValue={passport.portfolioUrl ?? ""} name="portfolioUrl" />
+                            </label>
+                            <label className="block space-y-2 text-sm text-[#16130f]">
+                              LinkedIn link
+                              <Input defaultValue={passport.linkedinUrl ?? ""} name="linkedinUrl" />
+                            </label>
+                            <label className="block space-y-2 text-sm text-[#16130f]">
+                              GitHub link
+                              <Input defaultValue={passport.githubUrl ?? ""} name="githubUrl" />
+                            </label>
+                          </div>
+                          <Button disabled={isUpdating || Boolean(uploadingProjectId)} type="submit">
+                            {isUpdating ? "Saving..." : "Save changes"}
+                          </Button>
+                        </form>
+                      </details>
+                    ) : null}
+
                     <div className="flex flex-wrap items-center gap-3">
-                      {passport.status !== "claimed" ? (
+                      {canManage ? (
                         <form action={regenerateFormAction}>
                           <input name="passportId" type="hidden" value={passport.passportId} />
                           <Button disabled={isRegenerating} type="submit" variant="secondary">
                             {isRegenerating ? "Generating..." : "Regenerate claim link"}
+                          </Button>
+                        </form>
+                      ) : null}
+                      {canManage ? (
+                        <form
+                          action={deleteFormAction}
+                          onSubmit={(event) => {
+                            if (!window.confirm(`Delete the claimable Passport for ${passport.fullName}?`)) {
+                              event.preventDefault();
+                            }
+                          }}
+                        >
+                          <input name="passportId" type="hidden" value={passport.passportId} />
+                          <Button disabled={isDeleting} type="submit" variant="danger">
+                            {isDeleting ? "Deleting..." : "Delete"}
                           </Button>
                         </form>
                       ) : null}

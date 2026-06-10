@@ -411,6 +411,64 @@ export async function regenerateClaimToken(passportId: string) {
   };
 }
 
+export async function updateClaimablePassport(
+  passportId: string,
+  input: CreateClaimablePassportInput
+) {
+  const adminClient = createAdminSupabaseClient();
+  const slug = input.passportSlug;
+  await assertPassportSlugAvailable(adminClient, slug, passportId);
+
+  const { data, error } = await adminClient
+    .from("unclaimed_passports")
+    .update({
+      full_name: input.fullName,
+      headline: input.headline,
+      bio: input.bio,
+      email: input.email,
+      school: input.school,
+      skills: input.skills,
+      projects: input.projects,
+      featured_work: input.featuredWork,
+      resume_url: input.resumeUrl,
+      portfolio_url: input.portfolioUrl,
+      linkedin_url: input.linkedinUrl,
+      github_url: input.githubUrl,
+      passport_slug: slug
+    })
+    .eq("passport_id", passportId)
+    .neq("status", "claimed")
+    .select("*")
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Failed to update claimable Passport: ${error.message}`);
+  }
+  if (!data) {
+    throw new Error("Claimed Passports are already owned and cannot be edited here.");
+  }
+
+  return mapPassport(data);
+}
+
+export async function deleteClaimablePassport(passportId: string) {
+  const adminClient = createAdminSupabaseClient();
+  const { data, error } = await adminClient
+    .from("unclaimed_passports")
+    .delete()
+    .eq("passport_id", passportId)
+    .neq("status", "claimed")
+    .select("passport_id")
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Failed to delete claimable Passport: ${error.message}`);
+  }
+  if (!data) {
+    throw new Error("Claimed Passports are already owned and cannot be deleted here.");
+  }
+}
+
 export async function fetchClaimablePassportByToken(token: string): Promise<ClaimLookupResult> {
   if (!token || token.length < 32) {
     return { passport: null, state: "invalid" };

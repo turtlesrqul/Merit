@@ -5,12 +5,14 @@ import { redirect } from "next/navigation";
 import { buildClaimPassportUrl, resolveClaimLinkBaseUrl } from "@/lib/auth/claim-links";
 import {
   createClaimablePassport,
+  deleteClaimablePassport,
   normalizeOptionalText,
   normalizeOptionalUrl,
   normalizePassportSlug,
   normalizeRequiredText,
   parseSkillsInput,
   regenerateClaimToken,
+  updateClaimablePassport,
   validatePassportSlug,
   type ClaimablePassportFeaturedWork,
   type ClaimablePassportProject
@@ -202,6 +204,74 @@ export async function regenerateAdminPassportClaimLinkAction(
     return {
       status: "error",
       message: error instanceof Error ? error.message : "Failed to regenerate claim link.",
+      claimLink: null,
+      passportId: null
+    };
+  }
+}
+
+export async function updateAdminPassportAction(
+  _previousState: AdminPassportActionState,
+  formData: FormData
+): Promise<AdminPassportActionState> {
+  try {
+    await requireAdminUser();
+    const passportId = normalizeRequiredText(formData.get("passportId"), "Passport id");
+    const featuredWork = parseFeaturedWork(formData);
+    const passportSlug = normalizePassportSlug(formData.get("passportSlug"));
+    validatePassportSlug(passportSlug);
+
+    const passport = await updateClaimablePassport(passportId, {
+      fullName: normalizeRequiredText(formData.get("fullName"), "Full name"),
+      headline: normalizeOptionalText(formData.get("headline")),
+      bio: normalizeOptionalText(formData.get("bio")),
+      email: normalizeOptionalText(formData.get("email")),
+      school: null,
+      skills: parseSkillsInput(formData.get("skills")),
+      projects: parseProjectEntries(formData, featuredWork),
+      featuredWork,
+      resumeUrl: normalizeFormUrl(formData, "resumeUrl", "Resume link"),
+      portfolioUrl: normalizeFormUrl(formData, "portfolioUrl", "Portfolio link"),
+      linkedinUrl: normalizeFormUrl(formData, "linkedinUrl", "LinkedIn link"),
+      githubUrl: normalizeFormUrl(formData, "githubUrl", "GitHub link"),
+      passportSlug
+    });
+
+    return {
+      status: "success",
+      message: `${passport.fullName} updated.`,
+      claimLink: null,
+      passportId: passport.passportId
+    };
+  } catch (error) {
+    return {
+      status: "error",
+      message: error instanceof Error ? error.message : "Failed to update Passport.",
+      claimLink: null,
+      passportId: null
+    };
+  }
+}
+
+export async function deleteAdminPassportAction(
+  _previousState: AdminPassportActionState,
+  formData: FormData
+): Promise<AdminPassportActionState> {
+  try {
+    await requireAdminUser();
+    const passportId = normalizeRequiredText(formData.get("passportId"), "Passport id");
+    await deleteClaimablePassport(passportId);
+
+    return {
+      status: "success",
+      message: "Claimable Passport deleted. Any existing claim link is now invalid.",
+      claimLink: null,
+      passportId
+    };
+  } catch (error) {
+    return {
+      status: "error",
+      message: error instanceof Error ? error.message : "Failed to delete Passport.",
       claimLink: null,
       passportId: null
     };
