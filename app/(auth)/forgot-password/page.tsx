@@ -5,6 +5,12 @@ import Link from "next/link";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 import { isRateLimitedAuthError, mapSupabaseAuthError } from "@/lib/auth/auth-errors";
 import { resolvePasswordResetRedirectUrl } from "@/lib/auth/auth-urls";
+import {
+  getSupportEmail,
+  getSupportInstagramHandle,
+  getSupportInstagramUrl,
+  getSupportUrl
+} from "@/lib/public-config";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -19,6 +25,10 @@ function isValidEmail(value: string) {
 }
 
 export default function ForgotPasswordPage() {
+  const supportEmail = getSupportEmail();
+  const supportInstagramHandle = getSupportInstagramHandle();
+  const supportInstagramUrl = getSupportInstagramUrl();
+  const supportUrl = getSupportUrl();
   const [email, setEmail] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -93,6 +103,27 @@ export default function ForgotPasswordPage() {
           <Link className="text-[#16130f] underline decoration-[#f3c945] underline-offset-4" href="/sign-in">
             sign in
           </Link>
+          .
+        </p>
+        <p className="text-xs leading-5 text-[#7b705f]">
+          Need help? Contact{" "}
+          <a
+            className="text-[#16130f] underline decoration-[#f3c945] underline-offset-4"
+            href={supportUrl}
+            rel="noreferrer"
+            target="_blank"
+          >
+            {supportEmail}
+          </a>{" "}
+          or{" "}
+          <a
+            className="text-[#16130f] underline decoration-[#f3c945] underline-offset-4"
+            href={supportInstagramUrl}
+            rel="noreferrer"
+            target="_blank"
+          >
+            {supportInstagramHandle}
+          </a>
           .
         </p>
       </Card>

@@ -22,7 +22,7 @@ export function AppShell({ children, userEmail, roleType }: AppShellProps) {
   const dashboardNavItems = [
     { href: "/profile", label: "Dashboard" },
     { href: "/home", label: "Explore" },
-    { href: "/search", label: "Search" },
+    { href: "/people", label: "People" },
     { href: "/opportunities", label: "Opportunities" },
     ...(roleType === "recruiter" ? [{ href: "/recruiter", label: "Recruiter" }] : [])
   ];
@@ -89,9 +89,6 @@ export function AppShell({ children, userEmail, roleType }: AppShellProps) {
               <>
                 <Link className="text-[#16130f] hover:text-[#6f6658]" href="/sign-in">
                   Sign In
-                </Link>
-                <Link href="/sign-up">
-                  <Button>Create Portfolio</Button>
                 </Link>
               </>
             )}

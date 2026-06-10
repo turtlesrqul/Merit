@@ -11,19 +11,6 @@ function resolveSafeNext(nextValue: string | null) {
   return nextValue;
 }
 
-function resolveSuccessPath({
-  from,
-  nextPath
-}: {
-  from: string | null;
-  nextPath: string;
-}) {
-  if (from === "signup") {
-    return "/auth/verified";
-  }
-  return nextPath;
-}
-
 export async function GET(request: NextRequest) {
   const env = getSupabaseEnvOrNull();
   if (!env) {
@@ -34,9 +21,8 @@ export async function GET(request: NextRequest) {
   const code = requestUrl.searchParams.get("code");
   const tokenHash = requestUrl.searchParams.get("token_hash");
   const otpType = requestUrl.searchParams.get("type") as EmailOtpType | null;
-  const from = requestUrl.searchParams.get("from");
   const nextPath = resolveSafeNext(requestUrl.searchParams.get("next"));
-  const successPath = resolveSuccessPath({ from, nextPath });
+  const successPath = nextPath;
   const redirectUrl = new URL(successPath, request.url);
   let response = NextResponse.redirect(redirectUrl);
 

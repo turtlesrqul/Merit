@@ -13,12 +13,9 @@ export default function RootPage() {
         <p className="mx-auto mt-10 max-w-3xl text-2xl leading-snug text-[#7b705f]">
           Build a portfolio that shows what you have actually made, then share one link with anyone who needs to see it.
         </p>
-        <div className="mt-16 flex flex-wrap justify-center gap-4">
-          <Link href="/sign-up">
-            <Button className="min-w-64">Create your portfolio</Button>
-          </Link>
+        <div className="mt-14 flex justify-center">
           <Link href="/home">
-            <Button className="min-w-56" variant="secondary">See examples</Button>
+            <Button className="min-w-64">Explore Merit</Button>
           </Link>
         </div>
       </section>

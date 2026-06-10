@@ -11,7 +11,7 @@ export default function AuthVerifiedPage() {
         </p>
         <h1 className="text-2xl font-semibold tracking-tight text-[#171512]">Your account is verified.</h1>
         <p className="text-sm text-[#5e574c]">
-          Return to your original signup tab. It should continue to home automatically. You can close this tab.
+          If you landed here from an older confirmation link, continue into Merit. New confirmation links should sign you in automatically.
         </p>
         <div className="flex flex-wrap gap-2">
           <Link href="/home">

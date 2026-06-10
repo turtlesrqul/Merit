@@ -1,9 +1,11 @@
-const DEFAULT_SUPPORT_LABEL = "@ryan.fahrein on Instagram";
-const DEFAULT_SUPPORT_URL = "https://instagram.com/ryan.fahrein";
+const DEFAULT_SUPPORT_EMAIL = "hello@meritsg.com";
+const DEFAULT_SUPPORT_URL = `mailto:${DEFAULT_SUPPORT_EMAIL}`;
+const DEFAULT_SUPPORT_INSTAGRAM_HANDLE = "@ryan.fahrein";
+const DEFAULT_SUPPORT_INSTAGRAM_URL = "https://instagram.com/ryan.fahrein";
 
 export function getSupportEmail() {
   const value = process.env.NEXT_PUBLIC_SUPPORT_EMAIL?.trim();
-  return value && value.length > 0 ? value : DEFAULT_SUPPORT_LABEL;
+  return value && value.length > 0 ? value : DEFAULT_SUPPORT_EMAIL;
 }
 
 export function getSupportUrl() {
@@ -12,6 +14,19 @@ export function getSupportUrl() {
     return value;
   }
   return DEFAULT_SUPPORT_URL;
+}
+
+export function getSupportInstagramHandle() {
+  const value = process.env.NEXT_PUBLIC_SUPPORT_INSTAGRAM_HANDLE?.trim();
+  return value && value.length > 0 ? value : DEFAULT_SUPPORT_INSTAGRAM_HANDLE;
+}
+
+export function getSupportInstagramUrl() {
+  const value = process.env.NEXT_PUBLIC_SUPPORT_INSTAGRAM_URL?.trim();
+  if (value && value.length > 0) {
+    return value;
+  }
+  return DEFAULT_SUPPORT_INSTAGRAM_URL;
 }
 
 function normalizePublicBaseUrl(value: string | undefined) {

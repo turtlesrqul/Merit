@@ -9,6 +9,8 @@ Merit uses Supabase Auth for signup confirmation, resend verification, and passw
 - Support display env:
   - `NEXT_PUBLIC_SUPPORT_EMAIL=hello@meritsg.com`
   - `NEXT_PUBLIC_SUPPORT_URL=mailto:hello@meritsg.com`
+  - `NEXT_PUBLIC_SUPPORT_INSTAGRAM_HANDLE=@ryan.fahrein`
+  - `NEXT_PUBLIC_SUPPORT_INSTAGRAM_URL=https://instagram.com/ryan.fahrein`
 
 ## Vercel Domain
 
@@ -43,6 +45,10 @@ Add redirect URLs:
 - `https://meritv3.vercel.app/reset-password`
 - `http://localhost:3000/auth/callback`
 - `http://localhost:3000/reset-password`
+- `http://localhost:3004/auth/callback`
+- `http://localhost:3004/reset-password`
+
+Merit routes signup confirmation and password recovery through `/auth/callback` so Supabase can establish a session before the app redirects to `/home` or `/reset-password`. Keep `/reset-password` allow-listed too so direct or older recovery links can still load the reset form.
 
 ## Resend SMTP For Supabase Auth
 

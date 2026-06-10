@@ -22,7 +22,16 @@ const MAX_PORTFOLIO_UPLOAD_BYTES = 50 * 1024 * 1024;
 const ALLOWED_CV_EXTENSIONS = [".pdf", ".doc", ".docx"];
 
 type ProfileRoleType = "candidate" | "recruiter";
-type ProfileSectionId = "projects" | "passport" | "portfolio" | "cv" | "activity" | "skills" | "saved";
+type ProfileSectionId =
+  | "overview"
+  | "profile"
+  | "projects"
+  | "passport"
+  | "portfolio"
+  | "cv"
+  | "activity"
+  | "skills"
+  | "saved";
 type ProfileState = ProfileStudioProps["initialProfile"];
 
 type ProfileStudioProps = {
@@ -44,12 +53,10 @@ type ProfileStudioProps = {
 };
 
 const sections: Array<{ id: ProfileSectionId; label: string }> = [
+  { id: "overview", label: "Overview" },
+  { id: "profile", label: "Edit Profile" },
   { id: "projects", label: "Projects" },
   { id: "passport", label: "Passport" },
-  { id: "portfolio", label: "Portfolio" },
-  { id: "cv", label: "CV" },
-  { id: "activity", label: "Activity" },
-  { id: "skills", label: "Skills" },
   { id: "saved", label: "Saved" }
 ];
 
@@ -295,7 +302,8 @@ export function ProfileStudio({
 }: ProfileStudioProps) {
   const router = useRouter();
   const [profile, setProfile] = useState(initialProfile);
-  const [activeSection, setActiveSection] = useState<ProfileSectionId>("projects");
+  const [activeSection, setActiveSection] = useState<ProfileSectionId>("overview");
+  const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "error">("idle");
   const [identityModalOpen, setIdentityModalOpen] = useState(false);
   const [passportModalOpen, setPassportModalOpen] = useState(false);
   const [identitySaving, setIdentitySaving] = useState(false);
@@ -348,6 +356,7 @@ export function ProfileStudio({
 
   const savedIdSet = useMemo(() => new Set(savedProjectIds), [savedProjectIds]);
   const inspiredIdSet = useMemo(() => new Set(inspiredProjectIds), [inspiredProjectIds]);
+  const passportPath = `/c/${userId}`;
 
   const featuredProject = useMemo(
     () => [...ownProjects].sort((a, b) => toProjectEngagementScore(b) - toProjectEngagementScore(a))[0] ?? null,
@@ -418,6 +427,20 @@ export function ProfileStudio({
       setInlineNameError(null);
     }
   }, [isInlineNameEditing, profile.name]);
+
+  const copyPassportLink = async () => {
+    setCopyStatus("idle");
+    const passportUrl =
+      typeof window !== "undefined" ? `${window.location.origin}${passportPath}` : passportPath;
+
+    try {
+      await navigator.clipboard.writeText(passportUrl);
+      setCopyStatus("copied");
+      window.setTimeout(() => setCopyStatus("idle"), 1800);
+    } catch {
+      setCopyStatus("error");
+    }
+  };
 
   const persistProfilePatch = async (patch: Partial<ProfileState>) => {
     const nextProfile: ProfileState = {
@@ -793,6 +816,218 @@ export function ProfileStudio({
   };
 
   const renderSection = () => {
+    if (activeSection === "overview") {
+      return (
+        <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]" id="section-overview">
+          <Card className="space-y-5 bg-transparent">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div className="space-y-3">
+                <p className="label-caps">Your Merit right now</p>
+                <h2 className="font-serif text-4xl leading-tight text-[#16130f]">
+                  {profile.name || "Merit Builder"}
+                </h2>
+                <p className="max-w-2xl text-base leading-7 text-[#7b705f]">
+                  {profile.headline || "Add a headline so people understand what you build and where you are headed."}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button onClick={copyPassportLink} type="button">
+                  {copyStatus === "copied" ? "Copied" : "Copy passport link"}
+                </Button>
+                <Link href={passportPath}>
+                  <Button variant="secondary">View as recruiter</Button>
+                </Link>
+              </div>
+            </div>
+
+            {copyStatus === "error" ? (
+              <p className="text-sm text-red-700">Could not copy automatically. Open the passport and copy the URL.</p>
+            ) : null}
+
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="border border-[#d7cebd] bg-[#eee8dd] p-4">
+                <p className="label-caps">Profile</p>
+                <p className="mt-2 text-2xl font-semibold text-[#16130f]">{profile.profileCompletionScore}%</p>
+                <p className="mt-1 text-sm text-[#7b705f]">Readiness</p>
+              </div>
+              <div className="border border-[#d7cebd] bg-[#eee8dd] p-4">
+                <p className="label-caps">Projects</p>
+                <p className="mt-2 text-2xl font-semibold text-[#16130f]">{ownProjects.length}</p>
+                <p className="mt-1 text-sm text-[#7b705f]">Published builds</p>
+              </div>
+              <div className="border border-[#d7cebd] bg-[#eee8dd] p-4">
+                <p className="label-caps">Share</p>
+                <p className="mt-2 truncate text-sm font-semibold text-[#16130f]">{passportPath}</p>
+                <p className="mt-1 text-sm text-[#7b705f]">Public passport</p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2 border-t border-[#d7cebd] pt-5">
+              <Button onClick={() => setActiveSection("profile")} type="button" variant="secondary">
+                Edit profile basics
+              </Button>
+              <Button onClick={() => setActiveSection("projects")} type="button" variant="secondary">
+                Manage projects
+              </Button>
+              <Link href="/projects/new">
+                <Button>Add project</Button>
+              </Link>
+            </div>
+          </Card>
+
+          <Card className="space-y-5 bg-[#eee8dd]">
+            <div className="space-y-2">
+              <p className="label-caps">Passport preview</p>
+              <div className="h-20 w-20 border border-[#d7cebd] bg-[#ded6c7] p-4 font-serif text-2xl text-[#7b705f]">
+                {(profile.name || "M")
+                  .split(" ")
+                  .map((part) => part[0])
+                  .join("")
+                  .slice(0, 2)
+                  .toUpperCase()}
+              </div>
+              <h3 className="font-serif text-3xl leading-tight text-[#16130f]">
+                {profile.name || "Merit Builder"}
+              </h3>
+              <p className="text-sm leading-6 text-[#7b705f]">{profile.headline || "No headline added yet."}</p>
+            </div>
+
+            <div className="space-y-3 border-y border-[#d7cebd] py-4">
+              <p className="label-caps">Open to</p>
+              {profile.targetRoles.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {profile.targetRoles.slice(0, 4).map((role) => (
+                    <Badge key={role}>{role}</Badge>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-[#7b705f]">Add target roles to clarify your direction.</p>
+              )}
+            </div>
+
+            {featuredProject ? (
+              <div className="space-y-2">
+                <p className="label-caps">Featured evidence</p>
+                <p className="font-serif text-2xl leading-tight text-[#16130f]">{featuredProject.title}</p>
+                <p className="line-clamp-2 text-sm leading-6 text-[#7b705f]">
+                  {featuredProject.hook || featuredProject.problemSolved}
+                </p>
+              </div>
+            ) : (
+              <p className="text-sm leading-6 text-[#7b705f]">Add a project to make the preview feel complete.</p>
+            )}
+          </Card>
+        </section>
+      );
+    }
+
+    if (activeSection === "profile") {
+      return (
+        <section className="grid gap-5 xl:grid-cols-2" id="section-profile">
+          <Card className="space-y-5 bg-transparent">
+            <div>
+              <p className="label-caps mb-2">Edit profile</p>
+              <h2 className="font-serif text-3xl text-[#16130f]">Profile basics</h2>
+            </div>
+            <form className="space-y-4" onSubmit={saveIdentity}>
+              <label className="block space-y-2 text-sm text-ink-900">
+                Name
+                <Input onChange={(event) => setNameDraft(event.target.value)} required value={nameDraft} />
+              </label>
+              <label className="block space-y-2 text-sm text-ink-900">
+                Role
+                <select
+                  className="w-full border border-[#d7cebd] bg-transparent px-3.5 py-2.5 text-sm text-[#16130f] outline-none focus:border-[#f3c945]"
+                  onChange={(event) => setRoleTypeDraft(event.target.value as ProfileRoleType)}
+                  value={roleTypeDraft}
+                >
+                  <option value="candidate">Candidate</option>
+                  <option value="recruiter">Recruiter</option>
+                </select>
+              </label>
+              <label className="block space-y-2 text-sm text-ink-900">
+                Headline
+                <Input
+                  onChange={(event) => setHeadlineDraft(event.target.value)}
+                  placeholder="Builder identity in one sentence"
+                  value={headlineDraft}
+                />
+              </label>
+              <label className="block space-y-2 text-sm text-ink-900">
+                Bio
+                <Textarea
+                  className="min-h-[120px]"
+                  onChange={(event) => setBioDraft(event.target.value)}
+                  placeholder="Tell us about yourself. Include your background, role, and interests."
+                  value={bioDraft}
+                />
+              </label>
+              {identityError ? <p className="text-sm text-red-700">{identityError}</p> : null}
+              {identitySuccess ? <p className="text-sm text-green-700">{identitySuccess}</p> : null}
+              <Button disabled={identitySaving} type="submit">
+                {identitySaving ? "Saving..." : "Save profile basics"}
+              </Button>
+            </form>
+          </Card>
+
+          <Card className="space-y-5 bg-transparent">
+            <div>
+              <p className="label-caps mb-2">Passport details</p>
+              <h2 className="font-serif text-3xl text-[#16130f]">Contact and evidence</h2>
+            </div>
+            <form className="space-y-4" onSubmit={savePassport}>
+              <label className="block space-y-2 text-sm text-ink-900">
+                Contact email
+                <Input
+                  onChange={(event) => setContactEmailDraft(event.target.value)}
+                  type="email"
+                  value={contactEmailDraft}
+                />
+              </label>
+              <label className="block space-y-2 text-sm text-ink-900">
+                Target roles
+                <Input
+                  onChange={(event) => setTargetRolesDraft(event.target.value)}
+                  placeholder="Frontend Engineer Intern, Product Designer"
+                  value={targetRolesDraft}
+                />
+              </label>
+              <label className="block space-y-2 text-sm text-ink-900">
+                CV / Resume link
+                <Input
+                  onChange={(event) => setCvLinkDraft(event.target.value)}
+                  placeholder="https://your-site.com/resume.pdf"
+                  value={cvLinkDraft}
+                />
+              </label>
+              <label className="block space-y-2 text-sm text-ink-900">
+                Portfolio links
+                <Textarea
+                  className="min-h-[120px]"
+                  onChange={(event) => setPortfolioLinksDraft(event.target.value)}
+                  placeholder={"https://your-site.com\nhttps://behance.net/you"}
+                  value={portfolioLinksDraft}
+                />
+              </label>
+              {passportError ? <p className="text-sm text-red-700">{passportError}</p> : null}
+              {passportSuccess ? <p className="text-sm text-green-700">{passportSuccess}</p> : null}
+              <div className="flex flex-wrap gap-2">
+                <Button disabled={passportSaving || isUploadingCv || isUploadingPortfolioFiles} type="submit">
+                  {passportSaving ? "Saving..." : "Save passport details"}
+                </Button>
+                <Button onClick={() => setActiveSection("portfolio")} type="button" variant="secondary">
+                  Portfolio uploads
+                </Button>
+                <Button onClick={() => setActiveSection("cv")} type="button" variant="secondary">
+                  CV uploads
+                </Button>
+              </div>
+            </form>
+          </Card>
+        </section>
+      );
+    }
+
     if (activeSection === "projects") {
       return (
         <section className="space-y-4" id="section-projects">
@@ -1301,166 +1536,24 @@ export function ProfileStudio({
           </nav>
         </aside>
 
-        <div className="space-y-10">
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-            <Card className="space-y-6 bg-transparent">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="space-y-2">
+        <div className="space-y-8">
+          <header className="flex flex-wrap items-end justify-between gap-4 border-b border-[#d7cebd] pb-7">
+            <div className="space-y-3">
               <p className="label-caps">Dashboard</p>
-              {isInlineNameEditing ? (
-                <div className="space-y-2">
-                  <Input
-                    autoFocus
-                    className="max-w-xl text-2xl font-semibold"
-                    disabled={inlineNameSaving}
-                    onChange={(event) => setInlineNameDraft(event.target.value)}
-                    placeholder="Merit Builder"
-                    value={inlineNameDraft}
-                  />
-                  {inlineNameError ? <p className="text-xs text-red-700">{inlineNameError}</p> : null}
-                  <div className="flex flex-wrap gap-2">
-                    <Button disabled={inlineNameSaving} onClick={saveInlineName}>
-                      {inlineNameSaving ? "Saving..." : "Save name"}
-                    </Button>
-                    <Button
-                      disabled={inlineNameSaving}
-                      onClick={() => {
-                        setIsInlineNameEditing(false);
-                        setInlineNameDraft(profile.name);
-                        setInlineNameError(null);
-                      }}
-                      variant="secondary"
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <h1 className="font-serif text-6xl leading-none text-[#16130f]">{profile.name || "Merit Builder"}</h1>
-                  <PencilEditButton
-                    label="Edit name"
-                    onClick={() => {
-                      setInlineNameDraft(profile.name);
-                      setInlineNameError(null);
-                      setIsInlineNameEditing(true);
-                    }}
-                  />
-                </div>
-              )}
-              {isInlineHeadlineEditing ? (
-                <div className="space-y-2">
-                  <Input
-                    autoFocus
-                    className="max-w-xl"
-                    disabled={inlineHeadlineSaving}
-                    onChange={(event) => setInlineHeadlineDraft(event.target.value)}
-                    placeholder="Add a headline to define your identity."
-                    value={inlineHeadlineDraft}
-                  />
-                  {inlineHeadlineError ? <p className="text-xs text-red-700">{inlineHeadlineError}</p> : null}
-                  <div className="flex flex-wrap gap-2">
-                    <Button disabled={inlineHeadlineSaving} onClick={saveInlineHeadline} type="button">
-                      {inlineHeadlineSaving ? "Saving..." : "Save headline"}
-                    </Button>
-                    <Button
-                      disabled={inlineHeadlineSaving}
-                      onClick={() => {
-                        setIsInlineHeadlineEditing(false);
-                        setInlineHeadlineDraft(profile.headline);
-                        setInlineHeadlineError(null);
-                      }}
-                      type="button"
-                      variant="ghost"
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <button
-                    className="max-w-xl text-left text-lg leading-8 text-[#7b705f] underline-offset-4 hover:text-[#16130f] hover:underline"
-                    onClick={() => {
-                      setInlineHeadlineDraft(profile.headline);
-                      setInlineHeadlineError(null);
-                      setIsInlineHeadlineEditing(true);
-                    }}
-                    type="button"
-                  >
-                    {profile.headline || "Add a headline to define your identity."}
-                  </button>
-                  <PencilEditButton
-                    label="Edit headline"
-                    onClick={() => {
-                      setInlineHeadlineDraft(profile.headline);
-                      setInlineHeadlineError(null);
-                      setIsInlineHeadlineEditing(true);
-                    }}
-                  />
-                </div>
-              )}
-              <div className="h-px w-44 bg-[#d7cebd]" />
-              <div className="flex flex-wrap gap-2">
-                <Badge className="capitalize">{profile.roleType}</Badge>
-                <Badge>{ownProjects.length} projects</Badge>
-              </div>
-            </div>
-          </div>
-
-          {featuredProject ? (
-            <div className="grid gap-4 border border-[#d7cebd] bg-[#eee8dd] p-4 md:grid-cols-[240px_minmax(0,1fr)]">
-              <div className="overflow-hidden border border-[#d7cebd]">
-                <div className="aspect-[4/3] bg-[#ece4d4]">
-                  {featuredVisual?.previewUrl ? (
-                    <img
-                      alt={`${featuredProject.title} preview`}
-                      className="h-full w-full object-cover"
-                      src={featuredVisual.previewUrl}
-                    />
-                  ) : (
-                    <div className="flex h-full items-center justify-center text-xs text-[#7a7265]">
-                      Preview unavailable
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="space-y-2">
-                <p className="label-caps">Featured build</p>
-                <h2 className="font-serif text-3xl leading-tight text-[#16130f]">{featuredProject.title}</h2>
-                <p className="text-sm leading-6 text-[#7b705f]">{featuredProject.hook || featuredProject.problemSolved}</p>
-                <div className="flex flex-wrap gap-2">
-                  <Link href={`/projects/${featuredProject.projectId}`}>
-                    <Button variant="secondary">Open project</Button>
-                  </Link>
-                  <Link href={`/c/${userId}`}>
-                    <Button variant="secondary">Public passport</Button>
-                  </Link>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="border border-dashed border-[#d7cebd] p-5">
-              <p className="text-sm text-[#7b705f]">
-                Publish your first project to activate the featured proof section.
+              <h1 className="font-serif text-5xl leading-none text-[#16130f]">Merit workspace</h1>
+              <p className="max-w-2xl text-base leading-7 text-[#7b705f]">
+                Edit your profile, manage project proof, preview your public passport, and copy the link when it is ready.
               </p>
             </div>
-          )}
-        </Card>
-
-        <Card className="space-y-4">
-          <p className="label-caps">Readiness snapshot</p>
-          <p className="font-serif text-6xl text-[#16130f]">{profile.profileCompletionScore}%</p>
-          <p className="text-sm leading-6 text-[#7b705f]">
-            Profile readiness is based on identity, contact, role intent, portfolio links, and project evidence.
-          </p>
-          <Link href={`/c/${userId}`}>
-            <Button className="w-full" variant="secondary">
-              View passport as recruiters
-            </Button>
-          </Link>
-        </Card>
-          </div>
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={copyPassportLink} type="button" variant="secondary">
+                {copyStatus === "copied" ? "Copied" : "Copy passport link"}
+              </Button>
+              <Link href={passportPath}>
+                <Button>View passport</Button>
+              </Link>
+            </div>
+          </header>
 
       <Card className="sticky top-16 z-20 border-[#d7cebd] bg-[#f4f0e8]/95 p-3 backdrop-blur lg:hidden">
         <nav className="overflow-x-auto">

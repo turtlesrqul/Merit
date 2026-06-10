@@ -28,7 +28,7 @@ export function ProjectCard({ project, showAuthor = true, actions }: ProjectCard
   return (
     <Card className="space-y-0 overflow-hidden border-0 bg-transparent p-0">
       <Link className="group block" href={`/projects/${project.projectId}`}>
-        <div className="relative aspect-[4/3] bg-[#e5ded1]">
+        <div className="relative aspect-[16/10] bg-[#e5ded1]">
           {visual.previewUrl ? (
             <img
               alt={`${project.title} preview`}
@@ -40,15 +40,15 @@ export function ProjectCard({ project, showAuthor = true, actions }: ProjectCard
               Visual preview coming soon
             </div>
           )}
-          <span className="absolute bottom-4 left-4 bg-[#fbf8f0] px-3 py-1 text-sm text-[#16130f]">
+          <span className="absolute bottom-3 left-3 bg-[#fbf8f0] px-2.5 py-1 text-xs text-[#16130f]">
             {project.category || labelProjectType(project.projectType)}
           </span>
         </div>
       </Link>
 
-      <div className="space-y-3 pt-5">
+      <div className="space-y-2.5 pt-4">
         <Link className="block space-y-2" href={`/projects/${project.projectId}`}>
-          <h3 className="line-clamp-2 font-serif text-3xl leading-tight text-[#16130f]">{project.title}</h3>
+          <h3 className="line-clamp-2 font-serif text-2xl leading-tight text-[#16130f]">{project.title}</h3>
           <p className="line-clamp-2 text-sm leading-6 text-[#7b705f]">{project.hook || "No hook added yet."}</p>
         </Link>
 

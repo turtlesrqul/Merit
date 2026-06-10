@@ -59,20 +59,20 @@ export function DiscoveryFeed({
   );
 
   return (
-    <section className="editorial-container py-16">
-      <div className="mb-12">
-        <h1 className="font-serif text-6xl leading-none text-[#16130f]">Explore</h1>
-        <div className="mt-10 grid gap-5 lg:grid-cols-[minmax(280px,520px)_1fr] lg:items-start">
+    <section className="editorial-container py-10 sm:py-12">
+      <div className="mb-8">
+        <h1 className="font-serif text-5xl leading-none text-[#16130f] sm:text-6xl">Explore</h1>
+        <div className="mt-7 grid gap-4 lg:grid-cols-[minmax(260px,480px)_1fr] lg:items-start">
           <Input
             aria-label="Search projects"
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search projects, profiles..."
             value={query}
           />
-          <div className="flex gap-2 overflow-x-auto pb-2">
+          <div className="flex gap-2 overflow-x-auto pb-1">
             {categories.map((option) => (
               <button
-                className={`shrink-0 border px-4 py-2 text-sm ${
+                className={`shrink-0 border px-3 py-1.5 text-sm ${
                   option === category
                     ? "border-[#f3c945] bg-[#f3c945] text-[#16130f]"
                     : "border-[#16130f] bg-transparent text-[#16130f]"
@@ -88,8 +88,8 @@ export function DiscoveryFeed({
         </div>
       </div>
 
-      <div className="mb-10 flex items-center gap-8 border-b border-[#d7cebd] text-lg">
-        <span className="border-b-2 border-[#f3c945] pb-3 text-[#16130f]">Projects {filteredProjects.length}</span>
+      <div className="mb-8 flex items-center gap-8 border-b border-[#d7cebd] text-base">
+        <span className="border-b-2 border-[#f3c945] pb-2.5 text-[#16130f]">Projects {filteredProjects.length}</span>
       </div>
 
       {filteredProjects.length === 0 ? (
@@ -97,7 +97,7 @@ export function DiscoveryFeed({
           No projects matched that search yet.
         </div>
       ) : (
-        <div className="grid gap-x-12 gap-y-16 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-x-8 gap-y-11 md:grid-cols-2 xl:grid-cols-3">
           {filteredProjects.map((project) => (
             <ProjectCard
               actions={

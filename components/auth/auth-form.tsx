@@ -6,7 +6,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { resolveSignupEmailCallbackUrl } from "@/lib/auth/auth-urls";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 import { isRateLimitedAuthError, mapSupabaseAuthError } from "@/lib/auth/auth-errors";
-import { getSupportEmail, getSupportUrl } from "@/lib/public-config";
+import {
+  getSupportEmail,
+  getSupportInstagramHandle,
+  getSupportInstagramUrl,
+  getSupportUrl
+} from "@/lib/public-config";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -34,6 +39,8 @@ export function AuthForm({ mode }: AuthFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supportEmail = getSupportEmail();
+  const supportInstagramHandle = getSupportInstagramHandle();
+  const supportInstagramUrl = getSupportInstagramUrl();
   const supportUrl = getSupportUrl();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -459,7 +466,7 @@ export function AuthForm({ mode }: AuthFormProps) {
             {isSignUp ? "Sign in" : "Sign up"}
           </Link>
         </p>
-        <p className="text-xs text-[#7b705f]">
+        <p className="text-xs leading-5 text-[#7b705f]">
           Need help? Contact{" "}
           <a
             className="text-[#16130f] underline decoration-[#f3c945] underline-offset-4"
@@ -468,6 +475,15 @@ export function AuthForm({ mode }: AuthFormProps) {
             target="_blank"
           >
             {supportEmail}
+          </a>{" "}
+          or{" "}
+          <a
+            className="text-[#16130f] underline decoration-[#f3c945] underline-offset-4"
+            href={supportInstagramUrl}
+            rel="noreferrer"
+            target="_blank"
+          >
+            {supportInstagramHandle}
           </a>
           .
         </p>

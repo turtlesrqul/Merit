@@ -24,7 +24,8 @@ function matchesQuery(member: DirectoryMember, query: string) {
     member.bio ?? "",
     member.roleType ?? "",
     member.topSkills.join(" "),
-    member.recentProjects.map((project) => project.title).join(" ")
+    member.recentProjects.map((project) => project.title).join(" "),
+    member.recentProjects.map((project) => project.category).join(" ")
   ]
     .join(" ")
     .toLowerCase();
@@ -41,46 +42,47 @@ export function PeopleDirectory({ members }: PeopleDirectoryProps) {
   );
 
   return (
-    <section className="space-y-4">
-      <Card className="space-y-2 border-[#ddcfac] bg-gradient-to-r from-[#f7f1e2] to-[#fdfbf7]">
-        <h1 className="text-3xl font-semibold tracking-tight text-[#171512]">People Directory</h1>
-        <p className="text-sm text-[#5e574c]">
-          Browse all users, inspect profile signals, and open their Passport pages.
+    <section className="editorial-container space-y-8 py-12">
+      <header className="border-b border-[#d7cebd] pb-8">
+        <h1 className="font-serif text-5xl leading-none text-[#16130f] sm:text-6xl">People</h1>
+        <p className="mt-5 max-w-2xl text-base leading-7 text-[#7b705f]">
+          Find builders by name, role, skills, and recent project evidence. Projects stay in Explore; this page is for people.
         </p>
-      </Card>
+      </header>
 
-      <Card className="space-y-3">
+      <div className="grid gap-3 md:grid-cols-[minmax(260px,480px)_1fr] md:items-center">
         <Input
+          aria-label="Search people"
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Search by name, headline, role, skill, or project title"
           value={query}
         />
-        <p className="text-sm text-[#6b6356]">
+        <p className="text-sm text-[#7b705f] md:text-right">
           Showing {visibleMembers.length} of {members.length} users
         </p>
-      </Card>
+      </div>
 
       {visibleMembers.length === 0 ? (
-        <Card>
-          <p className="text-sm text-ink-700">No users match that search.</p>
+        <Card className="border-dashed bg-transparent">
+          <p className="text-sm text-[#7b705f]">No people match that search.</p>
         </Card>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {visibleMembers.map((member) => (
-            <Card className="space-y-3 border-[#e5dccd] bg-[#fdfbf7]" key={member.userId}>
-              <div className="flex items-start justify-between gap-3">
+            <Card className="space-y-4 bg-transparent" key={member.userId}>
+              <div className="flex items-start justify-between gap-3 border-b border-[#d7cebd] pb-4">
                 <div>
-                  <p className="text-lg font-semibold text-ink-950">
+                  <p className="font-serif text-2xl leading-tight text-[#16130f]">
                     {member.name ?? "Merit User"}
                   </p>
                   {member.headline ? (
-                    <p className="text-sm text-ink-700">{member.headline}</p>
+                    <p className="mt-1 text-sm leading-6 text-[#7b705f]">{member.headline}</p>
                   ) : null}
                 </div>
                 <Badge className="capitalize">{member.roleType ?? "candidate"}</Badge>
               </div>
 
-              <p className="text-sm text-ink-700">
+              <p className="text-sm text-[#7b705f]">
                 {member.projectCount} project{member.projectCount === 1 ? "" : "s"}
               </p>
 
@@ -91,17 +93,17 @@ export function PeopleDirectory({ members }: PeopleDirectoryProps) {
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-ink-600">No skills tagged yet.</p>
+                <p className="text-sm text-[#7b705f]">No skills tagged yet.</p>
               )}
 
               {member.recentProjects.length > 0 ? (
                 <div className="space-y-1">
                   <p className="text-xs font-semibold uppercase tracking-[0.08em] text-ink-500">
-                    Recent projects
+                    Recent evidence
                   </p>
                   {member.recentProjects.map((project) => (
-                    <p className="text-sm text-ink-700" key={`${member.userId}-${project.title}`}>
-                      {project.title} <span className="text-ink-500">({project.category})</span>
+                    <p className="text-sm text-[#7b705f]" key={`${member.userId}-${project.title}`}>
+                      {project.title} <span className="text-[#9b907e]">({project.category})</span>
                     </p>
                   ))}
                 </div>

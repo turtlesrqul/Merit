@@ -24,5 +24,5 @@ export function resolveSignupEmailCallbackUrl() {
 }
 
 export function resolvePasswordResetRedirectUrl() {
-  return `${resolveAuthBaseUrl()}/reset-password`;
+  return `${resolveAuthBaseUrl()}/auth/callback?next=/reset-password`;
 }
