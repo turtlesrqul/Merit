@@ -61,12 +61,12 @@ function ProjectArchiveItem({ project }: { project: ProjectCardData }) {
   return (
     <article className="group">
       <a className="block" href={`/projects/${project.projectId}`}>
-        <div className="relative aspect-[4/3] overflow-hidden bg-[#e5ded1]">
+        <div className="relative aspect-[16/10] overflow-hidden bg-[#e5ded1]">
           {visual.previewUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               alt={`${project.title} preview`}
-              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+              className="h-full w-full object-contain p-2"
               src={visual.previewUrl}
             />
           ) : (
@@ -75,13 +75,13 @@ function ProjectArchiveItem({ project }: { project: ProjectCardData }) {
             </div>
           )}
           {project.category ? (
-            <span className="absolute bottom-4 left-4 bg-[#fbf8f0] px-3 py-1 text-sm text-[#16130f]">
+            <span className="absolute bottom-3 left-3 bg-[#fbf8f0] px-2.5 py-1 text-xs text-[#16130f]">
               {project.category}
             </span>
           ) : null}
         </div>
-        <div className="mt-5 space-y-1">
-          <h3 className="font-serif text-2xl leading-tight text-[#16130f]">{project.title}</h3>
+        <div className="mt-4 space-y-1">
+          <h3 className="font-serif text-xl leading-tight text-[#16130f]">{project.title}</h3>
           <p className="line-clamp-2 text-sm leading-6 text-[#7b705f]">{project.hook}</p>
         </div>
       </a>
@@ -120,18 +120,18 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
 
   return (
     <AppShell roleType={viewerProfile?.roleType} userEmail={user?.email}>
-      <section className="editorial-container pt-28">
-        <div className="grid gap-10 border-b border-[#d7cebd] pb-16 lg:grid-cols-[1fr_auto] lg:items-end">
-          <div className="space-y-8">
-            <div className="flex h-36 w-36 items-center justify-center bg-[#dfd6c6] font-serif text-5xl text-[#7b705f]">
+      <section className="editorial-container pt-12">
+        <div className="grid gap-6 border-b border-[#d7cebd] pb-8 lg:grid-cols-[1fr_auto] lg:items-end">
+          <div className="space-y-5">
+            <div className="flex h-20 w-20 items-center justify-center bg-[#dfd6c6] font-serif text-2xl text-[#7b705f]">
               {initialsForName(displayName)}
             </div>
-            <div className="max-w-4xl space-y-5">
-              <h1 className="font-serif text-6xl leading-[0.96] text-[#16130f] sm:text-7xl lg:text-8xl">
+            <div className="max-w-4xl space-y-4">
+              <h1 className="font-serif text-3xl leading-[1.06] text-[#16130f] sm:text-4xl lg:text-5xl">
                 {displayName}
               </h1>
               {candidate.headline ? (
-                <p className="max-w-3xl text-2xl leading-snug text-[#7b705f]">{candidate.headline}</p>
+                <p className="max-w-3xl text-base leading-7 text-[#7b705f]">{candidate.headline}</p>
               ) : null}
               <div className="space-y-2 pt-2 text-sm uppercase tracking-[0.12em] text-[#7b705f]">
                 <p>{candidate.roleType === "recruiter" ? "Recruiter" : "Builder portfolio"}</p>
@@ -144,17 +144,17 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
           <PublicProfileActions contactEmail={candidate.contactEmail} profileName={displayName} />
         </div>
 
-        <div className="pt-24">
-          <p className="label-caps mb-8">Featured work</p>
+        <div className="pt-12">
+          <p className="label-caps mb-5">Featured work</p>
           {featuredProject ? (
-            <article className="space-y-8">
+            <article className="space-y-5">
               <a className="block" href={`/projects/${featuredProject.projectId}`}>
-                <div className="aspect-[16/7] overflow-hidden bg-[#e5ded1]">
+                <div className="h-60 overflow-hidden bg-[#e5ded1] md:h-[420px]">
                   {featuredVisual?.previewUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       alt={`${featuredProject.title} preview`}
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-contain p-2"
                       src={featuredVisual.previewUrl}
                     />
                   ) : (
@@ -164,8 +164,8 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
               </a>
               <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_auto] md:items-start">
                 <div className="max-w-3xl space-y-3">
-                  <h2 className="font-serif text-4xl leading-tight text-[#16130f]">{featuredProject.title}</h2>
-                  <p className="text-xl leading-8 text-[#7b705f]">{featuredProject.hook}</p>
+                  <h2 className="font-serif text-2xl leading-tight text-[#16130f]">{featuredProject.title}</h2>
+                  <p className="text-base leading-7 text-[#7b705f]">{featuredProject.hook}</p>
                 </div>
                 <a href={`/projects/${featuredProject.projectId}`}>
                   <Button variant="secondary">View case study</Button>
@@ -173,21 +173,21 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
               </div>
             </article>
           ) : (
-            <div className="border border-dashed border-[#d7cebd] px-8 py-16 text-center text-[#7b705f]">
+            <div className="border border-dashed border-[#d7cebd] px-8 py-10 text-center text-[#7b705f]">
               No public projects yet.
             </div>
           )}
         </div>
 
         {archiveProjects.length > 0 ? (
-          <div className="pt-24">
-            <div className="mb-8 flex items-center justify-between border-b border-[#d7cebd] pb-4">
+          <div className="pt-12">
+            <div className="mb-5 flex items-center justify-between border-b border-[#d7cebd] pb-4">
               <p className="label-caps">Selected works</p>
               <p className="text-sm text-[#7b705f]">
                 {candidate.projects.length} project{candidate.projects.length === 1 ? "" : "s"}
               </p>
             </div>
-            <div className="grid gap-x-12 gap-y-16 md:grid-cols-2">
+            <div className="grid gap-x-8 gap-y-10 md:grid-cols-2">
               {archiveProjects.map((project) => (
                 <ProjectArchiveItem key={project.projectId} project={project} />
               ))}
@@ -196,8 +196,8 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
         ) : null}
 
         {candidate.roleType === "recruiter" ? (
-          <div className="pt-24">
-            <h2 className="mb-6 font-serif text-3xl text-[#16130f]">Posted opportunities</h2>
+          <div className="pt-12">
+            <h2 className="mb-5 font-serif text-2xl text-[#16130f]">Posted opportunities</h2>
             {recruiterOpportunities.length === 0 ? (
               <p className="text-sm text-[#7b705f]">No opportunities posted yet.</p>
             ) : (
@@ -223,13 +223,13 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
           </div>
         ) : null}
 
-        <div className="grid gap-12 border-t border-[#d7cebd] pt-20 md:grid-cols-[1fr_1fr]">
+        <div className="grid gap-8 border-t border-[#d7cebd] pt-12 md:grid-cols-[1fr_1fr]">
           <section className="space-y-4">
             <p className="label-caps">About</p>
             {candidate.bio ? (
-              <p className="max-w-xl text-lg leading-8 text-[#7b705f]">{candidate.bio}</p>
+              <p className="max-w-xl text-base leading-7 text-[#7b705f]">{candidate.bio}</p>
             ) : (
-              <p className="text-lg leading-8 text-[#7b705f]">No biography has been added yet.</p>
+              <p className="text-base leading-7 text-[#7b705f]">No biography has been added yet.</p>
             )}
             {cvLink ? (
               <a className="inline-flex text-sm text-[#16130f] underline underline-offset-4" href={cvLink} rel="noreferrer" target="_blank">
@@ -238,7 +238,7 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
             ) : null}
           </section>
 
-          <section className="space-y-8">
+          <section className="space-y-6">
             {skillList.length > 0 ? (
               <div className="space-y-4">
                 <p className="label-caps">Capabilities</p>

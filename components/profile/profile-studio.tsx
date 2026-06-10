@@ -818,12 +818,12 @@ export function ProfileStudio({
   const renderSection = () => {
     if (activeSection === "overview") {
       return (
-        <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]" id="section-overview">
-          <Card className="space-y-5 bg-transparent">
+        <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_340px]" id="section-overview">
+          <Card className="space-y-4 bg-transparent">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="space-y-3">
                 <p className="label-caps">Your Merit right now</p>
-                <h2 className="font-serif text-4xl leading-tight text-[#16130f]">
+                <h2 className="font-serif text-3xl leading-tight text-[#16130f]">
                   {profile.name || "Merit Builder"}
                 </h2>
                 <p className="max-w-2xl text-base leading-7 text-[#7b705f]">
@@ -845,24 +845,24 @@ export function ProfileStudio({
             ) : null}
 
             <div className="grid gap-4 md:grid-cols-3">
-              <div className="border border-[#d7cebd] bg-[#eee8dd] p-4">
+              <div className="border border-[#d7cebd] bg-[#eee8dd] p-3">
                 <p className="label-caps">Profile</p>
-                <p className="mt-2 text-2xl font-semibold text-[#16130f]">{profile.profileCompletionScore}%</p>
+                <p className="mt-1 text-xl font-semibold text-[#16130f]">{profile.profileCompletionScore}%</p>
                 <p className="mt-1 text-sm text-[#7b705f]">Readiness</p>
               </div>
-              <div className="border border-[#d7cebd] bg-[#eee8dd] p-4">
+              <div className="border border-[#d7cebd] bg-[#eee8dd] p-3">
                 <p className="label-caps">Projects</p>
-                <p className="mt-2 text-2xl font-semibold text-[#16130f]">{ownProjects.length}</p>
+                <p className="mt-1 text-xl font-semibold text-[#16130f]">{ownProjects.length}</p>
                 <p className="mt-1 text-sm text-[#7b705f]">Published builds</p>
               </div>
-              <div className="border border-[#d7cebd] bg-[#eee8dd] p-4">
+              <div className="border border-[#d7cebd] bg-[#eee8dd] p-3">
                 <p className="label-caps">Share</p>
                 <p className="mt-2 truncate text-sm font-semibold text-[#16130f]">{passportPath}</p>
                 <p className="mt-1 text-sm text-[#7b705f]">Public passport</p>
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-2 border-t border-[#d7cebd] pt-5">
+            <div className="flex flex-wrap gap-2 border-t border-[#d7cebd] pt-4">
               <Button onClick={() => setActiveSection("profile")} type="button" variant="secondary">
                 Edit profile basics
               </Button>
@@ -875,10 +875,10 @@ export function ProfileStudio({
             </div>
           </Card>
 
-          <Card className="space-y-5 bg-[#eee8dd]">
+          <Card className="space-y-4 bg-[#eee8dd]">
             <div className="space-y-2">
               <p className="label-caps">Passport preview</p>
-              <div className="h-20 w-20 border border-[#d7cebd] bg-[#ded6c7] p-4 font-serif text-2xl text-[#7b705f]">
+              <div className="h-16 w-16 border border-[#d7cebd] bg-[#ded6c7] p-3 font-serif text-xl text-[#7b705f]">
                 {(profile.name || "M")
                   .split(" ")
                   .map((part) => part[0])
@@ -886,7 +886,7 @@ export function ProfileStudio({
                   .slice(0, 2)
                   .toUpperCase()}
               </div>
-              <h3 className="font-serif text-3xl leading-tight text-[#16130f]">
+              <h3 className="font-serif text-2xl leading-tight text-[#16130f]">
                 {profile.name || "Merit Builder"}
               </h3>
               <p className="text-sm leading-6 text-[#7b705f]">{profile.headline || "No headline added yet."}</p>
@@ -908,7 +908,7 @@ export function ProfileStudio({
             {featuredProject ? (
               <div className="space-y-2">
                 <p className="label-caps">Featured evidence</p>
-                <p className="font-serif text-2xl leading-tight text-[#16130f]">{featuredProject.title}</p>
+                <p className="font-serif text-xl leading-tight text-[#16130f]">{featuredProject.title}</p>
                 <p className="line-clamp-2 text-sm leading-6 text-[#7b705f]">
                   {featuredProject.hook || featuredProject.problemSolved}
                 </p>
@@ -923,11 +923,11 @@ export function ProfileStudio({
 
     if (activeSection === "profile") {
       return (
-        <section className="grid gap-5 xl:grid-cols-2" id="section-profile">
-          <Card className="space-y-5 bg-transparent">
+        <section className="grid gap-4 xl:grid-cols-2" id="section-profile">
+          <Card className="space-y-4 bg-transparent">
             <div>
               <p className="label-caps mb-2">Edit profile</p>
-              <h2 className="font-serif text-3xl text-[#16130f]">Profile basics</h2>
+              <h2 className="font-serif text-2xl text-[#16130f]">Profile basics</h2>
             </div>
             <form className="space-y-4" onSubmit={saveIdentity}>
               <label className="block space-y-2 text-sm text-ink-900">
@@ -970,10 +970,10 @@ export function ProfileStudio({
             </form>
           </Card>
 
-          <Card className="space-y-5 bg-transparent">
+          <Card className="space-y-4 bg-transparent">
             <div>
               <p className="label-caps mb-2">Passport details</p>
-              <h2 className="font-serif text-3xl text-[#16130f]">Contact and evidence</h2>
+              <h2 className="font-serif text-2xl text-[#16130f]">Contact and evidence</h2>
             </div>
             <form className="space-y-4" onSubmit={savePassport}>
               <label className="block space-y-2 text-sm text-ink-900">
@@ -1517,7 +1517,7 @@ export function ProfileStudio({
   };
 
   return (
-    <section className="editorial-container py-12">
+      <section className="editorial-container py-8">
       <div className="grid gap-6 lg:grid-cols-[180px_minmax(0,1fr)]">
         <aside className="hidden pt-3 lg:block">
           <nav className="sticky top-24 space-y-5 text-sm">
@@ -1536,12 +1536,12 @@ export function ProfileStudio({
           </nav>
         </aside>
 
-        <div className="space-y-8">
-          <header className="flex flex-wrap items-end justify-between gap-4 border-b border-[#d7cebd] pb-7">
-            <div className="space-y-3">
+        <div className="space-y-6">
+          <header className="flex flex-wrap items-end justify-between gap-4 border-b border-[#d7cebd] pb-5">
+            <div className="space-y-2">
               <p className="label-caps">Dashboard</p>
-              <h1 className="font-serif text-5xl leading-none text-[#16130f]">Merit workspace</h1>
-              <p className="max-w-2xl text-base leading-7 text-[#7b705f]">
+              <h1 className="font-serif text-3xl leading-none text-[#16130f]">Merit workspace</h1>
+              <p className="max-w-2xl text-sm leading-6 text-[#7b705f]">
                 Edit your profile, manage project proof, preview your public passport, and copy the link when it is ready.
               </p>
             </div>

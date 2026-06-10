@@ -512,13 +512,13 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
   };
 
   return (
-    <div className="editorial-container space-y-10 py-12">
+    <div className="editorial-container space-y-6 py-8">
       <Card className="bg-transparent">
         <div className="flex flex-wrap items-end justify-between gap-4">
-          <div className="max-w-3xl space-y-4">
+          <div className="max-w-3xl space-y-3">
             <p className="label-caps">Project editor</p>
-            <h1 className="font-serif text-6xl leading-none text-[#16130f]">{heading}</h1>
-            <p className="text-lg leading-8 text-[#7b705f]">
+            <h1 className="font-serif text-3xl leading-none text-[#16130f]">{heading}</h1>
+            <p className="text-sm leading-6 text-[#7b705f]">
               Shape this project into a clear case study with strong visuals, proof links, and concise context.
             </p>
           </div>
@@ -528,17 +528,17 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
         </div>
       </Card>
 
-      <form className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]" onSubmit={handleSubmit}>
-        <div className="space-y-5">
-          <Card className="space-y-5">
+      <form className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_340px]" onSubmit={handleSubmit}>
+        <div className="space-y-4">
+          <Card className="space-y-4">
             <div>
-              <h2 className="font-serif text-3xl text-[#16130f]">Choose project type</h2>
+              <h2 className="font-serif text-2xl text-[#16130f]">Choose project type</h2>
               <p className="mt-2 text-sm text-[#7b705f]">Pick the format that best describes your main deliverable.</p>
             </div>
             <div className="grid gap-2 sm:grid-cols-2">
               {(["web", "design", "document", "other"] as const).map((type) => (
                 <label
-                  className={`flex cursor-pointer items-center justify-between border px-4 py-3 text-sm ${
+                  className={`flex cursor-pointer items-center justify-between border px-3 py-2 text-sm ${
                     projectType === type ? "border-[#f3c945] bg-[#f3c945] text-[#16130f]" : "border-[#16130f] text-[#16130f]"
                   }`}
                   key={type}
@@ -557,9 +557,9 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
             </div>
           </Card>
 
-          <Card className="space-y-5">
+          <Card className="space-y-4">
             <div>
-              <h2 className="font-serif text-3xl text-[#16130f]">Add main content</h2>
+              <h2 className="font-serif text-2xl text-[#16130f]">Add main content</h2>
               <p className="mt-2 text-sm text-[#7b705f]">
                 Upload files, paste links, and ensure at least one visual preview source.
               </p>
@@ -580,7 +580,7 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
               type="file"
             />
             <div
-              className={`border border-dashed p-5 transition-all ${
+              className={`border border-dashed p-4 transition-all ${
                 isDragActive
                   ? "border-[#f3c945] bg-[#f7edcf]"
                   : "border-[#d7cebd] bg-[#f4f0e8]"
@@ -633,8 +633,8 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
 
             <label className="block space-y-2 text-sm text-ink-900">
               Artifact links (one per line)
-              <Textarea
-                className="min-h-[160px]"
+                <Textarea
+                className="min-h-[120px]"
                 onChange={(event) => setArtifactLinks(event.target.value)}
                 placeholder={artifactPlaceholder(projectType)}
                 value={artifactLinks}
@@ -652,7 +652,7 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
                 type="file"
               />
               <div
-                className={`rounded-2xl border border-dashed p-5 transition-all ${
+                className={`rounded-xl border border-dashed p-4 transition-all ${
                   isThumbnailDragActive
                     ? "border-sun-400 bg-[radial-gradient(circle_at_22%_18%,rgba(244,207,89,0.22),transparent_43%),linear-gradient(180deg,#fff7de_0%,#fbf4e8_100%)] shadow-[0_10px_22px_rgba(127,97,34,0.12)]"
                     : "border-ink-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.9)_0%,rgba(246,244,239,0.86)_100%)]"
@@ -784,9 +784,9 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
             </div>
           </Card>
 
-          <Card className="space-y-5">
+          <Card className="space-y-4">
             <div>
-              <h2 className="font-serif text-3xl text-[#16130f]">Title and story</h2>
+              <h2 className="font-serif text-2xl text-[#16130f]">Title and story</h2>
               <p className="mt-2 text-sm text-[#7b705f]">Keep this concise and scannable for discovery feed browsing.</p>
             </div>
             <label className="block space-y-2 text-sm text-ink-900">
@@ -814,9 +814,9 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
             </label>
           </Card>
 
-          <Card className="space-y-5">
+          <Card className="space-y-4">
             <div>
-              <h2 className="font-serif text-3xl text-[#16130f]">Skills and impact</h2>
+              <h2 className="font-serif text-2xl text-[#16130f]">Skills and impact</h2>
               <p className="mt-2 text-sm text-[#7b705f]">These improve filtering, search, and recruiter context.</p>
             </div>
             <label className="block space-y-2 text-sm text-ink-900">
@@ -866,7 +866,7 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
           </Card>
         </div>
 
-        <aside className="space-y-5 xl:sticky xl:top-24 xl:self-start">
+        <aside className="space-y-4 xl:sticky xl:top-24 xl:self-start">
           <Card className="overflow-hidden p-0">
             <div className="border-b border-ink-100 px-4 py-3">
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-ink-600">Project Card Preview</p>

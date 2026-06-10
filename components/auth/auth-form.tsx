@@ -340,14 +340,14 @@ export function AuthForm({ mode }: AuthFormProps) {
   };
 
   return (
-    <main className="editorial-container flex min-h-[calc(100vh-4rem)] items-center py-16">
-      <Card className="mx-auto w-full max-w-xl space-y-8 bg-transparent">
+    <main className="editorial-container flex min-h-[calc(100vh-4rem)] items-center py-10">
+      <Card className="mx-auto w-full max-w-lg space-y-6 bg-transparent">
         <div className="space-y-5 text-center">
           <p className="label-caps mx-auto">Merit Access</p>
-          <h1 className="font-serif text-5xl leading-tight text-[#16130f]">
+          <h1 className="font-serif text-4xl leading-tight text-[#16130f]">
             {isSignUp ? "Create your Merit account" : "Welcome back"}
           </h1>
-          <p className="mx-auto max-w-md text-lg leading-8 text-[#7b705f]">
+          <p className="mx-auto max-w-md text-base leading-7 text-[#7b705f]">
             {isSignUp
               ? "Start building a profile around proof of work."
               : "Sign in to continue building your proof profile."}

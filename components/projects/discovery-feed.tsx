@@ -59,10 +59,10 @@ export function DiscoveryFeed({
   );
 
   return (
-    <section className="editorial-container py-10 sm:py-12">
-      <div className="mb-8">
-        <h1 className="font-serif text-5xl leading-none text-[#16130f] sm:text-6xl">Explore</h1>
-        <div className="mt-7 grid gap-4 lg:grid-cols-[minmax(260px,480px)_1fr] lg:items-start">
+    <section className="editorial-container py-8 sm:py-9">
+      <div className="mb-6">
+          <h1 className="font-serif text-4xl leading-none text-[#16130f]">Explore</h1>
+        <div className="mt-5 grid gap-3 lg:grid-cols-[minmax(260px,460px)_1fr] lg:items-start">
           <Input
             aria-label="Search projects"
             onChange={(event) => setQuery(event.target.value)}
@@ -88,7 +88,7 @@ export function DiscoveryFeed({
         </div>
       </div>
 
-      <div className="mb-8 flex items-center gap-8 border-b border-[#d7cebd] text-base">
+      <div className="mb-6 flex items-center gap-8 border-b border-[#d7cebd] text-sm">
         <span className="border-b-2 border-[#f3c945] pb-2.5 text-[#16130f]">Projects {filteredProjects.length}</span>
       </div>
 
@@ -97,7 +97,7 @@ export function DiscoveryFeed({
           No projects matched that search yet.
         </div>
       ) : (
-        <div className="grid gap-x-8 gap-y-11 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-x-7 gap-y-8 md:grid-cols-2 xl:grid-cols-3">
           {filteredProjects.map((project) => (
             <ProjectCard
               actions={

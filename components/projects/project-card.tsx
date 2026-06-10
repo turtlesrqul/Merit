@@ -32,7 +32,7 @@ export function ProjectCard({ project, showAuthor = true, actions }: ProjectCard
           {visual.previewUrl ? (
             <img
               alt={`${project.title} preview`}
-              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+              className="h-full w-full object-contain p-2"
               src={visual.previewUrl}
             />
           ) : (
@@ -46,9 +46,9 @@ export function ProjectCard({ project, showAuthor = true, actions }: ProjectCard
         </div>
       </Link>
 
-      <div className="space-y-2.5 pt-4">
+      <div className="space-y-2 pt-3">
         <Link className="block space-y-2" href={`/projects/${project.projectId}`}>
-          <h3 className="line-clamp-2 font-serif text-2xl leading-tight text-[#16130f]">{project.title}</h3>
+          <h3 className="line-clamp-2 font-serif text-xl leading-tight text-[#16130f]">{project.title}</h3>
           <p className="line-clamp-2 text-sm leading-6 text-[#7b705f]">{project.hook || "No hook added yet."}</p>
         </Link>
 

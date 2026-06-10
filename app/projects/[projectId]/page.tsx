@@ -82,60 +82,60 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
 
   return (
     <AppShell roleType={viewerProfile?.roleType} userEmail={user?.email}>
-      <article className="editorial-container pt-28">
+      <article className="editorial-container pt-12">
         <Link className="text-sm text-[#16130f] hover:text-[#7b705f]" href={`/c/${project.userId}`}>
           Back to {project.authorName ?? "builder"}'s profile
         </Link>
 
-        <header className="mt-20 space-y-10">
-          <div className="max-w-5xl space-y-8">
-            <h1 className="font-serif text-6xl leading-[0.96] text-[#16130f] sm:text-7xl lg:text-8xl">
+        <header className="mt-8 space-y-5">
+          <div className="max-w-4xl space-y-4">
+            <h1 className="font-serif text-3xl leading-[1.06] text-[#16130f] sm:text-4xl lg:text-5xl">
               {project.title}
             </h1>
-            <p className="max-w-4xl text-2xl leading-snug text-[#7b705f]">{project.hook}</p>
+            <p className="max-w-3xl text-base leading-7 text-[#7b705f]">{project.hook}</p>
           </div>
 
-          <div className="grid gap-8 border-y border-[#d7cebd] py-8 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-5 border-y border-[#d7cebd] py-4 sm:grid-cols-2 lg:grid-cols-4">
             <div>
               <p className="label-caps">Category</p>
-              <p className="mt-3 text-lg text-[#16130f]">{project.category || projectTypeLabel(project.projectType)}</p>
+              <p className="mt-1.5 text-sm text-[#16130f]">{project.category || projectTypeLabel(project.projectType)}</p>
             </div>
             <div>
               <p className="label-caps">Year</p>
-              <p className="mt-3 text-lg text-[#16130f]">{new Date(project.createdAt).getFullYear()}</p>
+              <p className="mt-1.5 text-sm text-[#16130f]">{new Date(project.createdAt).getFullYear()}</p>
             </div>
             <div>
               <p className="label-caps">Role</p>
-              <p className="mt-3 text-lg text-[#16130f]">{project.authorName ? `Built by ${project.authorName}` : "Builder"}</p>
+              <p className="mt-1.5 text-sm text-[#16130f]">{project.authorName ? `Built by ${project.authorName}` : "Builder"}</p>
             </div>
             <div>
               <p className="label-caps">Proof</p>
-              <p className="mt-3 text-lg text-[#16130f]">{project.artifacts.length} asset{project.artifacts.length === 1 ? "" : "s"}</p>
+              <p className="mt-1.5 text-sm text-[#16130f]">{project.artifacts.length} asset{project.artifacts.length === 1 ? "" : "s"}</p>
             </div>
           </div>
         </header>
 
-        <div className="mt-20 aspect-[16/7] overflow-hidden bg-[#e5ded1]">
+        <div className="mt-8 h-64 overflow-hidden bg-[#e5ded1] md:h-[420px]">
           {visual.previewUrl ? (
-            <img alt={`${project.title} preview`} className="h-full w-full object-cover" src={visual.previewUrl} />
+            <img alt={`${project.title} preview`} className="h-full w-full object-contain p-2" src={visual.previewUrl} />
           ) : (
             <div className="flex h-full items-center justify-center text-[#7b705f]">Preview coming soon</div>
           )}
         </div>
 
-        <div className="mt-16 grid gap-12 lg:grid-cols-[minmax(0,1fr)_320px]">
-          <div className="space-y-16">
-            <section className="max-w-3xl space-y-5">
+        <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_300px]">
+          <div className="space-y-7">
+            <section className="max-w-3xl space-y-4">
               <p className="label-caps">Overview</p>
-              <p className="text-xl leading-9 text-[#4b4439]">{project.whatWasBuilt || "No detailed overview has been added yet."}</p>
+              <p className="text-base leading-7 text-[#4b4439]">{project.whatWasBuilt || "No detailed overview has been added yet."}</p>
               {project.problemSolved ? (
-                <p className="text-lg leading-8 text-[#7b705f]">
+                <p className="text-base leading-7 text-[#7b705f]">
                   <span className="text-[#16130f]">Problem: </span>
                   {project.problemSolved}
                 </p>
               ) : null}
               {project.impact ? (
-                <p className="text-lg leading-8 text-[#7b705f]">
+                <p className="text-base leading-7 text-[#7b705f]">
                   <span className="text-[#16130f]">Outcome: </span>
                   {project.impact}
                 </p>
@@ -184,7 +184,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
           <aside className="space-y-5 border-t border-[#d7cebd] pt-6 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
             <div className="space-y-2">
               <p className="label-caps">Creator</p>
-              <p className="text-lg text-[#16130f]">{project.authorName ?? "Merit User"}</p>
+              <p className="text-base text-[#16130f]">{project.authorName ?? "Merit User"}</p>
               {project.authorHeadline ? <p className="text-sm leading-6 text-[#7b705f]">{project.authorHeadline}</p> : null}
               <Link href={`/c/${project.userId}`}>
                 <Button className="mt-3 w-full" variant="secondary">View profile</Button>

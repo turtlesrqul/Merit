@@ -42,10 +42,10 @@ export function PeopleDirectory({ members }: PeopleDirectoryProps) {
   );
 
   return (
-    <section className="editorial-container space-y-8 py-12">
-      <header className="border-b border-[#d7cebd] pb-8">
-        <h1 className="font-serif text-5xl leading-none text-[#16130f] sm:text-6xl">People</h1>
-        <p className="mt-5 max-w-2xl text-base leading-7 text-[#7b705f]">
+    <section className="editorial-container space-y-6 py-8">
+      <header className="border-b border-[#d7cebd] pb-5">
+          <h1 className="font-serif text-4xl leading-none text-[#16130f]">People</h1>
+        <p className="mt-4 max-w-2xl text-sm leading-6 text-[#7b705f]">
           Find builders by name, role, skills, and recent project evidence. Projects stay in Explore; this page is for people.
         </p>
       </header>
@@ -67,12 +67,12 @@ export function PeopleDirectory({ members }: PeopleDirectoryProps) {
           <p className="text-sm text-[#7b705f]">No people match that search.</p>
         </Card>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {visibleMembers.map((member) => (
-            <Card className="space-y-4 bg-transparent" key={member.userId}>
-              <div className="flex items-start justify-between gap-3 border-b border-[#d7cebd] pb-4">
+            <Card className="space-y-3 bg-transparent" key={member.userId}>
+              <div className="flex items-start justify-between gap-3 border-b border-[#d7cebd] pb-3">
                 <div>
-                  <p className="font-serif text-2xl leading-tight text-[#16130f]">
+                  <p className="font-serif text-xl leading-tight text-[#16130f]">
                     {member.name ?? "Merit User"}
                   </p>
                   {member.headline ? (
