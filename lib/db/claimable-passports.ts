@@ -637,28 +637,6 @@ export async function claimPassportForUser(token: string, authUser: User) {
   const adminClient = createAdminSupabaseClient();
   await assertPassportSlugAvailable(adminClient, passport.passportSlug, passport.passportId);
 
-  const tokenHash = hashClaimToken(token);
-  const { data: claimedRow, error: claimError } = await adminClient
-    .from("unclaimed_passports")
-    .update({
-      owner_user_id: authUser.id,
-      status: "claimed",
-      claimed_at: new Date().toISOString(),
-      claim_token_hash: null
-    })
-    .eq("passport_id", passport.passportId)
-    .eq("claim_token_hash", tokenHash)
-    .eq("status", "unclaimed")
-    .select("*")
-    .maybeSingle();
-
-  if (claimError) {
-    throw new Error(`Failed to claim Passport: ${claimError.message}`);
-  }
-  if (!claimedRow) {
-    throw new Error("This Passport was already claimed.");
-  }
-
   const portfolioLinks = resolvePortfolioLinks(passport);
   const profileScore = calculateProfileCompletionScore({
     name: passport.fullName,
@@ -682,6 +660,28 @@ export async function claimPassportForUser(token: string, authUser: User) {
   );
   if (userError) {
     throw new Error(`Failed to attach Passport to user: ${userError.message}`);
+  }
+
+  const tokenHash = hashClaimToken(token);
+  const { data: claimedRow, error: claimError } = await adminClient
+    .from("unclaimed_passports")
+    .update({
+      owner_user_id: authUser.id,
+      status: "claimed",
+      claimed_at: new Date().toISOString(),
+      claim_token_hash: null
+    })
+    .eq("passport_id", passport.passportId)
+    .eq("claim_token_hash", tokenHash)
+    .eq("status", "unclaimed")
+    .select("*")
+    .maybeSingle();
+
+  if (claimError) {
+    throw new Error(`Failed to claim Passport: ${claimError.message}`);
+  }
+  if (!claimedRow) {
+    throw new Error("This Passport was already claimed.");
   }
 
   const { error: profileError } = await adminClient.from("candidate_profiles").upsert(

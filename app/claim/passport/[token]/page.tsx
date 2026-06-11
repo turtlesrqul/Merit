@@ -13,10 +13,18 @@ type ClaimPassportPageProps = {
   params: Promise<{
     token: string;
   }>;
+  searchParams?: Promise<{
+    claim_error?: string | string[];
+  }>;
 };
 
-export default async function ClaimPassportPage({ params }: ClaimPassportPageProps) {
-  const { token } = await params;
+function getSingleSearchParam(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+export default async function ClaimPassportPage({ params, searchParams }: ClaimPassportPageProps) {
+  const [{ token }, resolvedSearchParams] = await Promise.all([params, searchParams]);
+  const claimErrorMessage = getSingleSearchParam(resolvedSearchParams?.claim_error);
   const lookup = await fetchClaimablePassportByToken(token);
   const supabase = await createServerSupabaseClient();
   const {
@@ -42,6 +50,11 @@ export default async function ClaimPassportPage({ params }: ClaimPassportPagePro
             <p className="text-sm leading-6 text-[#7b705f]">
               Ask the Merit admin who sent it to generate a fresh claim link.
             </p>
+            {claimErrorMessage ? (
+              <p className="border border-red-200 bg-red-50 p-3 text-sm leading-6 text-red-700" role="alert">
+                {claimErrorMessage}
+              </p>
+            ) : null}
           </Card>
         </section>
       </AppShell>
@@ -53,6 +66,11 @@ export default async function ClaimPassportPage({ params }: ClaimPassportPagePro
       <ClaimablePassportPreview passport={lookup.passport} />
       <section className="editorial-container pt-8">
         <Card className="space-y-4">
+          {claimErrorMessage ? (
+            <p className="border border-red-200 bg-red-50 p-3 text-sm leading-6 text-red-700" role="alert">
+              {claimErrorMessage}
+            </p>
+          ) : null}
           {lookup.state === "expired" ? (
             <>
               <p className="label-caps">Expired</p>
