@@ -646,20 +646,20 @@ export async function claimPassportForUser(token: string, authUser: User) {
     portfolioLinks,
     targetRoles: []
   });
+  const ownerEmail = authUser.email ?? passport.email ?? `${authUser.id}@placeholder.local`;
 
-  const { error: userError } = await adminClient.from("users").upsert(
+  const { error: ownerError } = await adminClient.from("users").upsert(
     {
       user_id: authUser.id,
-      email: authUser.email ?? passport.email ?? `${authUser.id}@placeholder.local`,
-      name: passport.fullName || deriveUserName(authUser),
-      headline: passport.headline,
+      email: ownerEmail,
+      name: deriveUserName(authUser),
       role_type: "candidate",
       target_roles: []
     },
-    { onConflict: "user_id" }
+    { onConflict: "user_id", ignoreDuplicates: true }
   );
-  if (userError) {
-    throw new Error(`Failed to attach Passport to user: ${userError.message}`);
+  if (ownerError) {
+    throw new Error(`Failed to prepare Passport owner: ${ownerError.message}`);
   }
 
   const tokenHash = hashClaimToken(token);
@@ -682,6 +682,21 @@ export async function claimPassportForUser(token: string, authUser: User) {
   }
   if (!claimedRow) {
     throw new Error("This Passport was already claimed.");
+  }
+
+  const { error: userError } = await adminClient.from("users").upsert(
+    {
+      user_id: authUser.id,
+      email: ownerEmail,
+      name: passport.fullName || deriveUserName(authUser),
+      headline: passport.headline,
+      role_type: "candidate",
+      target_roles: []
+    },
+    { onConflict: "user_id" }
+  );
+  if (userError) {
+    throw new Error(`Failed to attach Passport to user: ${userError.message}`);
   }
 
   const { error: profileError } = await adminClient.from("candidate_profiles").upsert(
