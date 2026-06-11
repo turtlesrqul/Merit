@@ -46,14 +46,14 @@ export function AppShell({ children, userEmail, roleType }: AppShellProps) {
             Merit
           </Link>
 
-          <nav className="flex items-center gap-4 text-sm text-[#6f6658]">
+          <nav className={cn("items-center gap-4 text-sm text-[#6f6658]", isSignedIn ? "hidden sm:flex" : "flex")}>
             {isSignedIn ? (
               <>
-                <span className="hidden h-7 border-l border-[#d7cebd] sm:block" />
+                <span className="h-7 border-l border-[#d7cebd]" />
                 {dashboardNavItems.map((item) => (
                   <Link
                     className={cn(
-                      "hidden transition-colors hover:text-[#16130f] sm:inline-flex",
+                      "inline-flex transition-colors hover:text-[#16130f]",
                       pathname === item.href || (item.href !== "/home" && pathname.startsWith(`${item.href}/`))
                         ? "text-[#16130f]"
                         : ""
@@ -96,6 +96,28 @@ export function AppShell({ children, userEmail, roleType }: AppShellProps) {
             )}
           </div>
         </div>
+        {isSignedIn ? (
+          <nav className="editorial-wide flex gap-2 overflow-x-auto pb-3 text-sm text-[#6f6658] sm:hidden">
+            {dashboardNavItems.map((item) => {
+              const active =
+                pathname === item.href || (item.href !== "/home" && pathname.startsWith(`${item.href}/`));
+              return (
+                <Link
+                  className={cn(
+                    "shrink-0 border px-3 py-1.5 transition-colors",
+                    active
+                      ? "border-[#f3c945] bg-[#f3c945] text-[#16130f]"
+                      : "border-[#d7cebd] bg-[#fbf8f0] hover:text-[#16130f]"
+                  )}
+                  href={item.href}
+                  key={item.href}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
+        ) : null}
       </header>
       <main className="page-fade">{children}</main>
       <footer className="mt-24 border-t border-[#d7cebd] bg-[#eee8dd]/70">

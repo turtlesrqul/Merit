@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
+import { CollapsibleProjectDescription } from "@/components/profile/collapsible-project-description";
 import { PublicProfileActions } from "@/components/profile/public-profile-actions";
 import { SkillTagsToggle } from "@/components/profile/skill-tags-toggle";
 import { Badge } from "@/components/ui/badge";
@@ -170,9 +171,13 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
                 <div className="max-w-3xl space-y-3">
                   <h2 className="font-serif text-2xl leading-tight text-[#16130f]">{featuredProject.title}</h2>
                   <p className="text-base leading-7 text-[#7b705f]">{featuredProject.hook}</p>
-                  <p className="max-w-3xl text-base leading-7 text-[#4b4439]">
-                    {featuredProject.whatWasBuilt || featuredProject.problemSolved || "No project description has been added yet."}
-                  </p>
+                  <CollapsibleProjectDescription
+                    description={
+                      featuredProject.whatWasBuilt ||
+                      featuredProject.problemSolved ||
+                      "No project description has been added yet."
+                    }
+                  />
                 </div>
                 <a
                   aria-label="View featured case study"
