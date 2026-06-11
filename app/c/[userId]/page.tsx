@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
-import { CollapsibleProjectDescription } from "@/components/profile/collapsible-project-description";
+import {
+  CollapsibleProjectDescription,
+  CollapsibleText
+} from "@/components/profile/collapsible-project-description";
 import { PublicProfileActions } from "@/components/profile/public-profile-actions";
 import { SkillTagsToggle } from "@/components/profile/skill-tags-toggle";
 import { Badge } from "@/components/ui/badge";
@@ -170,7 +173,12 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
               <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_auto] md:items-start">
                 <div className="max-w-3xl space-y-3">
                   <h2 className="font-serif text-2xl leading-tight text-[#16130f]">{featuredProject.title}</h2>
-                  <p className="text-base leading-7 text-[#7b705f]">{featuredProject.hook}</p>
+                  <CollapsibleText
+                    className="text-[#7b705f]"
+                    collapsedClassName="line-clamp-2"
+                    description={featuredProject.hook}
+                    threshold={140}
+                  />
                   <CollapsibleProjectDescription
                     description={
                       featuredProject.whatWasBuilt ||
@@ -228,7 +236,12 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
                       <h3 className="font-serif text-2xl text-[#16130f]">{opportunity.title}</h3>
                       <p className="text-sm text-[#7b705f]">{opportunity.company}</p>
                     </div>
-                    <p className="text-sm leading-6 text-[#7b705f]">{opportunity.description}</p>
+                    <CollapsibleText
+                      className="text-sm leading-6 text-[#7b705f]"
+                      collapsedClassName="line-clamp-3"
+                      description={opportunity.description}
+                      threshold={180}
+                    />
                     {opportunity.skillsSought.length > 0 ? (
                       <div className="flex flex-wrap gap-2">
                         {opportunity.skillsSought.map((skill) => (
@@ -247,7 +260,12 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
           <section className="space-y-4">
             <p className="label-caps">About</p>
             {candidate.bio ? (
-              <p className="max-w-xl text-base leading-7 text-[#7b705f]">{candidate.bio}</p>
+              <CollapsibleText
+                className="max-w-xl text-[#7b705f]"
+                collapsedClassName="line-clamp-4"
+                description={candidate.bio}
+                threshold={220}
+              />
             ) : (
               <p className="text-base leading-7 text-[#7b705f]">No biography has been added yet.</p>
             )}

@@ -1,4 +1,7 @@
-import { CollapsibleProjectDescription } from "@/components/profile/collapsible-project-description";
+import {
+  CollapsibleProjectDescription,
+  CollapsibleText
+} from "@/components/profile/collapsible-project-description";
 import { SkillTagsToggle } from "@/components/profile/skill-tags-toggle";
 import { ActionIcon, iconControlClassName } from "@/components/ui/action-icon";
 import type { ClaimablePassport } from "@/lib/db/claimable-passports";
@@ -147,7 +150,12 @@ export function ClaimablePassportPreview({ compact = false, passport }: Claimabl
             <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_auto] md:items-start">
               <div className="max-w-3xl space-y-3">
                 <h2 className="font-serif text-2xl leading-tight text-[#16130f]">{featuredTitle}</h2>
-                <p className="text-base leading-7 text-[#7b705f]">{featuredHook}</p>
+                <CollapsibleText
+                  className="text-[#7b705f]"
+                  collapsedClassName="line-clamp-2"
+                  description={featuredHook}
+                  threshold={140}
+                />
                 <CollapsibleProjectDescription description={featuredDescription} />
               </div>
               {featuredProject?.artifactUrl ? (
@@ -196,9 +204,18 @@ export function ClaimablePassportPreview({ compact = false, passport }: Claimabl
       <div className="grid gap-8 border-t border-[#d7cebd] pt-12 md:grid-cols-[1fr_1fr]">
         <section className="space-y-4">
           <p className="label-caps">About</p>
-          <p className="max-w-xl text-base leading-7 text-[#7b705f]">
-            {passport.bio || "No biography has been added yet."}
-          </p>
+          {passport.bio ? (
+            <CollapsibleText
+              className="max-w-xl text-[#7b705f]"
+              collapsedClassName="line-clamp-4"
+              description={passport.bio}
+              threshold={220}
+            />
+          ) : (
+            <p className="max-w-xl text-base leading-7 text-[#7b705f]">
+              No biography has been added yet.
+            </p>
+          )}
           {cvLink ? (
             <a
               className="inline-flex text-sm text-[#16130f] underline underline-offset-4"
