@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { resolveSafeAuthNext, resolveSignupEmailCallbackUrl } from "@/lib/auth/auth-urls";
+import { buildAuthPath, resolveSafeAuthNext, resolveSignupEmailCallbackUrl } from "@/lib/auth/auth-urls";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 import { isRateLimitedAuthError, mapSupabaseAuthError } from "@/lib/auth/auth-errors";
 import {
@@ -23,6 +23,7 @@ type AuthFormProps = {
 };
 
 const PENDING_SIGNUP_EMAIL_KEY = "merit_pending_signup_email";
+const PENDING_SIGNUP_NEXT_KEY = "merit_pending_signup_next";
 const LAST_SIGNUP_EMAIL_SENT_AT_KEY = "merit_last_signup_email_sent_at";
 const EMAIL_RESEND_COOLDOWN_MS = 60_000;
 
@@ -42,7 +43,11 @@ export function AuthForm({ mode }: AuthFormProps) {
   const supportInstagramHandle = getSupportInstagramHandle();
   const supportInstagramUrl = getSupportInstagramUrl();
   const supportUrl = getSupportUrl();
-  const nextPath = resolveSafeAuthNext(searchParams.get("next"));
+  const requestedNextParam = searchParams.get("next");
+  const requestedNextPath = resolveSafeAuthNext(requestedNextParam);
+  const hasExplicitNextPath = Boolean(requestedNextParam);
+  const [pendingSignupNextPath, setPendingSignupNextPath] = useState<string | null>(null);
+  const nextPath = hasExplicitNextPath ? requestedNextPath : pendingSignupNextPath ?? requestedNextPath;
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -57,6 +62,7 @@ export function AuthForm({ mode }: AuthFormProps) {
 
   const isSignUp = mode === "sign-up";
   const emailCallbackUrl = resolveSignupEmailCallbackUrl(nextPath);
+  const modeSwitchHref = buildAuthPath(isSignUp ? "/sign-in" : "/sign-up", nextPath);
 
   const redirectAfterAuth = useCallback(() => {
     if (typeof window !== "undefined") {
@@ -74,6 +80,7 @@ export function AuthForm({ mode }: AuthFormProps) {
     setResendAvailableAtMs(now + EMAIL_RESEND_COOLDOWN_MS);
     try {
       window.localStorage.setItem(PENDING_SIGNUP_EMAIL_KEY, normalizedEmail);
+      window.localStorage.setItem(PENDING_SIGNUP_NEXT_KEY, nextPath);
       window.localStorage.setItem(LAST_SIGNUP_EMAIL_SENT_AT_KEY, String(now));
     } catch {
       // Ignore storage write failures in locked-down browsers.
@@ -86,6 +93,7 @@ export function AuthForm({ mode }: AuthFormProps) {
     setResendSecondsRemaining(0);
     try {
       window.localStorage.removeItem(PENDING_SIGNUP_EMAIL_KEY);
+      window.localStorage.removeItem(PENDING_SIGNUP_NEXT_KEY);
       window.localStorage.removeItem(LAST_SIGNUP_EMAIL_SENT_AT_KEY);
     } catch {
       // Ignore storage write failures in locked-down browsers.
@@ -116,6 +124,21 @@ export function AuthForm({ mode }: AuthFormProps) {
       isMounted = false;
     };
   }, [redirectAfterAuth]);
+
+  useEffect(() => {
+    if (hasExplicitNextPath) {
+      return;
+    }
+
+    try {
+      const storedNextPath = window.localStorage.getItem(PENDING_SIGNUP_NEXT_KEY);
+      if (storedNextPath) {
+        setPendingSignupNextPath(resolveSafeAuthNext(storedNextPath));
+      }
+    } catch {
+      // Ignore storage read failures.
+    }
+  }, [hasExplicitNextPath]);
 
   useEffect(() => {
     if (!isSignUp) {
@@ -239,6 +262,7 @@ export function AuthForm({ mode }: AuthFormProps) {
       setResendAvailableAtMs(now + EMAIL_RESEND_COOLDOWN_MS);
       try {
         window.localStorage.setItem(PENDING_SIGNUP_EMAIL_KEY, resendEmail);
+        window.localStorage.setItem(PENDING_SIGNUP_NEXT_KEY, nextPath);
         window.localStorage.setItem(LAST_SIGNUP_EMAIL_SENT_AT_KEY, String(now));
       } catch {
         // Ignore storage write failures.
@@ -462,7 +486,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           {isSignUp ? "Already have an account?" : "Need an account?"}{" "}
           <Link
             className="text-[#16130f] underline decoration-[#f3c945] underline-offset-4"
-            href={isSignUp ? "/sign-in" : "/sign-up"}
+            href={modeSwitchHref}
           >
             {isSignUp ? "Sign in" : "Sign up"}
           </Link>

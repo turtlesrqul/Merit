@@ -9,6 +9,14 @@ export function resolveSafeAuthNext(nextValue: string | null | undefined) {
   return nextValue;
 }
 
+export function buildAuthPath(path: "/sign-in" | "/sign-up", nextValue: string | null | undefined) {
+  const nextPath = resolveSafeAuthNext(nextValue);
+  if (nextPath === "/home") {
+    return path;
+  }
+  return `${path}?next=${encodeURIComponent(nextPath)}`;
+}
+
 function resolveAuthBaseUrl() {
   const configuredBaseUrl = getPublicAppUrl();
   if (configuredBaseUrl) {

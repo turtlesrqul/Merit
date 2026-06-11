@@ -1,15 +1,9 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import type { EmailOtpType } from "@supabase/supabase-js";
+import { resolveSafeAuthNext } from "@/lib/auth/auth-urls";
 import { getSupabaseEnvOrNull } from "@/lib/supabase/env";
 import { supabaseAuthCookieOptions } from "@/lib/supabase/cookie-options";
-
-function resolveSafeNext(nextValue: string | null) {
-  if (!nextValue || !nextValue.startsWith("/")) {
-    return "/home";
-  }
-  return nextValue;
-}
 
 export async function GET(request: NextRequest) {
   const env = getSupabaseEnvOrNull();
@@ -21,7 +15,7 @@ export async function GET(request: NextRequest) {
   const code = requestUrl.searchParams.get("code");
   const tokenHash = requestUrl.searchParams.get("token_hash");
   const otpType = requestUrl.searchParams.get("type") as EmailOtpType | null;
-  const nextPath = resolveSafeNext(requestUrl.searchParams.get("next"));
+  const nextPath = resolveSafeAuthNext(requestUrl.searchParams.get("next"));
   const successPath = nextPath;
   const redirectUrl = new URL(successPath, request.url);
   let response = NextResponse.redirect(redirectUrl);
@@ -67,6 +61,7 @@ export async function GET(request: NextRequest) {
   if (authErrorMessage) {
     const signInUrl = new URL("/sign-in", request.url);
     signInUrl.searchParams.set("auth_error", authErrorMessage);
+    signInUrl.searchParams.set("next", nextPath);
     response = NextResponse.redirect(signInUrl);
   }
 

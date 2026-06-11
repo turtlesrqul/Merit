@@ -1,8 +1,22 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { buildAuthPath, resolveSafeAuthNext } from "@/lib/auth/auth-urls";
 
-export default function AuthVerifiedPage() {
+type AuthVerifiedPageProps = {
+  searchParams?: Promise<{
+    next?: string | string[];
+  }>;
+};
+
+function getNextPath(value: string | string[] | undefined) {
+  return resolveSafeAuthNext(Array.isArray(value) ? value[0] : value);
+}
+
+export default async function AuthVerifiedPage({ searchParams }: AuthVerifiedPageProps) {
+  const resolvedSearchParams = await searchParams;
+  const nextPath = getNextPath(resolvedSearchParams?.next);
+
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-[900px] items-center px-4 py-10">
       <Card className="mx-auto w-full max-w-xl space-y-4 border-[#ddcfac] bg-gradient-to-b from-[#fffdf9] to-[#f9f4ea]">
@@ -14,10 +28,10 @@ export default function AuthVerifiedPage() {
           If you landed here from an older confirmation link, continue into Merit. New confirmation links should sign you in automatically.
         </p>
         <div className="flex flex-wrap gap-2">
-          <Link href="/home">
-            <Button>Open home</Button>
+          <Link href={nextPath}>
+            <Button>Continue</Button>
           </Link>
-          <Link href="/sign-in">
+          <Link href={buildAuthPath("/sign-in", nextPath)}>
             <Button variant="secondary">Go to sign in</Button>
           </Link>
         </div>

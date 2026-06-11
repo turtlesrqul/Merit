@@ -5,6 +5,7 @@ import { ClaimablePassportPreview } from "@/components/passports/claimable-passp
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { claimPassportAction } from "@/app/claim/passport/[token]/actions";
+import { buildAuthPath } from "@/lib/auth/auth-urls";
 import { fetchClaimablePassportByToken } from "@/lib/db/claimable-passports";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -74,10 +75,10 @@ export default async function ClaimPassportPage({ params }: ClaimPassportPagePro
               <p className="label-caps">Sign in required</p>
               <h2 className="font-serif text-2xl text-[#16130f]">Sign in or create an account to claim this Passport</h2>
               <div className="flex flex-wrap gap-3">
-                <Link href={`/sign-in?next=${encodeURIComponent(nextPath)}`}>
+                <Link href={buildAuthPath("/sign-in", nextPath)}>
                   <Button>Sign in to claim</Button>
                 </Link>
-                <Link href={`/sign-up?next=${encodeURIComponent(nextPath)}`}>
+                <Link href={buildAuthPath("/sign-up", nextPath)}>
                   <Button variant="secondary">Create account</Button>
                 </Link>
               </div>
