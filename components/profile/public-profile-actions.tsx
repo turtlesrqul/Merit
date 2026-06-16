@@ -2,13 +2,21 @@
 
 import { useState } from "react";
 import { ActionIcon, IconButton, iconControlClassName } from "@/components/ui/action-icon";
+import { trackMeritEvent } from "@/lib/analytics/client";
 
 type PublicProfileActionsProps = {
   contactEmail: string | null;
+  passportSlug: string | null;
+  passportUserId: string;
   profileName: string;
 };
 
-export function PublicProfileActions({ contactEmail, profileName }: PublicProfileActionsProps) {
+export function PublicProfileActions({
+  contactEmail,
+  passportSlug,
+  passportUserId,
+  profileName
+}: PublicProfileActionsProps) {
   const [copied, setCopied] = useState(false);
 
   const shareProfile = async () => {
@@ -17,10 +25,20 @@ export function PublicProfileActions({ contactEmail, profileName }: PublicProfil
 
     if (navigator.share) {
       await navigator.share({ title, url });
+      trackMeritEvent("passport_link_copied_shared", {
+        method: "native_share",
+        passport_slug: passportSlug,
+        passport_user_id: passportUserId
+      });
       return;
     }
 
     await navigator.clipboard.writeText(url);
+    trackMeritEvent("passport_link_copied_shared", {
+      method: "clipboard",
+      passport_slug: passportSlug,
+      passport_user_id: passportUserId
+    });
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1800);
   };

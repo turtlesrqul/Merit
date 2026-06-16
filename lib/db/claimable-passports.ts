@@ -2,6 +2,7 @@ import "server-only";
 
 import { createHash, randomBytes } from "node:crypto";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
+import { buildArtifactPreviewUrl, detectArtifactType } from "@/lib/artifacts";
 import { calculateProfileCompletionScore } from "@/lib/profile/completion-score";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import type { Database } from "@/lib/supabase/types";
@@ -19,7 +20,9 @@ export type ClaimablePassportProject = {
   description: string;
   skills: string[];
   artifactUrl: string | null;
+  artifactUrls: string[];
   imageUrl: string | null;
+  imageUrls: string[];
 };
 
 export type ClaimablePassportFeaturedWork = {
@@ -46,6 +49,7 @@ export type ClaimablePassport = {
   passportSlug: string | null;
   claimExpiresAt: string;
   claimedAt: string | null;
+  claimToken?: string | null;
   status: ClaimablePassportStatus;
   createdAt: string;
   updatedAt: string;
@@ -98,6 +102,16 @@ function normalizeText(value: string) {
   return value.trim().replace(/\s+/g, " ");
 }
 
+function normalizeUrlList(value: unknown, legacyValue: unknown) {
+  const urls = Array.isArray(value)
+    ? value
+        .map((entry) => safeNullableString(entry))
+        .filter((entry): entry is string => Boolean(entry))
+    : [];
+  const legacyUrl = safeNullableString(legacyValue);
+  return Array.from(new Set([legacyUrl, ...urls].filter((entry): entry is string => Boolean(entry))));
+}
+
 function mapProjects(value: unknown): ClaimablePassportProject[] {
   if (!Array.isArray(value)) {
     return [];
@@ -113,15 +127,20 @@ function mapProjects(value: unknown): ClaimablePassportProject[] {
         return null;
       }
       const description = safeString(entry.description).trim();
-      return {
+      const artifactUrls = normalizeUrlList(entry.artifactUrls, entry.artifactUrl);
+      const imageUrls = normalizeUrlList(entry.imageUrls, entry.imageUrl);
+      const project: ClaimablePassportProject = {
         title,
         hook: safeString(entry.hook).trim().slice(0, 140) || title,
         category: normalizeText(safeString(entry.category)) || "Portfolio",
         description: description || title,
         skills: safeStringArray(entry.skills).map(normalizeText).filter(Boolean),
-        artifactUrl: safeNullableString(entry.artifactUrl),
-        imageUrl: safeNullableString(entry.imageUrl)
+        artifactUrl: artifactUrls[0] ?? null,
+        artifactUrls,
+        imageUrl: imageUrls[0] ?? null,
+        imageUrls
       };
+      return project;
     })
     .filter((entry): entry is ClaimablePassportProject => Boolean(entry));
 }
@@ -161,6 +180,7 @@ function mapPassport(row: UnclaimedPassportRow): ClaimablePassport {
     passportSlug: row.passport_slug,
     claimExpiresAt: row.claim_expires_at,
     claimedAt: row.claimed_at,
+    claimToken: row.claim_public_token,
     status: row.status,
     createdAt: row.created_at,
     updatedAt: row.updated_at
@@ -249,7 +269,9 @@ export function parseProjectInput(value: FormDataEntryValue | null, featuredWork
             description: index === 0 && featuredWork?.description ? featuredWork.description : title,
             skills: [],
             artifactUrl: null,
-            imageUrl: null
+            artifactUrls: [],
+            imageUrl: null,
+            imageUrls: []
           }))
       : [];
 
@@ -265,7 +287,9 @@ export function parseProjectInput(value: FormDataEntryValue | null, featuredWork
       description: featuredWork.description || featuredWork.title,
       skills: [],
       artifactUrl: null,
-      imageUrl: null
+      artifactUrls: [],
+      imageUrl: null,
+      imageUrls: []
     }
   ];
 }
@@ -363,6 +387,7 @@ export async function createClaimablePassport(
     github_url: input.githubUrl,
     passport_slug: slug,
     claim_token_hash: hashClaimToken(claimToken),
+    claim_public_token: claimToken,
     claim_expires_at: getClaimExpiryDate().toISOString(),
     status: "unclaimed"
   };
@@ -390,6 +415,7 @@ export async function regenerateClaimToken(passportId: string) {
     .from("unclaimed_passports")
     .update({
       claim_token_hash: hashClaimToken(claimToken),
+      claim_public_token: claimToken,
       claim_expires_at: getClaimExpiryDate().toISOString(),
       status: "unclaimed"
     })
@@ -475,11 +501,22 @@ export async function fetchClaimablePassportByToken(token: string): Promise<Clai
   }
 
   const adminClient = createAdminSupabaseClient();
-  const { data, error } = await adminClient
+  const tokenHash = hashClaimToken(token);
+  let lookupResult = await adminClient
     .from("unclaimed_passports")
     .select("*")
-    .eq("claim_token_hash", hashClaimToken(token))
+    .eq("claim_token_hash", tokenHash)
     .maybeSingle();
+
+  if (!lookupResult.data && !lookupResult.error) {
+    lookupResult = await adminClient
+      .from("unclaimed_passports")
+      .select("*")
+      .eq("claim_public_token", token)
+      .maybeSingle();
+  }
+
+  const { data, error } = lookupResult;
 
   if (error) {
     throw new Error(`Failed to load claimable Passport: ${error.message}`);
@@ -581,6 +618,7 @@ async function createClaimedProjects(
       adminClient,
       project.skills.length > 0 ? project.skills : passport.skills
     );
+    const coverImageUrl = project.imageUrls[0] ?? project.imageUrl;
     const { data: insertedProject, error: projectError } = await adminClient
       .from("projects")
       .insert({
@@ -592,7 +630,7 @@ async function createClaimedProjects(
         category: project.category,
         impact: null,
         project_type: "other",
-        cover_image_url: project.imageUrl,
+        cover_image_url: coverImageUrl,
         is_featured: index === 0
       })
       .select("project_id")
@@ -602,12 +640,20 @@ async function createClaimedProjects(
       throw new Error(`Failed to create claimed project: ${projectError.message}`);
     }
 
-    if (project.artifactUrl) {
-      const { error: artifactError } = await adminClient.from("artifacts").insert({
-        project_id: insertedProject.project_id,
-        artifact_type: "link",
-        artifact_url: project.artifactUrl
-      });
+    const imageUrlSet = new Set(project.imageUrls);
+    const artifactUrls = Array.from(new Set([...project.artifactUrls, ...project.imageUrls]));
+    if (artifactUrls.length > 0) {
+      const { error: artifactError } = await adminClient.from("artifacts").insert(
+        artifactUrls.map((artifactUrl) => {
+          const artifactType = imageUrlSet.has(artifactUrl) ? "image" : detectArtifactType(artifactUrl);
+          return {
+            project_id: insertedProject.project_id,
+            artifact_type: artifactType,
+            artifact_url: artifactUrl,
+            preview_url: buildArtifactPreviewUrl(artifactUrl, artifactType)
+          };
+        })
+      );
       if (artifactError) {
         throw new Error(`Failed to attach project artifact: ${artifactError.message}`);
       }
@@ -663,19 +709,34 @@ export async function claimPassportForUser(token: string, authUser: User) {
   }
 
   const tokenHash = hashClaimToken(token);
-  const { data: claimedRow, error: claimError } = await adminClient
+  const claimUpdate = {
+    owner_user_id: authUser.id,
+    status: "claimed" as const,
+    claimed_at: new Date().toISOString(),
+    claim_token_hash: tokenHash,
+    claim_public_token: null
+  };
+  let claimResult = await adminClient
     .from("unclaimed_passports")
-    .update({
-      owner_user_id: authUser.id,
-      status: "claimed",
-      claimed_at: new Date().toISOString(),
-      claim_token_hash: null
-    })
+    .update(claimUpdate)
     .eq("passport_id", passport.passportId)
     .eq("claim_token_hash", tokenHash)
     .eq("status", "unclaimed")
     .select("*")
     .maybeSingle();
+
+  if (!claimResult.data && !claimResult.error && passport.claimToken === token) {
+    claimResult = await adminClient
+      .from("unclaimed_passports")
+      .update(claimUpdate)
+      .eq("passport_id", passport.passportId)
+      .eq("claim_public_token", token)
+      .eq("status", "unclaimed")
+      .select("*")
+      .maybeSingle();
+  }
+
+  const { data: claimedRow, error: claimError } = claimResult;
 
   if (claimError) {
     throw new Error(`Failed to claim Passport: ${claimError.message}`);

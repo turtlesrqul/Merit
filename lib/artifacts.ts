@@ -14,6 +14,7 @@ type ProjectArtifactPreviewInput = {
   url: string;
   type: string;
   previewUrl: string | null;
+  label?: string;
 };
 
 export type ResolvedProjectVisual = {
@@ -47,6 +48,12 @@ export type ProjectViewerSource = {
   source: "artifact" | "cover" | "fallback";
   supportsFullscreen: boolean;
   reason: string | null;
+};
+
+export type ProjectImageGalleryItem = {
+  url: string;
+  label: string;
+  source: "cover" | "artifact";
 };
 
 const IMAGE_EXTENSIONS = /\.(png|jpe?g|gif|webp|avif|svg)(\?.*)?$/i;
@@ -551,6 +558,38 @@ export function resolveProjectVisualPreview({
     previewUrl: null,
     source: "fallback"
   };
+}
+
+export function resolveProjectImageGallery({
+  artifacts,
+  coverImageUrl
+}: {
+  artifacts: ProjectArtifactPreviewInput[];
+  coverImageUrl: string | null;
+}): ProjectImageGalleryItem[] {
+  const images: ProjectImageGalleryItem[] = [];
+  const seenUrls = new Set<string>();
+
+  const addImage = (urlValue: string | null | undefined, label: string, source: "cover" | "artifact") => {
+    const normalized = typeof urlValue === "string" ? urlValue.trim() : "";
+    if (!normalized || seenUrls.has(normalized)) {
+      return;
+    }
+    seenUrls.add(normalized);
+    images.push({ label, source, url: normalized });
+  };
+
+  addImage(coverImageUrl, "Cover image", "cover");
+
+  artifacts.forEach((artifact, index) => {
+    const viewer = resolveArtifactViewer(artifact.url, artifact.type);
+    if (viewer.kind !== "image" || !viewer.embedUrl) {
+      return;
+    }
+    addImage(artifact.previewUrl ?? viewer.embedUrl, artifact.label ?? `Image ${index + 1}`, "artifact");
+  });
+
+  return images;
 }
 
 export function hasAnyVisualPreview({

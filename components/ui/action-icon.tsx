@@ -6,6 +6,8 @@ export type ActionIconName =
   | "bookmark"
   | "check"
   | "chevron-down"
+  | "chevron-left"
+  | "chevron-right"
   | "copy"
   | "external"
   | "eye"
@@ -269,6 +271,22 @@ export function ActionIcon({ className, filled = false, name }: ActionIconProps)
     return (
       <svg {...common}>
         <path d="m6 9 6 6 6-6" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+      </svg>
+    );
+  }
+
+  if (name === "chevron-left") {
+    return (
+      <svg {...common}>
+        <path d="m15 6-6 6 6 6" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
+      </svg>
+    );
+  }
+
+  if (name === "chevron-right") {
+    return (
+      <svg {...common}>
+        <path d="m9 6 6 6-6 6" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" />
       </svg>
     );
   }

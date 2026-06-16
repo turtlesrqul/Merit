@@ -4,7 +4,7 @@ import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { getSupabaseEnvOrNull } from "@/lib/supabase/env";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
-const MAX_IMAGE_UPLOAD_BYTES = 10 * 1024 * 1024;
+const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
 const ARTIFACT_BUCKET =
   process.env.NEXT_PUBLIC_SUPABASE_ARTIFACT_BUCKET ?? "project-artifacts";
 
@@ -21,7 +21,7 @@ async function ensureArtifactBucket() {
   if (getBucketError) {
     const { error: createError } = await adminClient.storage.createBucket(ARTIFACT_BUCKET, {
       public: true,
-      fileSizeLimit: MAX_IMAGE_UPLOAD_BYTES
+      fileSizeLimit: MAX_UPLOAD_BYTES
     });
 
     if (createError && !createError.message.toLowerCase().includes("already exists")) {
@@ -33,7 +33,7 @@ async function ensureArtifactBucket() {
   if (bucketData && !bucketData.public) {
     const { error: updateError } = await adminClient.storage.updateBucket(ARTIFACT_BUCKET, {
       public: true,
-      fileSizeLimit: MAX_IMAGE_UPLOAD_BYTES
+      fileSizeLimit: MAX_UPLOAD_BYTES
     });
     if (updateError) {
       throw new Error(`Failed to update storage bucket "${ARTIFACT_BUCKET}": ${updateError.message}`);
@@ -63,40 +63,49 @@ export async function POST(request: Request) {
     }
 
     const formData = await request.formData();
-    const file = formData.get("file");
-    if (!(file instanceof File)) {
-      return NextResponse.json({ error: "No image file was provided." }, { status: 400 });
+    const files = [
+      ...formData.getAll("files"),
+      ...formData.getAll("file")
+    ].filter((value): value is File => value instanceof File);
+
+    if (files.length === 0) {
+      return NextResponse.json({ error: "No files were provided." }, { status: 400 });
     }
-    if (!file.type.startsWith("image/")) {
-      return NextResponse.json({ error: "Project image must be an image file." }, { status: 400 });
-    }
-    if (file.size > MAX_IMAGE_UPLOAD_BYTES) {
-      return NextResponse.json({ error: `${file.name} exceeds the 10MB image limit.` }, { status: 400 });
+
+    for (const file of files) {
+      if (file.size > MAX_UPLOAD_BYTES) {
+        return NextResponse.json({ error: `${file.name} exceeds the 50MB file limit.` }, { status: 400 });
+      }
     }
 
     const adminClient = createAdminSupabaseClient();
     await ensureArtifactBucket();
 
-    const safeName = sanitizeFileName(file.name);
-    const objectPath = `claimable-passports/${user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${safeName}`;
-    const { error: uploadError } = await adminClient.storage.from(ARTIFACT_BUCKET).upload(objectPath, file, {
-      contentType: file.type || undefined,
-      upsert: false
-    });
+    const uploadedUrls: string[] = [];
 
-    if (uploadError) {
-      throw new Error(`Failed to upload ${file.name}: ${uploadError.message}`);
+    for (const file of files) {
+      const safeName = sanitizeFileName(file.name);
+      const objectPath = `claimable-passports/${user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${safeName}`;
+      const { error: uploadError } = await adminClient.storage.from(ARTIFACT_BUCKET).upload(objectPath, file, {
+        contentType: file.type || undefined,
+        upsert: false
+      });
+
+      if (uploadError) {
+        throw new Error(`Failed to upload ${file.name}: ${uploadError.message}`);
+      }
+
+      const { data: publicUrlData } = adminClient.storage.from(ARTIFACT_BUCKET).getPublicUrl(objectPath);
+      if (!publicUrlData.publicUrl) {
+        throw new Error(`Failed to resolve public URL for ${file.name}.`);
+      }
+      uploadedUrls.push(publicUrlData.publicUrl);
     }
 
-    const { data: publicUrlData } = adminClient.storage.from(ARTIFACT_BUCKET).getPublicUrl(objectPath);
-    if (!publicUrlData.publicUrl) {
-      throw new Error(`Failed to resolve public URL for ${file.name}.`);
-    }
-
-    return NextResponse.json({ url: publicUrlData.publicUrl });
+    return NextResponse.json({ url: uploadedUrls[0] ?? null, urls: uploadedUrls });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Project image upload failed." },
+      { error: error instanceof Error ? error.message : "Project file upload failed." },
       { status: 500 }
     );
   }

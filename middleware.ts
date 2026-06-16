@@ -1,57 +1,21 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-
-const AUTH_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 400;
-
-function stripWrappingQuotes(value: string) {
-  const trimmed = value.trim();
-  if (
-    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
-    (trimmed.startsWith("'") && trimmed.endsWith("'"))
-  ) {
-    return trimmed.slice(1, -1).trim();
-  }
-  return trimmed;
-}
-
-function normalizeSupabaseUrl(value: string) {
-  const cleaned = stripWrappingQuotes(value);
-  const withoutRestPath = cleaned.replace(/\/rest\/v1\/?$/i, "");
-  return withoutRestPath.replace(/\/+$/g, "");
-}
-
-function getSupabaseEnvOrNull() {
-  const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const rawAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  const url = rawUrl ? normalizeSupabaseUrl(rawUrl) : "";
-  const anonKey = rawAnonKey ? stripWrappingQuotes(rawAnonKey) : "";
-
-  if (!url || !anonKey) {
-    return null;
-  }
-
-  return { url, anonKey };
-}
-
-const supabaseAuthCookieOptions = {
-  path: "/",
-  sameSite: "lax",
-  secure: process.env.NODE_ENV === "production",
-  maxAge: AUTH_COOKIE_MAX_AGE_SECONDS
-} satisfies CookieOptions;
+import { getSupabaseEnvOrNull } from "@/lib/supabase/env";
+import { supabaseAuthCookieOptions } from "@/lib/supabase/cookie-options";
 
 export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({
-    request
-  });
   const env = getSupabaseEnvOrNull();
+  let response = NextResponse.next({
+    request: {
+      headers: request.headers
+    }
+  });
+
   if (!env) {
     return response;
   }
-  const { url, anonKey } = env;
 
-  const supabase = createServerClient(url, anonKey, {
+  const supabase = createServerClient(env.url, env.anonKey, {
     cookieOptions: supabaseAuthCookieOptions,
     cookies: {
       getAll() {
@@ -64,21 +28,10 @@ export async function middleware(request: NextRequest) {
           options?: CookieOptions;
         }>
       ) {
-        cookiesToSet.forEach(({ name, value, options }) =>
-          request.cookies.set({
-            name,
-            value,
-            ...(options ?? {})
-          })
-        );
-
-        response = NextResponse.next({
-          request
+        cookiesToSet.forEach(({ name, value, options }) => {
+          request.cookies.set(name, value);
+          response.cookies.set(name, value, options as CookieOptions);
         });
-
-        cookiesToSet.forEach(({ name, value, options }) =>
-          response.cookies.set(name, value, options)
-        );
       }
     }
   });
@@ -88,10 +41,11 @@ export async function middleware(request: NextRequest) {
   } catch {
     // Keep existing cookies for transient auth/network errors; this avoids accidental forced sign-outs.
   }
-
   return response;
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"]
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)"
+  ]
 };

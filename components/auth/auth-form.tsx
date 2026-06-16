@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { buildAuthPath, resolveSafeAuthNext, resolveSignupEmailCallbackUrl } from "@/lib/auth/auth-urls";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
-import { isRateLimitedAuthError, mapSupabaseAuthError } from "@/lib/auth/auth-errors";
+import { isRateLimitedAuthError, mapAuthCallbackErrorParam, mapSupabaseAuthError } from "@/lib/auth/auth-errors";
 import {
   getSupportEmail,
   getSupportInstagramHandle,
@@ -167,7 +167,9 @@ export function AuthForm({ mode }: AuthFormProps) {
   }, [isSignUp]);
 
   useEffect(() => {
-    const authError = searchParams.get("auth_error");
+    const authError = mapAuthCallbackErrorParam(
+      searchParams.get("auth_error_code") ?? searchParams.get("auth_error")
+    );
     if (!authError) {
       return;
     }

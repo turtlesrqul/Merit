@@ -1,6 +1,7 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import type { EmailOtpType } from "@supabase/supabase-js";
+import { getAuthCallbackErrorCode } from "@/lib/auth/auth-errors";
 import { resolveSafeAuthNext } from "@/lib/auth/auth-urls";
 import { getSupabaseEnvOrNull } from "@/lib/supabase/env";
 import { supabaseAuthCookieOptions } from "@/lib/supabase/cookie-options";
@@ -40,11 +41,12 @@ export async function GET(request: NextRequest) {
     }
   });
 
-  let authErrorMessage: string | null = null;
+  let authErrorCode: string | null = null;
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (error) {
-      authErrorMessage = error.message;
+      console.error("Supabase auth code exchange failed", error);
+      authErrorCode = getAuthCallbackErrorCode(error);
     }
   } else if (tokenHash && otpType) {
     const { error } = await supabase.auth.verifyOtp({
@@ -52,15 +54,19 @@ export async function GET(request: NextRequest) {
       token_hash: tokenHash
     });
     if (error) {
-      authErrorMessage = error.message;
+      console.error("Supabase auth OTP verification failed", error);
+      authErrorCode = getAuthCallbackErrorCode(error);
     }
   } else {
-    authErrorMessage = "Missing authentication token in callback URL.";
+    console.error("Supabase auth callback missing code or token_hash", {
+      callbackUrl: requestUrl.toString()
+    });
+    authErrorCode = "auth_callback_failed";
   }
 
-  if (authErrorMessage) {
+  if (authErrorCode) {
     const signInUrl = new URL("/sign-in", request.url);
-    signInUrl.searchParams.set("auth_error", authErrorMessage);
+    signInUrl.searchParams.set("auth_error_code", authErrorCode);
     signInUrl.searchParams.set("next", nextPath);
     response = NextResponse.redirect(signInUrl);
   }

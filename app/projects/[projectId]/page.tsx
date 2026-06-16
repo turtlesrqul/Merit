@@ -2,13 +2,15 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
+import { ProjectDetailAnalytics } from "@/components/analytics/project-detail-analytics";
+import { ProjectImageCarousel } from "@/components/projects/project-image-carousel";
 import { ProjectInteractions } from "@/components/projects/project-interactions";
 import { ProjectPreviewPlayer } from "@/components/projects/project-preview-player";
 import { ProjectReportButton } from "@/components/projects/project-report-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ActionIcon, iconControlClassName } from "@/components/ui/action-icon";
-import { resolveProjectVisualPreview } from "@/lib/artifacts";
+import { resolveProjectImageGallery, resolveProjectVisualPreview } from "@/lib/artifacts";
 import { getViewerProfile } from "@/lib/db/profile";
 import {
   fetchProjectById,
@@ -23,6 +25,7 @@ type ProjectDetailPageProps = {
   }>;
   searchParams?: Promise<{
     from?: string;
+    passport?: string;
   }>;
 };
 
@@ -84,11 +87,21 @@ export default async function ProjectDetailPage({ params, searchParams }: Projec
     coverImageUrl: project.coverImageUrl,
     projectType: project.projectType
   });
+  const galleryImages = resolveProjectImageGallery({
+    artifacts: project.artifacts,
+    coverImageUrl: project.coverImageUrl
+  });
   const backHref = source?.from === "explore" ? "/home" : `/c/${project.userId}`;
   const backLabel = source?.from === "explore" ? "Back to Explore" : `Back to ${project.authorName ?? "builder"}'s profile`;
 
   return (
     <AppShell roleType={viewerProfile?.roleType} userEmail={user?.email}>
+      <ProjectDetailAnalytics
+        ownerUserId={project.userId}
+        passportUserId={source?.passport ?? null}
+        projectId={project.projectId}
+        source={source?.from ?? null}
+      />
       <article className="editorial-container pt-12">
         <Link
           aria-label={backLabel}
@@ -129,7 +142,9 @@ export default async function ProjectDetailPage({ params, searchParams }: Projec
         </header>
 
         <div className="mt-8 overflow-hidden">
-          {visual.previewUrl ? (
+          {galleryImages.length > 0 ? (
+            <ProjectImageCarousel images={galleryImages} title={project.title} />
+          ) : visual.previewUrl ? (
             <img
               alt={`${project.title} preview`}
               className="mx-auto max-h-[520px] max-w-full object-contain"

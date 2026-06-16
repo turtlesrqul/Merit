@@ -22,6 +22,13 @@ function getSingleSearchParam(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
 }
 
+function getClaimedPassportPath(passport: NonNullable<Awaited<ReturnType<typeof fetchClaimablePassportByToken>>["passport"]>) {
+  if (passport.passportSlug) {
+    return `/passport/${passport.passportSlug}`;
+  }
+  return passport.ownerUserId ? `/c/${passport.ownerUserId}` : "/home";
+}
+
 export default async function ClaimPassportPage({ params, searchParams }: ClaimPassportPageProps) {
   const [{ token }, resolvedSearchParams] = await Promise.all([params, searchParams]);
   const claimErrorMessage = getSingleSearchParam(resolvedSearchParams?.claim_error);
@@ -31,11 +38,27 @@ export default async function ClaimPassportPage({ params, searchParams }: ClaimP
     data: { user }
   } = await supabase.auth.getUser();
 
-  if (lookup.state === "claimed" && lookup.passport?.ownerUserId) {
-    if (lookup.passport.passportSlug) {
-      redirect(`/passport/${lookup.passport.passportSlug}`);
+  if (lookup.state === "claimed" && lookup.passport) {
+    if (user && lookup.passport.ownerUserId === user.id) {
+      redirect(getClaimedPassportPath(lookup.passport));
     }
-    redirect(`/c/${lookup.passport.ownerUserId}`);
+
+    return (
+      <AppShell userEmail={user?.email}>
+        <section className="editorial-container pt-10">
+          <Card className="max-w-2xl space-y-4">
+            <p className="label-caps">Claim link</p>
+            <h1 className="font-serif text-3xl text-[#16130f]">This passport has already been claimed.</h1>
+            <p className="text-sm leading-6 text-[#7b705f]">
+              Check your dashboard or passport page to view your passport.
+            </p>
+            <Link href={user ? "/home" : buildAuthPath("/sign-in", "/home")}>
+              <Button>Go to dashboard</Button>
+            </Link>
+          </Card>
+        </section>
+      </AppShell>
+    );
   }
 
   const nextPath = `/claim/passport/${token}`;

@@ -5,6 +5,13 @@ type AuthErrorContext =
   | "forgot-password"
   | "reset-password";
 
+export const AUTH_LINK_EXPIRED_OR_BROWSER_MESSAGE =
+  "This sign-in link expired or was opened in a different browser. Please request a new link or sign in again.";
+
+const GENERIC_AUTH_ERROR_MESSAGE = "Something went wrong. Please try again.";
+const GENERIC_AUTH_CALLBACK_ERROR_MESSAGE =
+  "We could not complete sign-in. Please request a new link or sign in again.";
+
 function readErrorMessage(error: unknown) {
   if (!error || typeof error !== "object" || !("message" in error)) {
     return "";
@@ -79,6 +86,37 @@ function isAuthSessionMissingError(message: string) {
   return message.toLowerCase().includes("auth session missing");
 }
 
+function isPkceOrCrossBrowserLinkError(message: string) {
+  const normalizedMessage = message.toLowerCase();
+  return (
+    normalizedMessage.includes("pkce") ||
+    normalizedMessage.includes("code verifier") ||
+    normalizedMessage.includes("invalid flow state") ||
+    normalizedMessage.includes("otp expired") ||
+    normalizedMessage.includes("invalid otp") ||
+    normalizedMessage.includes("invalid token") ||
+    normalizedMessage.includes("expired")
+  );
+}
+
+export function getAuthCallbackErrorCode(error: unknown) {
+  const message = readErrorMessage(error);
+  if (isPkceOrCrossBrowserLinkError(message)) {
+    return "auth_link_expired";
+  }
+  return "auth_callback_failed";
+}
+
+export function mapAuthCallbackErrorParam(value: string | null | undefined) {
+  if (!value) {
+    return null;
+  }
+  if (value === "auth_link_expired" || isPkceOrCrossBrowserLinkError(value)) {
+    return AUTH_LINK_EXPIRED_OR_BROWSER_MESSAGE;
+  }
+  return GENERIC_AUTH_CALLBACK_ERROR_MESSAGE;
+}
+
 export function mapSupabaseAuthError(error: unknown, context: AuthErrorContext) {
   const message = readErrorMessage(error);
 
@@ -114,5 +152,8 @@ export function mapSupabaseAuthError(error: unknown, context: AuthErrorContext) 
     }
   }
 
-  return message || "Something went wrong. Please try again.";
+  if (message) {
+    console.error("Unhandled Supabase auth error", { context, error });
+  }
+  return GENERIC_AUTH_ERROR_MESSAGE;
 }

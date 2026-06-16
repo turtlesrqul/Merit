@@ -87,13 +87,24 @@ function getStringValues(formData: FormData, key: string) {
   return formData.getAll(key).map((value) => (typeof value === "string" ? value : ""));
 }
 
-function normalizeIndexedUrl(values: string[], index: number, label: string) {
+function normalizeIndexedUrlList(values: string[], index: number, label: string) {
   const raw = values[index] ?? "";
-  const value = normalizeOptionalUrl(raw);
-  if (raw.trim().length > 0 && !value) {
-    throw new Error(`${label} must be an http(s) URL.`);
-  }
-  return value;
+  const entries = raw
+    .split(/\n+/)
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+
+  return Array.from(
+    new Set(
+      entries.map((entry, entryIndex) => {
+        const value = normalizeOptionalUrl(entry);
+        if (!value) {
+          throw new Error(`${label}${entries.length > 1 ? ` ${entryIndex + 1}` : ""} must be an http(s) URL.`);
+        }
+        return value;
+      })
+    )
+  );
 }
 
 function parseProjectEntries(formData: FormData, featuredWork: ClaimablePassportFeaturedWork | null): ClaimablePassportProject[] {
@@ -112,15 +123,20 @@ function parseProjectEntries(formData: FormData, featuredWork: ClaimablePassport
         return null;
       }
       const description = descriptions[index]?.trim() || hooks[index]?.trim() || normalizedTitle;
-      return {
+      const artifactUrls = normalizeIndexedUrlList(links, index, "Project link");
+      const imageUrls = normalizeIndexedUrlList(images, index, "Project image URL");
+      const project: ClaimablePassportProject = {
         title: normalizedTitle,
         hook: (hooks[index]?.trim() || description || normalizedTitle).slice(0, 140),
         category: categories[index]?.trim() || "Portfolio",
         description,
         skills: parseSkillsInput(skills[index] ?? ""),
-        artifactUrl: normalizeIndexedUrl(links, index, "Project link"),
-        imageUrl: normalizeIndexedUrl(images, index, "Project image URL")
+        artifactUrl: artifactUrls[0] ?? null,
+        artifactUrls,
+        imageUrl: imageUrls[0] ?? null,
+        imageUrls
       };
+      return project;
     })
     .filter((project): project is ClaimablePassportProject => Boolean(project));
 
@@ -136,7 +152,9 @@ function parseProjectEntries(formData: FormData, featuredWork: ClaimablePassport
       description: featuredWork.description || featuredWork.title,
       skills: [],
       artifactUrl: null,
-      imageUrl: null
+      artifactUrls: [],
+      imageUrl: null,
+      imageUrls: []
     }
   ];
 }

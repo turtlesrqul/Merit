@@ -2,6 +2,7 @@ import {
   CollapsibleProjectDescription,
   CollapsibleText
 } from "@/components/profile/collapsible-project-description";
+import { ProjectImageCarousel } from "@/components/projects/project-image-carousel";
 import { SkillTagsToggle } from "@/components/profile/skill-tags-toggle";
 import { ActionIcon, iconControlClassName } from "@/components/ui/action-icon";
 import type { ClaimablePassport } from "@/lib/db/claimable-passports";
@@ -34,21 +35,32 @@ function statusLabel(status: ClaimablePassport["status"]) {
   return status.charAt(0).toUpperCase() + status.slice(1);
 }
 
+function getClaimableProjectImages(project: ClaimableProject) {
+  const urls = project.imageUrls.length > 0 ? project.imageUrls : project.imageUrl ? [project.imageUrl] : [];
+  return urls.map((url, index) => ({
+    label: `Image ${index + 1}`,
+    url
+  }));
+}
+
 function ClaimableArchiveItem({
   project
 }: {
   project: ClaimableProject;
 }) {
+  const imageUrl = project.imageUrls[0] ?? project.imageUrl;
+  const artifactUrl = project.artifactUrls[0] ?? project.artifactUrl;
+
   return (
     <article className="group">
       <div className="block">
         <div className="relative aspect-[16/10] overflow-hidden bg-[#e5ded1]">
-          {project.imageUrl ? (
+          {imageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               alt={`${project.title} preview`}
               className="h-full w-full object-cover"
-              src={project.imageUrl}
+              src={imageUrl}
             />
           ) : (
             <div className="flex h-full items-center justify-center px-6 text-center text-sm text-[#7b705f]">
@@ -64,10 +76,10 @@ function ClaimableArchiveItem({
         <div className="mt-4 space-y-1">
           <h3 className="font-serif text-xl leading-tight text-[#16130f]">{project.title}</h3>
           <p className="line-clamp-2 text-sm leading-6 text-[#7b705f]">{project.hook}</p>
-          {project.artifactUrl ? (
+          {artifactUrl ? (
             <a
               className="inline-flex text-sm text-[#16130f] underline underline-offset-4"
-              href={project.artifactUrl}
+              href={artifactUrl}
               rel="noreferrer"
               target="_blank"
             >
@@ -97,6 +109,8 @@ export function ClaimablePassportPreview({ compact = false, passport }: Claimabl
     featuredProject?.description ||
     passport.featuredWork?.description ||
     "No project description has been added yet.";
+  const featuredImages = featuredProject ? getClaimableProjectImages(featuredProject) : [];
+  const featuredArtifactUrl = featuredProject?.artifactUrls[0] ?? featuredProject?.artifactUrl ?? null;
   const skillList = Array.from(
     new Set([
       ...passport.skills,
@@ -134,13 +148,8 @@ export function ClaimablePassportPreview({ compact = false, passport }: Claimabl
         {featuredProject || passport.featuredWork ? (
           <article className="space-y-5">
             <div className="overflow-hidden">
-              {featuredProject?.imageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  alt={`${featuredTitle} preview`}
-                  className="mx-auto max-h-[420px] max-w-full object-contain"
-                  src={featuredProject.imageUrl}
-                />
+              {featuredImages.length > 0 ? (
+                <ProjectImageCarousel images={featuredImages} title={featuredTitle} />
               ) : (
                 <div className="flex min-h-60 items-center justify-center bg-[#e5ded1] text-[#7b705f]">
                   Preview coming soon
@@ -158,11 +167,11 @@ export function ClaimablePassportPreview({ compact = false, passport }: Claimabl
                 />
                 <CollapsibleProjectDescription description={featuredDescription} />
               </div>
-              {featuredProject?.artifactUrl ? (
+              {featuredArtifactUrl ? (
                 <a
                   aria-label="View featured work"
                   className={iconControlClassName()}
-                  href={featuredProject.artifactUrl}
+                  href={featuredArtifactUrl}
                   rel="noreferrer"
                   target="_blank"
                   title="View featured work"

@@ -10,6 +10,56 @@ type Table<Row, Insert, Update> = {
 export type Database = {
   public: {
     Tables: {
+      analytics_events: Table<
+        {
+          event_id: string;
+          event_name: string;
+          user_id: string | null;
+          anonymous_id: string | null;
+          passport_user_id: string | null;
+          project_id: string | null;
+          claim_passport_id: string | null;
+          source: string | null;
+          referrer: string | null;
+          path: string | null;
+          url: string | null;
+          user_agent: string | null;
+          properties: Json;
+          created_at: string;
+        },
+        {
+          event_id?: string;
+          event_name: string;
+          user_id?: string | null;
+          anonymous_id?: string | null;
+          passport_user_id?: string | null;
+          project_id?: string | null;
+          claim_passport_id?: string | null;
+          source?: string | null;
+          referrer?: string | null;
+          path?: string | null;
+          url?: string | null;
+          user_agent?: string | null;
+          properties?: Json;
+          created_at?: string;
+        },
+        {
+          event_id?: string;
+          event_name?: string;
+          user_id?: string | null;
+          anonymous_id?: string | null;
+          passport_user_id?: string | null;
+          project_id?: string | null;
+          claim_passport_id?: string | null;
+          source?: string | null;
+          referrer?: string | null;
+          path?: string | null;
+          url?: string | null;
+          user_agent?: string | null;
+          properties?: Json;
+          created_at?: string;
+        }
+      >;
       users: Table<
         {
           user_id: string;
@@ -268,6 +318,7 @@ export type Database = {
           github_url: string | null;
           passport_slug: string | null;
           claim_token_hash: string | null;
+          claim_public_token: string | null;
           claim_expires_at: string;
           claimed_at: string | null;
           status: "unclaimed" | "claimed" | "expired";
@@ -292,6 +343,7 @@ export type Database = {
           github_url?: string | null;
           passport_slug?: string | null;
           claim_token_hash?: string | null;
+          claim_public_token?: string | null;
           claim_expires_at?: string;
           claimed_at?: string | null;
           status?: "unclaimed" | "claimed" | "expired";
@@ -316,6 +368,7 @@ export type Database = {
           github_url?: string | null;
           passport_slug?: string | null;
           claim_token_hash?: string | null;
+          claim_public_token?: string | null;
           claim_expires_at?: string;
           claimed_at?: string | null;
           status?: "unclaimed" | "claimed" | "expired";

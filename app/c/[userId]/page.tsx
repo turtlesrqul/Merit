@@ -1,6 +1,10 @@
 import { notFound } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
 import {
+  PublicPassportAnalytics,
+  PublicPassportCta
+} from "@/components/analytics/public-passport-analytics";
+import {
   CollapsibleProjectDescription,
   CollapsibleText
 } from "@/components/profile/collapsible-project-description";
@@ -56,7 +60,17 @@ function initialsForName(name: string) {
     .toUpperCase();
 }
 
-function ProjectArchiveItem({ project }: { project: ProjectCardData }) {
+function buildPassportProjectHref(projectId: string, passportUserId: string) {
+  return `/projects/${projectId}?from=passport&passport=${encodeURIComponent(passportUserId)}`;
+}
+
+function ProjectArchiveItem({
+  passportUserId,
+  project
+}: {
+  passportUserId: string;
+  project: ProjectCardData;
+}) {
   const visual = resolveProjectVisualPreview({
     artifacts: project.artifacts,
     coverImageUrl: project.coverImageUrl,
@@ -65,7 +79,7 @@ function ProjectArchiveItem({ project }: { project: ProjectCardData }) {
 
   return (
     <article className="group">
-      <a className="block" href={`/projects/${project.projectId}`}>
+      <a className="block" href={buildPassportProjectHref(project.projectId, passportUserId)}>
         <div className="relative aspect-[16/10] overflow-hidden bg-[#e5ded1]">
           {visual.previewUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -126,20 +140,27 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
 
   return (
     <AppShell roleType={viewerProfile?.roleType} userEmail={user?.email}>
-      <section className="editorial-container pt-12">
-        <div className="grid gap-6 border-b border-[#d7cebd] pb-8 lg:grid-cols-[1fr_auto] lg:items-end">
-          <div className="space-y-5">
-            <div className="flex h-20 w-20 items-center justify-center bg-[#dfd6c6] font-serif text-2xl text-[#7b705f]">
+      <PublicPassportAnalytics
+        featuredProjectId={featuredProject?.projectId ?? null}
+        passportSlug={candidate.passportSlug}
+        passportUserId={candidate.userId}
+        projectCount={candidate.projects.length}
+        viewerSignedIn={Boolean(user)}
+      />
+      <section className="editorial-container pt-8 sm:pt-10">
+        <div className="grid gap-4 border-b border-[#d7cebd] pb-5 sm:pb-6 lg:grid-cols-[1fr_auto] lg:items-center">
+          <div className="space-y-3">
+            <div className="flex h-14 w-14 items-center justify-center bg-[#dfd6c6] font-serif text-xl text-[#7b705f] sm:h-16 sm:w-16 sm:text-2xl">
               {initialsForName(displayName)}
             </div>
-            <div className="max-w-4xl space-y-4">
-              <h1 className="font-serif text-3xl leading-[1.06] text-[#16130f] sm:text-4xl lg:text-5xl">
+            <div className="max-w-4xl space-y-2.5">
+              <h1 className="font-serif text-3xl leading-[1.04] text-[#16130f] sm:text-4xl lg:text-[2.75rem]">
                 {displayName}
               </h1>
               {candidate.headline ? (
-                <p className="max-w-3xl text-base leading-7 text-[#7b705f]">{candidate.headline}</p>
+                <p className="max-w-3xl text-sm leading-6 text-[#7b705f] sm:text-base">{candidate.headline}</p>
               ) : null}
-              <div className="space-y-2 pt-2 text-sm uppercase tracking-[0.12em] text-[#7b705f]">
+              <div className="space-y-1 text-xs uppercase tracking-[0.12em] text-[#7b705f] sm:text-sm">
                 <p>{candidate.roleType === "recruiter" ? "Recruiter Passport" : "Passport"}</p>
                 {candidate.targetRoles.length > 0 ? (
                   <p className="text-[#d8aa14]">Open to {candidate.targetRoles.slice(0, 2).join(" / ")}</p>
@@ -147,20 +168,35 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
               </div>
             </div>
           </div>
-          <PublicProfileActions contactEmail={candidate.contactEmail} profileName={displayName} />
+          <PublicProfileActions
+            contactEmail={candidate.contactEmail}
+            passportSlug={candidate.passportSlug}
+            passportUserId={candidate.userId}
+            profileName={displayName}
+          />
         </div>
 
-        <div className="pt-12">
-          <p className="label-caps mb-5">Featured work</p>
+        {!user ? (
+          <div className="pt-5">
+            <PublicPassportCta
+              passportSlug={candidate.passportSlug}
+              passportUserId={candidate.userId}
+              placement="top"
+            />
+          </div>
+        ) : null}
+
+        <div className="pt-8 sm:pt-10">
+          <p className="label-caps mb-4">Featured work</p>
           {featuredProject ? (
             <article className="space-y-5">
-              <a className="block" href={`/projects/${featuredProject.projectId}`}>
+              <a className="block" href={buildPassportProjectHref(featuredProject.projectId, candidate.userId)}>
                 <div className="overflow-hidden">
                   {featuredVisual?.previewUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       alt={`${featuredProject.title} preview`}
-                      className="mx-auto max-h-[420px] max-w-full object-contain"
+                      className="mx-auto max-h-[360px] max-w-full object-contain sm:max-h-[420px]"
                       src={featuredVisual.previewUrl}
                     />
                   ) : (
@@ -190,7 +226,7 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
                 <a
                   aria-label="View featured case study"
                   className={iconControlClassName()}
-                  href={`/projects/${featuredProject.projectId}`}
+                  href={buildPassportProjectHref(featuredProject.projectId, candidate.userId)}
                   title="View featured case study"
                 >
                   <ActionIcon name="eye" />
@@ -217,7 +253,11 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
             </summary>
             <div className="grid gap-x-8 gap-y-10 md:grid-cols-2">
               {archiveProjects.map((project) => (
-                <ProjectArchiveItem key={project.projectId} project={project} />
+                <ProjectArchiveItem
+                  key={project.projectId}
+                  passportUserId={candidate.userId}
+                  project={project}
+                />
               ))}
             </div>
           </details>
@@ -311,6 +351,16 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
             ) : null}
           </section>
         </div>
+
+        {!user ? (
+          <div className="pt-10">
+            <PublicPassportCta
+              passportSlug={candidate.passportSlug}
+              passportUserId={candidate.userId}
+              placement="bottom"
+            />
+          </div>
+        ) : null}
       </section>
     </AppShell>
   );

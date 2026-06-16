@@ -5,6 +5,7 @@ import Link from "next/link";
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { resolveProjectVisualPreview } from "@/lib/artifacts";
+import { trackMeritEvent } from "@/lib/analytics/client";
 import type { ProjectCardData } from "@/lib/db/projects";
 import { calculateProfileCompletionScore } from "@/lib/profile/completion-score";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
@@ -451,6 +452,11 @@ export function ProfileStudio({
 
     try {
       await navigator.clipboard.writeText(passportUrl);
+      trackMeritEvent("passport_link_copied_shared", {
+        method: "profile_studio_clipboard",
+        passport_slug: profile.passportSlug,
+        passport_user_id: userId
+      });
       setCopyStatus("copied");
       window.setTimeout(() => setCopyStatus("idle"), 1800);
     } catch {

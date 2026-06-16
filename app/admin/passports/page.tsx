@@ -1,11 +1,14 @@
 import Link from "next/link";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
 import { PassportAdminStudio } from "@/components/admin/passport-admin-studio";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { buildClaimPassportUrl, resolveClaimLinkBaseUrl } from "@/lib/auth/claim-links";
 import { resolveSafeAuthNext } from "@/lib/auth/auth-urls";
 import { listClaimablePassports } from "@/lib/db/claimable-passports";
+import { getPublicAppUrl } from "@/lib/public-config";
 import { isAdminEmail } from "@/lib/runtime-config";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -39,9 +42,24 @@ export default async function AdminPassportsPage() {
   }
 
   const passports = await listClaimablePassports();
+  const headerStore = await headers();
+  const claimLinkBaseUrl = resolveClaimLinkBaseUrl({
+    fallbackSiteUrl: getPublicAppUrl(),
+    fallbackViteSiteUrl: process.env.VITE_SITE_URL,
+    forwardedHost: headerStore.get("x-forwarded-host"),
+    forwardedProto: headerStore.get("x-forwarded-proto"),
+    host: headerStore.get("host"),
+    origin: headerStore.get("origin"),
+    referer: headerStore.get("referer")
+  });
+  const passportsWithClaimLinks = passports.map(({ claimToken, ...passport }) => ({
+    ...passport,
+    claimLink: claimToken ? buildClaimPassportUrl(claimToken, claimLinkBaseUrl) : null
+  }));
+
   return (
     <AppShell userEmail={user.email}>
-      <PassportAdminStudio passports={passports} />
+      <PassportAdminStudio passports={passportsWithClaimLinks} />
     </AppShell>
   );
 }

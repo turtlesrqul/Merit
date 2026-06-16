@@ -85,6 +85,7 @@ Apply:
 `supabase/migrations/202604220001_matches_rationale_and_recruiter_policies.sql`
 `supabase/migrations/202605050001_v2_project_showcase.sql`
 `supabase/migrations/202605140001_moderation_baseline.sql`
+`supabase/migrations/202606160001_analytics_events_and_claim_public_tokens.sql`
 
 ## Scripts
 - `npm run dev`
