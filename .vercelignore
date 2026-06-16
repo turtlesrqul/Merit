@@ -4,4 +4,6 @@
 .tmp-chrome-*/
 .vercel/
 node_modules/
+create_merit_google_form.gs
+outputs/
 tsconfig.tsbuildinfo
