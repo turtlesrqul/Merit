@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { buildAuthPath, resolveSafeAuthNext, resolveSignupEmailCallbackUrl } from "@/lib/auth/auth-urls";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 import { isRateLimitedAuthError, mapAuthCallbackErrorParam, mapSupabaseAuthError } from "@/lib/auth/auth-errors";
@@ -26,6 +26,15 @@ const PENDING_SIGNUP_EMAIL_KEY = "merit_pending_signup_email";
 const PENDING_SIGNUP_NEXT_KEY = "merit_pending_signup_next";
 const LAST_SIGNUP_EMAIL_SENT_AT_KEY = "merit_last_signup_email_sent_at";
 const EMAIL_RESEND_COOLDOWN_MS = 60_000;
+const AUTH_ERROR_SOURCE_CALLBACK = "callback";
+const AUTH_ERROR_QUERY_KEYS = [
+  "auth_error_code",
+  "auth_error",
+  "auth_error_source",
+  "error",
+  "error_code",
+  "error_description"
+];
 
 function normalizeEmailAddress(value: string) {
   return value.trim().toLowerCase();
@@ -36,8 +45,56 @@ function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized);
 }
 
+function readHashAuthErrorParam() {
+  if (typeof window === "undefined" || !window.location.hash) {
+    return null;
+  }
+
+  const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+  return (
+    hashParams.get("auth_error_code") ??
+    hashParams.get("auth_error") ??
+    hashParams.get("error") ??
+    hashParams.get("error_code") ??
+    hashParams.get("error_description")
+  );
+}
+
+function clearAuthErrorUrlState() {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  const url = new URL(window.location.href);
+  let changed = false;
+
+  AUTH_ERROR_QUERY_KEYS.forEach((key) => {
+    if (url.searchParams.has(key)) {
+      url.searchParams.delete(key);
+      changed = true;
+    }
+  });
+
+  if (url.hash) {
+    const hashParams = new URLSearchParams(url.hash.replace(/^#/, ""));
+    AUTH_ERROR_QUERY_KEYS.forEach((key) => {
+      if (hashParams.has(key)) {
+        hashParams.delete(key);
+        changed = true;
+      }
+    });
+    const nextHash = hashParams.toString();
+    url.hash = nextHash ? `#${nextHash}` : "";
+  }
+
+  if (changed) {
+    window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}${url.hash}`);
+  }
+}
+
 export function AuthForm({ mode }: AuthFormProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const supportEmail = getSupportEmail();
   const supportInstagramHandle = getSupportInstagramHandle();
@@ -59,12 +116,16 @@ export function AuthForm({ mode }: AuthFormProps) {
   const [pendingVerificationEmail, setPendingVerificationEmail] = useState<string>("");
   const [resendAvailableAtMs, setResendAvailableAtMs] = useState<number>(0);
   const [resendSecondsRemaining, setResendSecondsRemaining] = useState(0);
+  const handledAuthErrorKeyRef = useRef<string | null>(null);
 
   const isSignUp = mode === "sign-up";
   const emailCallbackUrl = resolveSignupEmailCallbackUrl(nextPath);
   const modeSwitchHref = buildAuthPath(isSignUp ? "/sign-in" : "/sign-up", nextPath);
 
   const redirectAfterAuth = useCallback(() => {
+    setErrorMessage(null);
+    setSuccessMessage(null);
+    clearAuthErrorUrlState();
     if (typeof window !== "undefined") {
       window.location.assign(nextPath);
       return;
@@ -167,14 +228,31 @@ export function AuthForm({ mode }: AuthFormProps) {
   }, [isSignUp]);
 
   useEffect(() => {
-    const authError = mapAuthCallbackErrorParam(
-      searchParams.get("auth_error_code") ?? searchParams.get("auth_error")
-    );
-    if (!authError) {
+    const queryAuthErrorCode = searchParams.get("auth_error_code") ?? searchParams.get("auth_error");
+    const hashAuthErrorCode = readHashAuthErrorParam();
+    const authErrorSource = searchParams.get("auth_error_source");
+
+    if (!queryAuthErrorCode && !hashAuthErrorCode && !authErrorSource) {
       return;
     }
-    setErrorMessage(authError);
-  }, [searchParams]);
+
+    const handledKey = `${pathname}?${searchParams.toString()}#${hashAuthErrorCode ?? ""}`;
+    if (handledAuthErrorKeyRef.current === handledKey) {
+      return;
+    }
+    handledAuthErrorKeyRef.current = handledKey;
+
+    if (authErrorSource === AUTH_ERROR_SOURCE_CALLBACK) {
+      const authError = mapAuthCallbackErrorParam(queryAuthErrorCode ?? hashAuthErrorCode);
+      if (authError) {
+        setErrorMessage(authError);
+      }
+    } else {
+      setErrorMessage(null);
+    }
+
+    clearAuthErrorUrlState();
+  }, [pathname, searchParams]);
 
   useEffect(() => {
     if (!isSignUp || !resendAvailableAtMs) {
@@ -387,7 +465,10 @@ export function AuthForm({ mode }: AuthFormProps) {
               Full name
               <Input
                 autoComplete="name"
-                onChange={(event) => setName(event.target.value)}
+                onChange={(event) => {
+                  setErrorMessage(null);
+                  setName(event.target.value);
+                }}
                 placeholder="Avery Tan"
                 required
                 value={name}
@@ -399,7 +480,10 @@ export function AuthForm({ mode }: AuthFormProps) {
             Email
             <Input
               autoComplete="email"
-              onChange={(event) => setEmail(event.target.value)}
+              onChange={(event) => {
+                setErrorMessage(null);
+                setEmail(event.target.value);
+              }}
               placeholder="you@example.com"
               required
               type="email"
@@ -412,7 +496,10 @@ export function AuthForm({ mode }: AuthFormProps) {
             <Input
               autoComplete={isSignUp ? "new-password" : "current-password"}
               minLength={8}
-              onChange={(event) => setPassword(event.target.value)}
+              onChange={(event) => {
+                setErrorMessage(null);
+                setPassword(event.target.value);
+              }}
               required
               type="password"
               value={password}
@@ -423,7 +510,10 @@ export function AuthForm({ mode }: AuthFormProps) {
               <input
                 checked={acceptedTerms}
                 className="mt-0.5 h-4 w-4"
-                onChange={(event) => setAcceptedTerms(event.target.checked)}
+                onChange={(event) => {
+                  setErrorMessage(null);
+                  setAcceptedTerms(event.target.checked);
+                }}
                 type="checkbox"
               />
               <span>

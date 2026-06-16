@@ -176,16 +176,6 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
           />
         </div>
 
-        {!user ? (
-          <div className="pt-5">
-            <PublicPassportCta
-              passportSlug={candidate.passportSlug}
-              passportUserId={candidate.userId}
-              placement="top"
-            />
-          </div>
-        ) : null}
-
         <div className="pt-8 sm:pt-10">
           <p className="label-caps mb-4">Featured work</p>
           {featuredProject ? (

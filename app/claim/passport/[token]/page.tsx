@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
+import { ClaimPassportPanel } from "@/components/passports/claim-passport-panel";
 import { ClaimablePassportPreview } from "@/components/passports/claimable-passport-preview";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { claimPassportAction } from "@/app/claim/passport/[token]/actions";
 import { buildAuthPath } from "@/lib/auth/auth-urls";
 import { fetchClaimablePassportByToken } from "@/lib/db/claimable-passports";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -89,13 +89,13 @@ export default async function ClaimPassportPage({ params, searchParams }: ClaimP
       <ClaimablePassportPreview passport={lookup.passport} />
       <section className="editorial-container pt-8">
         <Card className="space-y-4">
-          {claimErrorMessage ? (
-            <p className="border border-red-200 bg-red-50 p-3 text-sm leading-6 text-red-700" role="alert">
-              {claimErrorMessage}
-            </p>
-          ) : null}
           {lookup.state === "expired" ? (
             <>
+              {claimErrorMessage ? (
+                <p className="border border-red-200 bg-red-50 p-3 text-sm leading-6 text-red-700" role="alert">
+                  {claimErrorMessage}
+                </p>
+              ) : null}
               <p className="label-caps">Expired</p>
               <h2 className="font-serif text-2xl text-[#16130f]">This Passport claim link has expired</h2>
               <p className="text-sm leading-6 text-[#7b705f]">
@@ -103,16 +103,14 @@ export default async function ClaimPassportPage({ params, searchParams }: ClaimP
               </p>
             </>
           ) : user ? (
-            <>
-              <p className="label-caps">Ready to claim</p>
-              <h2 className="font-serif text-2xl text-[#16130f]">Add this Passport to your Merit account</h2>
-              <form action={claimPassportAction}>
-                <input name="token" type="hidden" value={token} />
-                <Button type="submit">Claim this Passport</Button>
-              </form>
-            </>
+            <ClaimPassportPanel initialErrorMessage={claimErrorMessage} token={token} />
           ) : (
             <>
+              {claimErrorMessage ? (
+                <p className="border border-red-200 bg-red-50 p-3 text-sm leading-6 text-red-700" role="alert">
+                  {claimErrorMessage}
+                </p>
+              ) : null}
               <p className="label-caps">Sign in required</p>
               <h2 className="font-serif text-2xl text-[#16130f]">Sign in or create an account to claim this Passport</h2>
               <div className="flex flex-wrap gap-3">

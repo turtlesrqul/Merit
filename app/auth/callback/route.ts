@@ -67,6 +67,7 @@ export async function GET(request: NextRequest) {
   if (authErrorCode) {
     const signInUrl = new URL("/sign-in", request.url);
     signInUrl.searchParams.set("auth_error_code", authErrorCode);
+    signInUrl.searchParams.set("auth_error_source", "callback");
     signInUrl.searchParams.set("next", nextPath);
     response = NextResponse.redirect(signInUrl);
   }
