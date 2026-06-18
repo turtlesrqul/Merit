@@ -41,7 +41,6 @@ type PassportAdminStudioProps = {
 };
 
 type PassportPlaceholderResponse = {
-  headline: string;
   bio: string;
   skills: string[];
   projectTitle: string;
@@ -75,7 +74,7 @@ type PlaceholderProjectType =
   | "other";
 
 const PLACEHOLDER_PROJECT_TYPE_OPTIONS: { value: PlaceholderProjectType; label: string }[] = [
-  { value: "auto", label: "Auto / Infer from image or note" },
+  { value: "auto", label: "Auto / Infer from headline, image, or note" },
   { value: "website", label: "Website" },
   { value: "mobile-app", label: "Mobile App" },
   { value: "dashboard", label: "Dashboard" },
@@ -211,11 +210,11 @@ function normalizePassportSlugDraft(value: string) {
     .slice(0, 80);
 }
 
-function inferProjectTypeFromCourse(course: string): ProjectType {
-  if (/\b(design|visual|creative|media|fashion|interior|animation|art|ui|ux)\b/i.test(course)) {
+function inferProjectTypeFromHeadline(headline: string): ProjectType {
+  if (/\b(design|visual|creative|media|fashion|interior|animation|art|ui|ux|branding)\b/i.test(headline)) {
     return "design";
   }
-  if (/\b(document|writing|journalism|business|marketing|communications?)\b/i.test(course)) {
+  if (/\b(document|writing|journalism|business|marketing|communications?|editorial|deck)\b/i.test(headline)) {
     return "document";
   }
   return "web";
@@ -225,9 +224,9 @@ function projectTypeOptionLabel(value: PlaceholderProjectType) {
   return PLACEHOLDER_PROJECT_TYPE_OPTIONS.find((option) => option.value === value)?.label ?? "Other";
 }
 
-function projectTypeFromPlaceholderOption(value: PlaceholderProjectType, course: string): ProjectType {
+function projectTypeFromPlaceholderOption(value: PlaceholderProjectType, headline: string): ProjectType {
   if (value === "auto") {
-    return inferProjectTypeFromCourse(course);
+    return inferProjectTypeFromHeadline(headline);
   }
   if (value === "website" || value === "mobile-app" || value === "dashboard" || value === "software-project" || value === "data-project") {
     return "web";
@@ -303,7 +302,6 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
   const [createProjectImageUrl, setCreateProjectImageUrl] = useState("");
   const [createFullName, setCreateFullName] = useState("");
   const [createEmail, setCreateEmail] = useState("");
-  const [createCourse, setCreateCourse] = useState("");
   const [createPlaceholderProjectType, setCreatePlaceholderProjectType] =
     useState<PlaceholderProjectType>("auto");
   const [createHeadline, setCreateHeadline] = useState("");
@@ -443,7 +441,7 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
 
   const handleCreatePlaceholderProjectTypeChange = (value: PlaceholderProjectType) => {
     setCreatePlaceholderProjectType(value);
-    setCreateProjectType(projectTypeFromPlaceholderOption(value, createCourse));
+    setCreateProjectType(projectTypeFromPlaceholderOption(value, createHeadline));
   };
 
   const updateEditProjectLinks = (id: string, links: string) => {
@@ -676,17 +674,13 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
 
   const handleGeneratePlaceholder = async () => {
     const name = createFullName.trim();
-    const course = createCourse.trim();
+    const headline = createHeadline.trim();
 
     setPlaceholderError(null);
     setPlaceholderMessage(null);
 
     if (!name) {
       setPlaceholderError("Enter a student name before generating placeholder content.");
-      return;
-    }
-    if (!course) {
-      setPlaceholderError("Enter or select a course before generating placeholder content.");
       return;
     }
 
@@ -702,7 +696,7 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
           body: JSON.stringify({
             name,
             email: createEmail,
-            course,
+            headline,
             publicPath: createPublicPathPreview || undefined,
             projectType: projectTypeOptionLabel(createPlaceholderProjectType),
             projectNote: createProjectNote,
@@ -716,10 +710,9 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
       }
 
       if (!createProjectTitle.trim() && !createProjectHook.trim() && !createProjectDescription.trim()) {
-        setCreateProjectType(projectTypeFromPlaceholderOption(createPlaceholderProjectType, course));
+        setCreateProjectType(projectTypeFromPlaceholderOption(createPlaceholderProjectType, headline));
       }
 
-      setCreateHeadline((current) => current.trim() || generated.headline || current);
       setCreateBio((current) => current.trim() || generated.bio || current);
       setCreateProjectSkills((current) =>
         current.trim() || (Array.isArray(generated.skills) ? generated.skills.join(", ") : current)
@@ -740,9 +733,8 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
           },
           body: JSON.stringify({
             name,
-            course,
+            headline,
             projectType: projectTypeOptionLabel(createPlaceholderProjectType),
-            headline: generated.headline,
             projectTitle: generated.projectTitle,
             projectOneLiner: generated.projectOneLiner,
             projectDescription: generated.projectDescription,
@@ -845,7 +837,7 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
                   <p className="label-caps">Project editor</p>
                   <h2 className="font-serif text-3xl leading-none text-[#16130f]">Create claimable Passport</h2>
                   <p className="text-sm leading-6 text-[#7b705f]">
-                    Start with a name and course, then generate editable placeholder copy and a project cover.
+                    Start with a name and headline, then generate editable placeholder copy and a project cover.
                   </p>
                 </div>
                 <div className="border border-[#d7cebd] bg-[#eee8dd] px-4 py-3 text-sm text-[#7b705f]">
@@ -882,19 +874,18 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
                   />
                 </label>
                 <label className="block space-y-2 text-sm text-[#16130f]">
-                  Course
+                  Headline
                   <Input
-                    name="course"
+                    name="headline"
                     onChange={(event) => {
-                      const nextCourse = event.target.value;
-                      setCreateCourse(nextCourse);
+                      const nextHeadline = event.target.value;
+                      setCreateHeadline(nextHeadline);
                       if (createPlaceholderProjectType === "auto") {
-                        setCreateProjectType(inferProjectTypeFromCourse(nextCourse));
+                        setCreateProjectType(inferProjectTypeFromHeadline(nextHeadline));
                       }
                     }}
-                    placeholder="Diploma in Design or Information Technology"
-                    required
-                    value={createCourse}
+                    placeholder="Design student at Temasek Polytechnic"
+                    value={createHeadline}
                   />
                 </label>
                 <label className="block space-y-2 text-sm text-[#16130f]">
@@ -1063,15 +1054,6 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
                 <h3 className="font-serif text-2xl text-[#16130f]">Generated passport fields</h3>
                 <p className="mt-2 text-sm text-[#7b705f]">Review and edit before saving the pre-claim Passport.</p>
               </div>
-              <label className="block space-y-2 text-sm text-[#16130f]">
-                Headline
-                <Input
-                  name="headline"
-                  onChange={(event) => setCreateHeadline(event.target.value)}
-                  placeholder="Emerging UI/UX Designer focused on thoughtful digital experiences"
-                  value={createHeadline}
-                />
-              </label>
               <label className="block space-y-2 text-sm text-[#16130f]">
                 Bio
                 <Textarea
@@ -1687,7 +1669,7 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
                 <div className="space-y-1">
                   <p className="text-lg font-semibold text-[#16130f]">{createProjectTitle || "Untitled Project"}</p>
                   <p className="text-sm text-[#7b705f]">{createProjectHook || "Your one-line hook appears here."}</p>
-                  <p className="text-xs text-[#7b705f]">{createCourse || "Course not set"}</p>
+                  <p className="text-xs text-[#7b705f]">{createHeadline || "Headline not set"}</p>
                   <p className="text-xs text-[#7b705f]">{projectTypeLabel(createProjectType)}</p>
                 </div>
               </div>
@@ -1696,7 +1678,6 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
             <Card className="space-y-3 border-[#d7cebd] bg-[#fbf8f0]">
               <p className="text-sm font-semibold text-[#16130f]">Checklist</p>
               <p className="text-sm text-[#7b705f]">{createFullName.trim() ? "Done" : "Missing"} student name</p>
-              <p className="text-sm text-[#7b705f]">{createCourse.trim() ? "Done" : "Missing"} course</p>
               <p className="text-sm text-[#7b705f]">{createHeadline.trim() ? "Done" : "Missing"} headline</p>
               <p className="text-sm text-[#7b705f]">{createProjectTitle.trim() ? "Done" : "Missing"} project title</p>
               <p className="text-sm text-[#7b705f]">

@@ -15,7 +15,6 @@ const MAX_TEXT_LENGTH = 900;
 
 type PlaceholderImageRequest = {
   name?: unknown;
-  course?: unknown;
   projectType?: unknown;
   headline?: unknown;
   projectTitle?: unknown;
@@ -90,16 +89,15 @@ async function requireAdminUser() {
   return { user };
 }
 
-function isDesignCourse(course: string) {
-  return /\b(design|visual|creative|media|fashion|interior|animation|art|ui|ux)\b/i.test(course);
+function isDesignHeadline(headline: string) {
+  return /\b(design|visual|creative|media|fashion|interior|animation|art|ui|ux|branding)\b/i.test(headline);
 }
 
-function isItCourse(course: string) {
-  return /\b(it|information technology|software|web|app|cyber|data|computer|programming|systems?)\b/i.test(course);
+function isItHeadline(headline: string) {
+  return /\b(it|information technology|software|web|app|cyber|data|computer|programming|systems?)\b/i.test(headline);
 }
 
 function buildImagePrompt({
-  course,
   headline,
   name,
   projectDescription,
@@ -108,7 +106,6 @@ function buildImagePrompt({
   projectType,
   projectTitle
 }: {
-  course: string;
   headline: string;
   name: string;
   projectDescription: string;
@@ -130,18 +127,19 @@ function buildImagePrompt({
             ? "poster design, campaign graphic, visual identity board, brand system mockup, or polished portfolio cover"
             : explicitType.includes("fashion") || explicitType.includes("moodboard") || explicitType.includes("photography")
               ? "fashion moodboard, photography contact sheet, media campaign board, editorial collage, or visual direction board"
-              : isDesignCourse(course)
+              : isDesignHeadline(headline)
     ? "minimal poster design, branding mockup, editorial layout, UI/UX case study cover, product portfolio cover, or visual identity board"
-    : isItCourse(course)
+    : isItHeadline(headline)
       ? "app interface mockup, website landing page preview, dashboard UI, data visualization, code/product concept cover, mobile app screen, or software project thumbnail"
-      : "clean student portfolio project cover with a course-appropriate concept";
+      : "clean student portfolio project cover with a headline-appropriate concept";
 
   return [
     "Create one generic but high-quality student portfolio project cover image.",
     `Student name for context only, do not show a face or portrait: ${name}.`,
-    `Course: ${course}.`,
-    `Project type: ${projectType || "Auto / infer from course and project description"}.`,
-    headline ? `Generated headline: ${headline}.` : "",
+    headline
+      ? `Passport headline for context: ${headline}.`
+      : "Passport headline for context: not provided.",
+    `Project type: ${projectType || "Auto / infer from headline and project description"}.`,
     `Project title: ${projectTitle || "Student portfolio project"}.`,
     projectOneLiner ? `Project one-liner: ${projectOneLiner}.` : "",
     projectDescription ? `Project description: ${projectDescription}.` : "",
@@ -172,7 +170,6 @@ export async function POST(request: Request) {
 
     const body = (await request.json().catch(() => null)) as PlaceholderImageRequest | null;
     const name = cleanText(body?.name, 120);
-    const course = cleanText(body?.course, 160);
     const projectType = cleanText(body?.projectType, 120);
     const headline = cleanText(body?.headline, 180);
     const projectTitle = cleanText(body?.projectTitle, 160);
@@ -183,15 +180,11 @@ export async function POST(request: Request) {
     if (!name) {
       return NextResponse.json({ error: "Student name is required." }, { status: 400 });
     }
-    if (!course) {
-      return NextResponse.json({ error: "Course is required." }, { status: 400 });
-    }
 
     const client = new OpenAI({ apiKey });
     const imageResponse = await client.images.generate({
       model: IMAGE_MODEL,
       prompt: buildImagePrompt({
-        course,
         headline,
         name,
         projectDescription,

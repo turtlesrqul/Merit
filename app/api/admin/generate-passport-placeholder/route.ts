@@ -13,7 +13,7 @@ const MAX_IMAGE_DATA_URL_LENGTH = 8 * 1024 * 1024;
 type PlaceholderRequest = {
   name?: unknown;
   email?: unknown;
-  course?: unknown;
+  headline?: unknown;
   publicPath?: unknown;
   projectType?: unknown;
   projectNote?: unknown;
@@ -22,7 +22,6 @@ type PlaceholderRequest = {
 };
 
 type PassportPlaceholder = {
-  headline: string;
   bio: string;
   skills: string[];
   projectTitle: string;
@@ -34,7 +33,6 @@ const placeholderSchema = {
   type: "object",
   additionalProperties: false,
   required: [
-    "headline",
     "bio",
     "skills",
     "projectTitle",
@@ -42,7 +40,6 @@ const placeholderSchema = {
     "projectDescription"
   ],
   properties: {
-    headline: { type: "string" },
     bio: { type: "string" },
     skills: {
       type: "array",
@@ -108,7 +105,6 @@ function isPassportPlaceholder(value: unknown): value is PassportPlaceholder {
   }
   const record = value as Record<string, unknown>;
   return (
-    typeof record.headline === "string" &&
     typeof record.bio === "string" &&
     Array.isArray(record.skills) &&
     record.skills.every((skill) => typeof skill === "string") &&
@@ -145,14 +141,14 @@ async function requireAdminUser() {
 }
 
 function buildPrompt({
-  course,
+  headline,
   name,
   projectType,
   projectImageUrl,
   projectNote,
   publicPath
 }: {
-  course: string;
+  headline: string;
   name: string;
   projectType: string;
   projectImageUrl: string;
@@ -161,13 +157,15 @@ function buildPrompt({
 }) {
   return [
     `Student name: ${name}`,
-    `Course: ${course}`,
-    `Project type: ${projectType || "Auto / infer from note, image, or course"}`,
+    headline
+      ? `Passport headline: ${headline}`
+      : "Passport headline: not provided. Infer broad context from the project type, note, or image only.",
+    `Project type: ${projectType || "Auto / infer from note, image, or headline"}`,
     publicPath ? `Public passport path: /passport/${publicPath}` : "Public passport path: not provided",
     projectNote ? `Optional project note: ${projectNote}` : "Optional project note: none provided",
     projectImageUrl
       ? "A project image or thumbnail is attached. Use it as light visual context without inventing specific claims."
-      : "No project image was provided. Create a generic course-appropriate student project concept."
+      : "No project image was provided. Create a generic headline- and project-type-appropriate student project concept."
   ].join("\n");
 }
 
@@ -189,7 +187,7 @@ export async function POST(request: Request) {
     const body = (await request.json().catch(() => null)) as PlaceholderRequest | null;
     const name = cleanText(body?.name, 120);
     const email = cleanText(body?.email, 254);
-    const course = cleanText(body?.course, 160);
+    const headline = cleanText(body?.headline, 180);
     const publicPath = cleanText(body?.publicPath, 120);
     const projectType = cleanText(body?.projectType, 120);
     const projectNote = cleanMultilineText(body?.projectNote, 1000);
@@ -200,16 +198,13 @@ export async function POST(request: Request) {
     if (!name) {
       return NextResponse.json({ error: "Student name is required." }, { status: 400 });
     }
-    if (!course) {
-      return NextResponse.json({ error: "Course is required." }, { status: 400 });
-    }
 
     const client = new OpenAI({ apiKey });
     const userContent: OpenAI.Chat.Completions.ChatCompletionContentPart[] = [
       {
         type: "text",
         text: buildPrompt({
-          course,
+          headline,
           name,
           projectType,
           projectImageUrl: imageInputUrl,
@@ -236,7 +231,7 @@ export async function POST(request: Request) {
         {
           role: "system",
           content:
-            `You generate editable placeholder content for pre-claim student portfolio passports. Write polished, professional, believable student profile copy. Do not invent specific real-world achievements, clients, awards, internships, companies, grades, years of experience, or personal history. Use the provided name, course, project type, optional project note, and optional project image as context. If a specific project type is provided, strongly match the generated project title, one-liner, description, and skills to that type. If project type is Auto, infer from the image/note first and course second. Never include the student's email in generated public copy. Return only valid JSON matching the schema.${email ? " The email was supplied for admin validation only and must not appear in the output." : ""}`
+            `You generate editable placeholder content for pre-claim student portfolio passports. Write polished, professional, believable student profile copy. Do not invent specific real-world achievements, clients, awards, internships, companies, grades, years of experience, or personal history. Use the provided name, headline, project type, optional project note, and optional project image as context. The headline may contain course, school, discipline, or positioning information. If a specific project type is provided, strongly match the generated project title, one-liner, description, and skills to that type. If project type is Auto, infer from the image/note first and headline second. Never include the student's email in generated public copy. Return only valid JSON matching the schema.${email ? " The email was supplied for admin validation only and must not appear in the output." : ""}`
         },
         {
           role: "user",
@@ -265,7 +260,6 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({
-      headline: parsed.headline.trim(),
       bio: parsed.bio.trim(),
       skills: parsed.skills.map((skill) => skill.trim()).filter(Boolean).slice(0, 8),
       projectTitle: parsed.projectTitle.trim(),

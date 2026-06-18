@@ -175,7 +175,7 @@ export async function createAdminPassportAction(
         headline: normalizeOptionalText(formData.get("headline")),
         bio: normalizeOptionalText(formData.get("bio")),
         email: normalizeOptionalText(formData.get("email")),
-        school: normalizeRequiredText(formData.get("course"), "Course"),
+        school: normalizeOptionalText(formData.get("course")),
         skills: parseSkillsInput(formData.get("skills")),
         projects: parseProjectEntries(formData, featuredWork),
         featuredWork,
