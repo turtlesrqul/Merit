@@ -175,7 +175,7 @@ export async function createAdminPassportAction(
         headline: normalizeOptionalText(formData.get("headline")),
         bio: normalizeOptionalText(formData.get("bio")),
         email: normalizeOptionalText(formData.get("email")),
-        school: null,
+        school: normalizeRequiredText(formData.get("course"), "Course"),
         skills: parseSkillsInput(formData.get("skills")),
         projects: parseProjectEntries(formData, featuredWork),
         featuredWork,
@@ -244,7 +244,7 @@ export async function updateAdminPassportAction(
       headline: normalizeOptionalText(formData.get("headline")),
       bio: normalizeOptionalText(formData.get("bio")),
       email: normalizeOptionalText(formData.get("email")),
-      school: null,
+      school: normalizeOptionalText(formData.get("course")),
       skills: parseSkillsInput(formData.get("skills")),
       projects: parseProjectEntries(formData, featuredWork),
       featuredWork,
@@ -282,7 +282,7 @@ export async function deleteAdminPassportAction(
 
     return {
       status: "success",
-      message: "Claimable Passport deleted. Any existing claim link is now invalid.",
+      message: "Passport deleted. Public Passport path and any existing claim link are now unavailable.",
       claimLink: null,
       passportId
     };

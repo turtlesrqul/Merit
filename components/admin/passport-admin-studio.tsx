@@ -24,8 +24,7 @@ import {
   buildPreparedArtifacts,
   categoryForProjectType,
   parseCommaSeparatedSkills,
-  parseLineSeparatedLinks,
-  validateVisualRequirements
+  parseLineSeparatedLinks
 } from "@/lib/projects/form-validation";
 import {
   artifactPlaceholder,
@@ -39,6 +38,64 @@ type AdminClaimablePassport = Omit<ClaimablePassport, "claimToken"> & {
 
 type PassportAdminStudioProps = {
   passports: AdminClaimablePassport[];
+};
+
+type PassportPlaceholderResponse = {
+  headline: string;
+  bio: string;
+  skills: string[];
+  projectTitle: string;
+  projectOneLiner: string;
+  projectDescription: string;
+  error?: string;
+};
+
+type PlaceholderImageResponse = {
+  imageUrl?: string;
+  storagePath?: string;
+  error?: string;
+};
+
+type AdminPassportTab = "unclaimed" | "claimed" | "expired";
+type PlaceholderProjectType =
+  | "auto"
+  | "website"
+  | "mobile-app"
+  | "dashboard"
+  | "ui-ux-case-study"
+  | "visual-design"
+  | "poster"
+  | "branding-identity"
+  | "presentation-deck"
+  | "editorial-layout"
+  | "fashion-moodboard"
+  | "photography-media"
+  | "software-project"
+  | "data-project"
+  | "other";
+
+const PLACEHOLDER_PROJECT_TYPE_OPTIONS: { value: PlaceholderProjectType; label: string }[] = [
+  { value: "auto", label: "Auto / Infer from image or note" },
+  { value: "website", label: "Website" },
+  { value: "mobile-app", label: "Mobile App" },
+  { value: "dashboard", label: "Dashboard" },
+  { value: "ui-ux-case-study", label: "UI/UX Case Study" },
+  { value: "visual-design", label: "Visual Design" },
+  { value: "poster", label: "Poster" },
+  { value: "branding-identity", label: "Branding / Identity" },
+  { value: "presentation-deck", label: "Presentation Deck" },
+  { value: "editorial-layout", label: "Editorial / Layout" },
+  { value: "fashion-moodboard", label: "Fashion / Moodboard" },
+  { value: "photography-media", label: "Photography / Media" },
+  { value: "software-project", label: "Software Project" },
+  { value: "data-project", label: "Data Project" },
+  { value: "other", label: "Other" }
+];
+
+const TAB_LABELS: Record<AdminPassportTab, string> = {
+  unclaimed: "Unclaimed",
+  claimed: "Claimed",
+  expired: "Expired"
 };
 
 const initialActionState: AdminPassportActionState = {
@@ -151,7 +208,70 @@ function normalizePassportSlugDraft(value: string) {
     .replace(/[^a-z0-9-]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .replace(/-{2,}/g, "-")
-    .slice(0, 40);
+    .slice(0, 80);
+}
+
+function inferProjectTypeFromCourse(course: string): ProjectType {
+  if (/\b(design|visual|creative|media|fashion|interior|animation|art|ui|ux)\b/i.test(course)) {
+    return "design";
+  }
+  if (/\b(document|writing|journalism|business|marketing|communications?)\b/i.test(course)) {
+    return "document";
+  }
+  return "web";
+}
+
+function projectTypeOptionLabel(value: PlaceholderProjectType) {
+  return PLACEHOLDER_PROJECT_TYPE_OPTIONS.find((option) => option.value === value)?.label ?? "Other";
+}
+
+function projectTypeFromPlaceholderOption(value: PlaceholderProjectType, course: string): ProjectType {
+  if (value === "auto") {
+    return inferProjectTypeFromCourse(course);
+  }
+  if (value === "website" || value === "mobile-app" || value === "dashboard" || value === "software-project" || value === "data-project") {
+    return "web";
+  }
+  if (value === "presentation-deck" || value === "editorial-layout") {
+    return "document";
+  }
+  if (
+    value === "ui-ux-case-study" ||
+    value === "visual-design" ||
+    value === "poster" ||
+    value === "branding-identity" ||
+    value === "fashion-moodboard" ||
+    value === "photography-media"
+  ) {
+    return "design";
+  }
+  return "other";
+}
+
+function projectCategoryForPlaceholderOption(value: PlaceholderProjectType, broadProjectType: ProjectType) {
+  return value === "auto" ? categoryForProjectType(broadProjectType) : projectTypeOptionLabel(value);
+}
+
+function tabForPassport(passport: AdminClaimablePassport): AdminPassportTab {
+  if (passport.status === "claimed" || passport.claimedAt) {
+    return "claimed";
+  }
+  if (passport.status === "expired" || new Date(passport.claimExpiresAt).getTime() <= Date.now()) {
+    return "expired";
+  }
+  return "unclaimed";
+}
+
+function sortPassportsForTab(passports: AdminClaimablePassport[], tab: AdminPassportTab) {
+  return [...passports].sort((a, b) => {
+    if (tab === "claimed") {
+      return new Date(b.claimedAt ?? b.updatedAt).getTime() - new Date(a.claimedAt ?? a.updatedAt).getTime();
+    }
+    if (tab === "expired") {
+      return new Date(b.claimExpiresAt).getTime() - new Date(a.claimExpiresAt).getTime();
+    }
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
 }
 
 export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
@@ -181,10 +301,23 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
   const [createProjectSkills, setCreateProjectSkills] = useState("");
   const [createProjectLink, setCreateProjectLink] = useState("");
   const [createProjectImageUrl, setCreateProjectImageUrl] = useState("");
+  const [createFullName, setCreateFullName] = useState("");
+  const [createEmail, setCreateEmail] = useState("");
+  const [createCourse, setCreateCourse] = useState("");
+  const [createPlaceholderProjectType, setCreatePlaceholderProjectType] =
+    useState<PlaceholderProjectType>("auto");
+  const [createHeadline, setCreateHeadline] = useState("");
+  const [createBio, setCreateBio] = useState("");
+  const [createProjectNote, setCreateProjectNote] = useState("");
+  const [isGeneratingPlaceholder, setIsGeneratingPlaceholder] = useState(false);
+  const [placeholderMessage, setPlaceholderMessage] = useState<string | null>(null);
+  const [placeholderError, setPlaceholderError] = useState<string | null>(null);
   const [createProjectFileUploadMessage, setCreateProjectFileUploadMessage] = useState<string | null>(null);
   const [isCreateProjectFilesDragActive, setIsCreateProjectFilesDragActive] = useState(false);
   const [createExtraProjects, setCreateExtraProjects] = useState<ExtraCreateProjectDraft[]>([]);
   const [createPassportSlug, setCreatePassportSlug] = useState("");
+  const [isCreatePassportSlugDirty, setIsCreatePassportSlugDirty] = useState(false);
+  const [activeTab, setActiveTab] = useState<AdminPassportTab>("unclaimed");
   const [isCreateThumbnailDragActive, setIsCreateThumbnailDragActive] = useState(false);
   const [isUploadingThumbnail, setIsUploadingThumbnail] = useState(false);
   const [thumbnailUploadMessage, setThumbnailUploadMessage] = useState<string | null>(null);
@@ -225,7 +358,17 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
       ),
     [createExtraProjects, createProjectSkills]
   );
-  const createProjectCategory = categoryForProjectType(createProjectType);
+  const createProjectCategory = projectCategoryForPlaceholderOption(createPlaceholderProjectType, createProjectType);
+  const createPublicPathPreview = createPassportSlug || normalizePassportSlugDraft(createFullName);
+  const tabbedPassports = useMemo(
+    () => ({
+      unclaimed: sortPassportsForTab(passports.filter((passport) => tabForPassport(passport) === "unclaimed"), "unclaimed"),
+      claimed: sortPassportsForTab(passports.filter((passport) => tabForPassport(passport) === "claimed"), "claimed"),
+      expired: sortPassportsForTab(passports.filter((passport) => tabForPassport(passport) === "expired"), "expired")
+    }),
+    [passports]
+  );
+  const visiblePassports = tabbedPassports[activeTab];
   const createVisual = useMemo(
     () =>
       resolveProjectVisualPreview({
@@ -284,6 +427,23 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
       source: "recent_passports"
     });
     setCopiedLink(claimLink);
+  };
+
+  const handleCreateNameChange = (value: string) => {
+    setCreateFullName(value);
+    if (!isCreatePassportSlugDirty) {
+      setCreatePassportSlug(normalizePassportSlugDraft(value));
+    }
+  };
+
+  const handleCreateSlugChange = (value: string) => {
+    setIsCreatePassportSlugDirty(true);
+    setCreatePassportSlug(normalizePassportSlugDraft(value));
+  };
+
+  const handleCreatePlaceholderProjectTypeChange = (value: PlaceholderProjectType) => {
+    setCreatePlaceholderProjectType(value);
+    setCreateProjectType(projectTypeFromPlaceholderOption(value, createCourse));
   };
 
   const updateEditProjectLinks = (id: string, links: string) => {
@@ -406,12 +566,13 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
       const formData = new FormData();
       formData.append("files", file);
 
-      const response = await fetch("/api/artifacts/upload", {
+      const response = await fetch("/api/admin/passports/project-image", {
         method: "POST",
         body: formData
       });
       const payload = (await response.json()) as {
         urls?: string[];
+        url?: string;
         error?: string;
       };
 
@@ -419,7 +580,7 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
         throw new Error(payload.error ?? "Thumbnail upload failed.");
       }
 
-      const uploadedUrl = Array.isArray(payload.urls) ? payload.urls[0] : undefined;
+      const uploadedUrl = Array.isArray(payload.urls) ? payload.urls[0] : payload.url;
       if (!uploadedUrl) {
         throw new Error("No thumbnail URL was returned.");
       }
@@ -468,12 +629,13 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
       const formData = new FormData();
       formData.append("files", file);
 
-      const response = await fetch("/api/artifacts/upload", {
+      const response = await fetch("/api/admin/passports/project-image", {
         method: "POST",
         body: formData
       });
       const payload = (await response.json()) as {
         urls?: string[];
+        url?: string;
         error?: string;
       };
 
@@ -481,7 +643,7 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
         throw new Error(payload.error ?? "Thumbnail upload failed.");
       }
 
-      const uploadedUrl = Array.isArray(payload.urls) ? payload.urls[0] : undefined;
+      const uploadedUrl = Array.isArray(payload.urls) ? payload.urls[0] : payload.url;
       if (!uploadedUrl) {
         throw new Error("No thumbnail URL was returned.");
       }
@@ -512,6 +674,102 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
     }
   };
 
+  const handleGeneratePlaceholder = async () => {
+    const name = createFullName.trim();
+    const course = createCourse.trim();
+
+    setPlaceholderError(null);
+    setPlaceholderMessage(null);
+
+    if (!name) {
+      setPlaceholderError("Enter a student name before generating placeholder content.");
+      return;
+    }
+    if (!course) {
+      setPlaceholderError("Enter or select a course before generating placeholder content.");
+      return;
+    }
+
+    const hadProjectImage = createPrimaryImageUrl.length > 0;
+    setIsGeneratingPlaceholder(true);
+
+    try {
+      const response = await fetch("/api/admin/generate-passport-placeholder", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+          body: JSON.stringify({
+            name,
+            email: createEmail,
+            course,
+            publicPath: createPublicPathPreview || undefined,
+            projectType: projectTypeOptionLabel(createPlaceholderProjectType),
+            projectNote: createProjectNote,
+            projectImageUrl: createPrimaryImageUrl || undefined
+          })
+      });
+      const generated = (await response.json().catch(() => ({}))) as PassportPlaceholderResponse;
+
+      if (!response.ok) {
+        throw new Error(generated.error ?? "Unable to generate placeholder content.");
+      }
+
+      if (!createProjectTitle.trim() && !createProjectHook.trim() && !createProjectDescription.trim()) {
+        setCreateProjectType(projectTypeFromPlaceholderOption(createPlaceholderProjectType, course));
+      }
+
+      setCreateHeadline((current) => current.trim() || generated.headline || current);
+      setCreateBio((current) => current.trim() || generated.bio || current);
+      setCreateProjectSkills((current) =>
+        current.trim() || (Array.isArray(generated.skills) ? generated.skills.join(", ") : current)
+      );
+      setCreateProjectTitle((current) => current.trim() || generated.projectTitle || current);
+      setCreateProjectHook((current) => current.trim() || generated.projectOneLiner || current);
+      setCreateProjectDescription((current) => current.trim() || generated.projectDescription || current);
+
+      let nextMessage = hadProjectImage
+        ? "Placeholder content generated. Existing project image kept."
+        : "Placeholder content generated.";
+
+      if (!hadProjectImage) {
+        const imageResponse = await fetch("/api/admin/generate-placeholder-project-image", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            name,
+            course,
+            projectType: projectTypeOptionLabel(createPlaceholderProjectType),
+            headline: generated.headline,
+            projectTitle: generated.projectTitle,
+            projectOneLiner: generated.projectOneLiner,
+            projectDescription: generated.projectDescription,
+            projectNote: createProjectNote
+          })
+        });
+        const imagePayload = (await imageResponse.json().catch(() => ({}))) as PlaceholderImageResponse;
+
+        if (!imageResponse.ok || !imagePayload.imageUrl) {
+          throw new Error(imagePayload.error ?? "Placeholder text was generated, but the cover image failed.");
+        }
+
+        setCreateProjectImageUrl((currentImages) =>
+          currentImages.trim() ? currentImages : replacePrimaryImageUrl(currentImages, imagePayload.imageUrl as string)
+        );
+        setThumbnailUploadMessage("Generated placeholder cover attached.");
+        nextMessage = "Placeholder content and cover image generated. Existing edited fields were preserved.";
+      }
+
+      setPlaceholderMessage(nextMessage);
+    } catch (error) {
+      setPlaceholderError(error instanceof Error ? error.message : "Unable to generate placeholder content.");
+    } finally {
+      setIsGeneratingPlaceholder(false);
+    }
+  };
+
   const handleCreateSubmit = (event: FormEvent<HTMLFormElement>) => {
     if (uploadingProjectId) {
       event.preventDefault();
@@ -523,14 +781,13 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
       setUploadError("Please wait for thumbnail upload to finish before creating the claim link.");
       return;
     }
-
-    const visualValidationMessage = validateVisualRequirements({
-      preparedArtifacts: preparedCreateArtifacts,
-      coverImageUrl: createPrimaryImageUrl
-    });
-    if (visualValidationMessage) {
+    const normalizedPath = createPublicPathPreview;
+    const localPathCollision = normalizedPath
+      ? passports.find((passport) => passport.passportSlug === normalizedPath)
+      : null;
+    if (localPathCollision) {
       event.preventDefault();
-      setUploadError(visualValidationMessage);
+      setUploadError(`Public path "${normalizedPath}" is already used by ${localPathCollision.fullName}. Try a suffix.`);
       return;
     }
     setUploadError(null);
@@ -588,7 +845,7 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
                   <p className="label-caps">Project editor</p>
                   <h2 className="font-serif text-3xl leading-none text-[#16130f]">Create claimable Passport</h2>
                   <p className="text-sm leading-6 text-[#7b705f]">
-                    Build the placeholder project like a normal Merit project, then generate a private claim link.
+                    Start with a name and course, then generate editable placeholder copy and a project cover.
                   </p>
                 </div>
                 <div className="border border-[#d7cebd] bg-[#eee8dd] px-4 py-3 text-sm text-[#7b705f]">
@@ -599,113 +856,96 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
 
             <Card className="space-y-4">
               <div>
-                <h3 className="font-serif text-2xl text-[#16130f]">Choose project type</h3>
-                <p className="mt-2 text-sm text-[#7b705f]">Pick the format that best describes the main deliverable.</p>
+                <h3 className="font-serif text-2xl text-[#16130f]">Placeholder generator</h3>
+                <p className="mt-2 text-sm text-[#7b705f]">Use the quick fields while reviewing students from mobile.</p>
               </div>
-              <div className="grid gap-2 sm:grid-cols-2">
-                {(["web", "design", "document", "other"] as const).map((type) => (
-                  <label
-                    className={`flex cursor-pointer items-center justify-between border px-3 py-2 text-sm ${
-                      createProjectType === type
-                        ? "border-[#f3c945] bg-[#f3c945] text-[#16130f]"
-                        : "border-[#16130f] text-[#16130f]"
-                    }`}
-                    key={type}
-                  >
-                    <span>{projectTypeLabel(type)}</span>
-                    <input
-                      checked={createProjectType === type}
-                      className="h-4 w-4"
-                      onChange={() => setCreateProjectType(type)}
-                      type="radio"
-                    />
-                  </label>
-                ))}
-              </div>
-            </Card>
 
-            <Card className="space-y-4">
-              <div>
-                <h3 className="font-serif text-2xl text-[#16130f]">Add main content</h3>
-                <p className="mt-2 text-sm text-[#7b705f]">Paste project links and add a reliable visual thumbnail.</p>
-              </div>
-              <div className="border border-[#d7cebd] bg-[#f4f0e8] px-4 py-3">
-                <p className="label-caps">In-Merit viewer tips</p>
-                <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-[#7b705f]">
-                  {artifactTips(createProjectType).map((tip) => (
-                    <li key={tip}>{tip}</li>
-                  ))}
-                </ul>
+              <div className="grid gap-3 md:grid-cols-2">
+                <label className="block space-y-2 text-sm text-[#16130f]">
+                  Student name
+                  <Input
+                    name="fullName"
+                    onChange={(event) => handleCreateNameChange(event.target.value)}
+                    placeholder="Avery Tan"
+                    required
+                    value={createFullName}
+                  />
+                </label>
+                <label className="block space-y-2 text-sm text-[#16130f]">
+                  Email
+                  <Input
+                    name="email"
+                    onChange={(event) => setCreateEmail(event.target.value)}
+                    placeholder="avery@example.com"
+                    type="email"
+                    value={createEmail}
+                  />
+                </label>
+                <label className="block space-y-2 text-sm text-[#16130f]">
+                  Course
+                  <Input
+                    name="course"
+                    onChange={(event) => {
+                      const nextCourse = event.target.value;
+                      setCreateCourse(nextCourse);
+                      if (createPlaceholderProjectType === "auto") {
+                        setCreateProjectType(inferProjectTypeFromCourse(nextCourse));
+                      }
+                    }}
+                    placeholder="Diploma in Design or Information Technology"
+                    required
+                    value={createCourse}
+                  />
+                </label>
+                <label className="block space-y-2 text-sm text-[#16130f]">
+                  Public Passport path
+                  <div className="grid gap-2 sm:grid-cols-[auto_1fr] sm:items-center">
+                    <span className="border border-[#d7cebd] bg-[#eee8dd] px-3 py-2 text-sm text-[#7b705f]">
+                      /passport/
+                    </span>
+                    <Input
+                      maxLength={80}
+                      minLength={3}
+                      name="passportSlug"
+                      onChange={(event) => handleCreateSlugChange(event.target.value)}
+                      pattern="[a-z0-9]+(-[a-z0-9]+)*"
+                      placeholder="avery-tan"
+                      title="Use 3-80 lowercase letters, numbers, and hyphens. No spaces or special characters."
+                      value={createPassportSlug}
+                    />
+                  </div>
+                  <span className="block break-all text-xs text-[#7b705f]">
+                    Public URL preview: /passport/{createPublicPathPreview || "student-name"}
+                  </span>
+                </label>
               </div>
 
               <label className="block space-y-2 text-sm text-[#16130f]">
-                Project links (one per line)
-                <Textarea
-                  className="min-h-[120px]"
-                  name="projectLink"
-                  onChange={(event) => setCreateProjectLink(event.target.value)}
-                  placeholder={artifactPlaceholder(createProjectType)}
-                  value={createProjectLink}
-                />
+                Project type
+                <select
+                  className="min-h-11 w-full border border-[#d7cebd] bg-white px-3 py-2 text-sm text-[#16130f] outline-none transition focus:border-[#d8aa14] focus:ring-2 focus:ring-[#f3c945]/40"
+                  name="placeholderProjectType"
+                  onChange={(event) =>
+                    handleCreatePlaceholderProjectTypeChange(event.target.value as PlaceholderProjectType)
+                  }
+                  value={createPlaceholderProjectType}
+                >
+                  {PLACEHOLDER_PROJECT_TYPE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                <input name="projectTypeContext" type="hidden" value={projectTypeOptionLabel(createPlaceholderProjectType)} />
               </label>
 
-              <div className="space-y-2">
-                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-ink-700">Project files and images</p>
-                <input
-                  className="hidden"
-                  disabled={uploadingProjectId === "create-project-1-files"}
-                  id="create-project-1-files"
-                  multiple
-                  onChange={(event) => {
-                    if (event.currentTarget.files) {
-                      void uploadCreateProjectFiles(event.currentTarget.files);
-                    }
-                    event.currentTarget.value = "";
-                  }}
-                  type="file"
-                />
-                <div
-                  className={`rounded-xl border border-dashed p-4 transition-all ${
-                    isCreateProjectFilesDragActive
-                      ? "border-sun-400 bg-[radial-gradient(circle_at_22%_18%,rgba(244,207,89,0.22),transparent_43%),linear-gradient(180deg,#fff7de_0%,#fbf4e8_100%)] shadow-[0_10px_22px_rgba(127,97,34,0.12)]"
-                      : "border-ink-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.9)_0%,rgba(246,244,239,0.86)_100%)]"
-                  }`}
-                  onDragEnter={(event) => {
-                    event.preventDefault();
-                    setIsCreateProjectFilesDragActive(true);
-                  }}
-                  onDragLeave={(event) => {
-                    event.preventDefault();
-                    setIsCreateProjectFilesDragActive(false);
-                  }}
-                  onDragOver={(event) => {
-                    event.preventDefault();
-                    setIsCreateProjectFilesDragActive(true);
-                  }}
-                  onDrop={handleCreateProjectFilesDrop}
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-4">
-                    <div>
-                      <p className="text-sm font-semibold text-ink-900">Drop project files here</p>
-                      <p className="text-xs text-ink-600">Images become slideshow images; all uploaded files are added as project links.</p>
-                    </div>
-                    <Button
-                      disabled={uploadingProjectId === "create-project-1-files"}
-                      onClick={() => document.getElementById("create-project-1-files")?.click()}
-                      type="button"
-                      variant="secondary"
-                    >
-                      {uploadingProjectId === "create-project-1-files" ? "Uploading..." : "Choose files"}
-                    </Button>
-                  </div>
+              <div className="space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.08em] text-ink-700">
+                    Optional project image
+                  </p>
+                  {thumbnailUploadMessage ? <p className="text-xs text-emerald-700">{thumbnailUploadMessage}</p> : null}
                 </div>
-                {createProjectFileUploadMessage ? (
-                  <p className="text-xs text-emerald-700">{createProjectFileUploadMessage}</p>
-                ) : null}
-              </div>
-
-              <div className="space-y-2">
-                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-ink-700">Thumbnail image upload</p>
                 <input
                   accept="image/*"
                   className="hidden"
@@ -715,10 +955,10 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
                   type="file"
                 />
                 <div
-                  className={`rounded-xl border border-dashed p-4 transition-all ${
+                  className={`border border-dashed p-4 transition-all ${
                     isCreateThumbnailDragActive
-                      ? "border-sun-400 bg-[radial-gradient(circle_at_22%_18%,rgba(244,207,89,0.22),transparent_43%),linear-gradient(180deg,#fff7de_0%,#fbf4e8_100%)] shadow-[0_10px_22px_rgba(127,97,34,0.12)]"
-                      : "border-ink-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.9)_0%,rgba(246,244,239,0.86)_100%)]"
+                      ? "border-sun-400 bg-[#fff7de] shadow-[0_10px_22px_rgba(127,97,34,0.12)]"
+                      : "border-ink-200 bg-[#f7f3ea]"
                   }`}
                   onDragEnter={(event) => {
                     event.preventDefault();
@@ -734,25 +974,17 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
                   }}
                   onDrop={handleCreateThumbnailDrop}
                 >
-                  <div className="flex flex-wrap items-center justify-between gap-4">
-                    <div className="flex items-start gap-3">
-                      <div className="mt-0.5 rounded-xl border border-sun-200 bg-white/80 p-2 text-ink-700">
-                        <svg aria-hidden="true" className="h-5 w-5" fill="none" viewBox="0 0 24 24">
-                          <path
-                            d="M12 16V8m0 0 3 3m-3-3-3 3M4 15.5A3.5 3.5 0 0 1 7.5 12h.5A5 5 0 1 1 18 12h.5a3.5 3.5 0 1 1 0 7H7a3 3 0 0 1-3-3z"
-                            stroke="currentColor"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="1.8"
-                          />
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold text-ink-900">Drop thumbnail image here</p>
-                        <p className="text-xs text-ink-600">Use PNG/JPG/WebP and keep it under 10MB for fast loading.</p>
-                      </div>
+                  <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+                    <div>
+                      <p className="text-sm font-semibold text-ink-900">
+                        {createPrimaryImageUrl ? "Project image selected" : "Add a project image if you have one"}
+                      </p>
+                      <p className="mt-1 text-xs text-ink-600">
+                        No image is required. If empty, generation will create and save a cover.
+                      </p>
                     </div>
                     <Button
+                      className="min-h-11 w-full sm:w-auto"
                       disabled={isUploadingThumbnail}
                       onClick={() => thumbnailInputRef.current?.click()}
                       type="button"
@@ -762,153 +994,100 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
                     </Button>
                   </div>
                 </div>
-                <p className="text-xs text-ink-600">Select an image file from your device to use as the thumbnail.</p>
-                {isUploadingThumbnail ? <p className="text-xs text-ink-600">Uploading thumbnail...</p> : null}
-                {thumbnailUploadMessage ? <p className="text-xs text-emerald-700">{thumbnailUploadMessage}</p> : null}
-              </div>
-
-              <input name="projectImageUrl" type="hidden" value={createProjectImageUrl} />
-              <div className="space-y-2">
-                <p className="text-xs text-ink-600">
-                  This thumbnail is used as your primary card/miniplayer preview if set.
-                </p>
+                <input name="projectImageUrl" type="hidden" value={createProjectImageUrl} />
                 {createPrimaryImageUrl ? (
-                  <div className="max-w-sm overflow-hidden rounded-xl border border-ink-200">
-                    <div className="aspect-[16/9] bg-slate-100">
-                      <img
-                        alt="Selected thumbnail preview"
-                        className={`h-full w-full ${thumbnailObjectFit === "cover" ? "object-cover" : "object-contain p-1"}`}
-                        src={createPrimaryImageUrl}
-                      />
+                  <div className="space-y-3">
+                    <div className="max-w-sm overflow-hidden border border-ink-200">
+                      <div className="aspect-[16/9] bg-slate-100">
+                        <img
+                          alt="Selected project thumbnail preview"
+                          className={`h-full w-full ${thumbnailObjectFit === "cover" ? "object-cover" : "object-contain p-1"}`}
+                          src={createPrimaryImageUrl}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Button onClick={() => setCreateProjectImageUrl("")} type="button" variant="secondary">
+                        Remove image
+                      </Button>
+                      <div className="inline-flex overflow-hidden border border-ink-200">
+                        <button
+                          className={`px-3 py-2 text-xs font-semibold transition ${
+                            thumbnailObjectFit === "contain" ? "bg-sun-100 text-ink-950" : "bg-white text-ink-700 hover:bg-slate-50"
+                          }`}
+                          onClick={() => setThumbnailObjectFit("contain")}
+                          type="button"
+                        >
+                          Fit contain
+                        </button>
+                        <button
+                          className={`border-l border-ink-200 px-3 py-2 text-xs font-semibold transition ${
+                            thumbnailObjectFit === "cover" ? "bg-sun-100 text-ink-950" : "bg-white text-ink-700 hover:bg-slate-50"
+                          }`}
+                          onClick={() => setThumbnailObjectFit("cover")}
+                          type="button"
+                        >
+                          Fit cover
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ) : null}
-                <div className="flex flex-wrap items-center gap-2">
-                  <Button
-                    onClick={() => setCreateProjectImageUrl("")}
-                    type="button"
-                    variant={createProjectImageUrls.length > 0 ? "secondary" : "primary"}
-                  >
-                    Use auto preview
-                  </Button>
-                  <div className="inline-flex overflow-hidden rounded-xl border border-ink-200">
-                    <button
-                      className={`px-3 py-1.5 text-xs font-semibold transition ${
-                        thumbnailObjectFit === "contain" ? "bg-sun-100 text-ink-950" : "bg-white text-ink-700 hover:bg-slate-50"
-                      }`}
-                      onClick={() => setThumbnailObjectFit("contain")}
-                      type="button"
-                    >
-                      Fit contain
-                    </button>
-                    <button
-                      className={`border-l border-ink-200 px-3 py-1.5 text-xs font-semibold transition ${
-                        thumbnailObjectFit === "cover" ? "bg-sun-100 text-ink-950" : "bg-white text-ink-700 hover:bg-slate-50"
-                      }`}
-                      onClick={() => setThumbnailObjectFit("cover")}
-                      type="button"
-                    >
-                      Fit cover
-                    </button>
-                  </div>
-                </div>
-                {thumbnailCandidates.length > 0 ? (
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    {thumbnailCandidates.map((artifact) => {
-                      const previewUrl = artifact.preview_url;
-                      const isSelected =
-                        createPrimaryImageUrl.length > 0 &&
-                        createPrimaryImageUrl === normalizeArtifactUrl(previewUrl);
-
-                      return (
-                        <button
-                          className={`overflow-hidden rounded-xl border text-left transition ${
-                            isSelected
-                              ? "border-sun-400 ring-2 ring-sun-200"
-                              : "border-ink-200 hover:border-sun-300"
-                          }`}
-                          key={`${artifact.artifact_url}-${previewUrl}`}
-                          onClick={() =>
-                            setCreateProjectImageUrl((currentImages) => replacePrimaryImageUrl(currentImages, previewUrl))
-                          }
-                          type="button"
-                        >
-                          <div className="aspect-[16/9] bg-slate-100">
-                            <img
-                              alt="Thumbnail candidate preview"
-                              className={`h-full w-full ${thumbnailObjectFit === "cover" ? "object-cover" : "object-contain p-1"}`}
-                              src={previewUrl}
-                            />
-                          </div>
-                          <div className="px-2 py-1 text-xs text-ink-700">
-                            {artifact.artifact_type}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                ) : null}
-                {createProjectImageUrls.length > 1 ? (
-                  <div className="max-w-2xl">
-                    <ProjectImageCarousel
-                      images={getProjectImageCarouselImages(createProjectImageUrls)}
-                      title={createProjectTitle || "Project 1"}
-                    />
-                  </div>
-                ) : null}
               </div>
+
+              <label className="block space-y-2 text-sm text-[#16130f]">
+                Optional project note
+                <Textarea
+                  className="min-h-[92px]"
+                  name="projectNote"
+                  onChange={(event) => setCreateProjectNote(event.target.value)}
+                  placeholder="Short context from Instagram, portfolio, or memory."
+                  value={createProjectNote}
+                />
+              </label>
+
+              {placeholderError ? <p className="text-sm text-red-700">{placeholderError}</p> : null}
+              {placeholderMessage ? <p className="text-sm text-emerald-700">{placeholderMessage}</p> : null}
+              <Button
+                className="min-h-11 w-full sm:w-auto"
+                disabled={isGeneratingPlaceholder || isUploadingThumbnail || Boolean(uploadingProjectId)}
+                onClick={() => void handleGeneratePlaceholder()}
+                type="button"
+              >
+                {isGeneratingPlaceholder ? "Generating placeholder..." : "Generate Placeholder"}
+              </Button>
             </Card>
 
             <Card className="space-y-4">
               <div>
-                <h3 className="font-serif text-2xl text-[#16130f]">Title and story</h3>
-                <p className="mt-2 text-sm text-[#7b705f]">Keep the project concise and scannable for the claim preview.</p>
+                <h3 className="font-serif text-2xl text-[#16130f]">Generated passport fields</h3>
+                <p className="mt-2 text-sm text-[#7b705f]">Review and edit before saving the pre-claim Passport.</p>
               </div>
               <label className="block space-y-2 text-sm text-[#16130f]">
-                Project title
+                Headline
                 <Input
-                  maxLength={120}
-                  name="projectTitle"
-                  onChange={(event) => setCreateProjectTitle(event.target.value)}
-                  placeholder="AI study planner"
-                  required
-                  value={createProjectTitle}
+                  name="headline"
+                  onChange={(event) => setCreateHeadline(event.target.value)}
+                  placeholder="Emerging UI/UX Designer focused on thoughtful digital experiences"
+                  value={createHeadline}
                 />
               </label>
               <label className="block space-y-2 text-sm text-[#16130f]">
-                One-line hook
-                <Input
-                  maxLength={140}
-                  name="projectHook"
-                  onChange={(event) => setCreateProjectHook(event.target.value)}
-                  placeholder="What was built and why does it matter?"
-                  required
-                  value={createProjectHook}
-                />
-              </label>
-              <label className="block space-y-2 text-sm text-[#16130f]">
-                Short description
+                Bio
                 <Textarea
                   className="min-h-[120px]"
-                  name="projectDescription"
-                  onChange={(event) => setCreateProjectDescription(event.target.value)}
-                  placeholder="How it works, the person's role, and what makes it compelling."
-                  value={createProjectDescription}
+                  name="bio"
+                  onChange={(event) => setCreateBio(event.target.value)}
+                  placeholder="Short editable profile summary."
+                  value={createBio}
                 />
               </label>
-            </Card>
-
-            <Card className="space-y-4">
-              <div>
-                <h3 className="font-serif text-2xl text-[#16130f]">Skills</h3>
-                <p className="mt-2 text-sm text-[#7b705f]">These become both Passport capabilities and project tags.</p>
-              </div>
               <label className="block space-y-2 text-sm text-[#16130f]">
-                Skill tags (comma separated)
+                Skills
                 <Input
                   name="projectSkills"
                   onChange={(event) => setCreateProjectSkills(event.target.value)}
-                  placeholder="next.js, figma, reliability engineering"
+                  placeholder="Visual Design, UI/UX, Prototyping"
                   value={createProjectSkills}
                 />
               </label>
@@ -927,23 +1106,192 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
             </Card>
 
             <Card className="space-y-4">
-              <div className="flex flex-wrap items-end justify-between gap-3">
-                <div>
-                  <h3 className="font-serif text-2xl text-[#16130f]">Additional projects</h3>
-                  <p className="mt-2 text-sm text-[#7b705f]">Add more project blocks before generating the claim link.</p>
-                </div>
-                <Button onClick={addCreateProject} type="button" variant="secondary">
-                  Add another project
-                </Button>
+              <div>
+                <h3 className="font-serif text-2xl text-[#16130f]">Generated project fields</h3>
+                <p className="mt-2 text-sm text-[#7b705f]">These populate the first project on the claimable Passport.</p>
               </div>
+              <label className="block space-y-2 text-sm text-[#16130f]">
+                Project title
+                <Input
+                  maxLength={120}
+                  name="projectTitle"
+                  onChange={(event) => setCreateProjectTitle(event.target.value)}
+                  placeholder="Portfolio case study"
+                  value={createProjectTitle}
+                />
+              </label>
+              <label className="block space-y-2 text-sm text-[#16130f]">
+                Project one-liner
+                <Input
+                  maxLength={140}
+                  name="projectHook"
+                  onChange={(event) => setCreateProjectHook(event.target.value)}
+                  placeholder="A concise, portfolio-friendly summary."
+                  value={createProjectHook}
+                />
+              </label>
+              <label className="block space-y-2 text-sm text-[#16130f]">
+                Project description
+                <Textarea
+                  className="min-h-[120px]"
+                  name="projectDescription"
+                  onChange={(event) => setCreateProjectDescription(event.target.value)}
+                  placeholder="Describe the project concept in two to four sentences."
+                  value={createProjectDescription}
+                />
+              </label>
+            </Card>
 
-              {createExtraProjects.length === 0 ? (
-                <p className="border border-[#d7cebd] bg-[#f4f0e8] p-3 text-sm text-[#7b705f]">
-                  One project is included by default. Add another when the Passport should launch with multiple projects.
-                </p>
-              ) : null}
+            <details className="group">
+              <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 border border-[#d7cebd] bg-[#eee8dd] px-4 py-3 text-sm font-semibold text-[#16130f]">
+                <span>Advanced Details</span>
+                <span className="text-xs uppercase tracking-[0.12em] text-[#7b705f]">Expand</span>
+              </summary>
+              <div className="mt-4 space-y-4">
+                <Card className="space-y-4">
+                  <div>
+                    <h3 className="font-serif text-2xl text-[#16130f]">Project links and files</h3>
+                    <p className="mt-2 text-sm text-[#7b705f]">Keep drag-and-drop and extra evidence when available.</p>
+                  </div>
+                  <div className="border border-[#d7cebd] bg-[#f4f0e8] px-4 py-3">
+                    <p className="label-caps">In-Merit viewer tips</p>
+                    <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-[#7b705f]">
+                      {artifactTips(createProjectType).map((tip) => (
+                        <li key={tip}>{tip}</li>
+                      ))}
+                    </ul>
+                  </div>
 
-              {createExtraProjects.map((project, index) => {
+                  <label className="block space-y-2 text-sm text-[#16130f]">
+                    Project links (one per line)
+                    <Textarea
+                      className="min-h-[120px]"
+                      name="projectLink"
+                      onChange={(event) => setCreateProjectLink(event.target.value)}
+                      placeholder={artifactPlaceholder(createProjectType)}
+                      value={createProjectLink}
+                    />
+                  </label>
+
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold uppercase tracking-[0.08em] text-ink-700">Project files and images</p>
+                    <input
+                      className="hidden"
+                      disabled={uploadingProjectId === "create-project-1-files"}
+                      id="create-project-1-files"
+                      multiple
+                      onChange={(event) => {
+                        if (event.currentTarget.files) {
+                          void uploadCreateProjectFiles(event.currentTarget.files);
+                        }
+                        event.currentTarget.value = "";
+                      }}
+                      type="file"
+                    />
+                    <div
+                      className={`border border-dashed p-4 transition-all ${
+                        isCreateProjectFilesDragActive
+                          ? "border-sun-400 bg-[#fff7de] shadow-[0_10px_22px_rgba(127,97,34,0.12)]"
+                          : "border-ink-200 bg-white"
+                      }`}
+                      onDragEnter={(event) => {
+                        event.preventDefault();
+                        setIsCreateProjectFilesDragActive(true);
+                      }}
+                      onDragLeave={(event) => {
+                        event.preventDefault();
+                        setIsCreateProjectFilesDragActive(false);
+                      }}
+                      onDragOver={(event) => {
+                        event.preventDefault();
+                        setIsCreateProjectFilesDragActive(true);
+                      }}
+                      onDrop={handleCreateProjectFilesDrop}
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-4">
+                        <div>
+                          <p className="text-sm font-semibold text-ink-900">Drop project files here</p>
+                          <p className="text-xs text-ink-600">Images become slideshow images; all uploaded files are added as project links.</p>
+                        </div>
+                        <Button
+                          disabled={uploadingProjectId === "create-project-1-files"}
+                          onClick={() => document.getElementById("create-project-1-files")?.click()}
+                          type="button"
+                          variant="secondary"
+                        >
+                          {uploadingProjectId === "create-project-1-files" ? "Uploading..." : "Choose files"}
+                        </Button>
+                      </div>
+                    </div>
+                    {createProjectFileUploadMessage ? (
+                      <p className="text-xs text-emerald-700">{createProjectFileUploadMessage}</p>
+                    ) : null}
+                  </div>
+
+                  {thumbnailCandidates.length > 0 ? (
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {thumbnailCandidates.map((artifact) => {
+                        const previewUrl = artifact.preview_url;
+                        const isSelected =
+                          createPrimaryImageUrl.length > 0 &&
+                          createPrimaryImageUrl === normalizeArtifactUrl(previewUrl);
+
+                        return (
+                          <button
+                            className={`overflow-hidden border text-left transition ${
+                              isSelected
+                                ? "border-sun-400 ring-2 ring-sun-200"
+                                : "border-ink-200 hover:border-sun-300"
+                            }`}
+                            key={`${artifact.artifact_url}-${previewUrl}`}
+                            onClick={() =>
+                              setCreateProjectImageUrl((currentImages) => replacePrimaryImageUrl(currentImages, previewUrl))
+                            }
+                            type="button"
+                          >
+                            <div className="aspect-[16/9] bg-slate-100">
+                              <img
+                                alt="Thumbnail candidate preview"
+                                className={`h-full w-full ${thumbnailObjectFit === "cover" ? "object-cover" : "object-contain p-1"}`}
+                                src={previewUrl}
+                              />
+                            </div>
+                            <div className="px-2 py-1 text-xs text-ink-700">
+                              {artifact.artifact_type}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : null}
+                  {createProjectImageUrls.length > 1 ? (
+                    <div className="max-w-2xl">
+                      <ProjectImageCarousel
+                        images={getProjectImageCarouselImages(createProjectImageUrls)}
+                        title={createProjectTitle || "Project 1"}
+                      />
+                    </div>
+                  ) : null}
+                </Card>
+
+                <Card className="space-y-4">
+                  <div className="flex flex-wrap items-end justify-between gap-3">
+                    <div>
+                      <h3 className="font-serif text-2xl text-[#16130f]">Additional projects</h3>
+                      <p className="mt-2 text-sm text-[#7b705f]">Add more project blocks before generating the claim link.</p>
+                    </div>
+                    <Button onClick={addCreateProject} type="button" variant="secondary">
+                      Add another project
+                    </Button>
+                  </div>
+
+                  {createExtraProjects.length === 0 ? (
+                    <p className="border border-[#d7cebd] bg-[#f4f0e8] p-3 text-sm text-[#7b705f]">
+                      One project is included by default. Add another when the Passport should launch with multiple projects.
+                    </p>
+                  ) : null}
+
+                  {createExtraProjects.map((project, index) => {
                 const projectNumber = index + 2;
                 const projectCategory = categoryForProjectType(project.type);
                 const projectPreparedArtifacts = buildPreparedArtifacts(project.links);
@@ -1265,87 +1613,46 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
                     ) : null}
                   </fieldset>
                 );
-              })}
-            </Card>
+                  })}
+                </Card>
 
-            <Card className="space-y-4">
-              <div>
-                <h3 className="font-serif text-2xl text-[#16130f]">Passport owner</h3>
-                <p className="mt-2 text-sm text-[#7b705f]">Set the public identity and optional path before generating the claim link.</p>
+                <Card className="space-y-4">
+                  <div>
+                    <h3 className="font-serif text-2xl text-[#16130f]">Links and publishing</h3>
+                    <p className="mt-2 text-sm text-[#7b705f]">Optional resume, portfolio, and social links.</p>
+                  </div>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <label className="block space-y-2 text-sm text-[#16130f]">
+                      Resume link
+                      <Input name="resumeUrl" placeholder="https://..." />
+                    </label>
+                    <label className="block space-y-2 text-sm text-[#16130f]">
+                      Portfolio link
+                      <Input name="portfolioUrl" placeholder="https://..." />
+                    </label>
+                    <label className="block space-y-2 text-sm text-[#16130f]">
+                      LinkedIn link
+                      <Input name="linkedinUrl" placeholder="https://..." />
+                    </label>
+                    <label className="block space-y-2 text-sm text-[#16130f]">
+                      GitHub link
+                      <Input name="githubUrl" placeholder="https://..." />
+                    </label>
+                  </div>
+                </Card>
               </div>
-              <div className="grid gap-3 md:grid-cols-2">
-                <label className="block space-y-2 text-sm text-[#16130f]">
-                  Passport/person name
-                  <Input name="fullName" placeholder="Avery Tan" required />
-                </label>
-                <label className="block space-y-2 text-sm text-[#16130f]">
-                  Email
-                  <Input name="email" placeholder="person@example.com" type="email" />
-                </label>
-              </div>
-              <label className="block space-y-2 text-sm text-[#16130f]">
-                Headline
-                <Input name="headline" placeholder="Product designer building civic tools" />
-              </label>
-              <label className="block space-y-2 text-sm text-[#16130f]">
-                Bio
-                <Textarea className="min-h-[120px]" name="bio" placeholder="Short context for the Passport owner." />
-              </label>
-              <label className="block space-y-2 text-sm text-[#16130f]">
-                Public Passport path
-                <div className="grid gap-2 sm:grid-cols-[auto_1fr] sm:items-center">
-                  <span className="border border-[#d7cebd] bg-[#eee8dd] px-3 py-2 text-sm text-[#7b705f]">
-                    /passport/
-                  </span>
-                  <Input
-                    maxLength={40}
-                    minLength={3}
-                    name="passportSlug"
-                    onChange={(event) => setCreatePassportSlug(normalizePassportSlugDraft(event.target.value))}
-                    pattern="[a-z0-9]+(-[a-z0-9]+)*"
-                    placeholder="avery-tan"
-                    title="Use 3-40 lowercase letters, numbers, and hyphens. No spaces or special characters."
-                    value={createPassportSlug}
-                  />
-                </div>
-              </label>
-            </Card>
-
-            <Card className="space-y-4">
-              <div>
-                <h3 className="font-serif text-2xl text-[#16130f]">Optional links</h3>
-                <p className="mt-2 text-sm text-[#7b705f]">These carry into the claimed Passport profile.</p>
-              </div>
-              <div className="grid gap-4 md:grid-cols-2">
-                <label className="block space-y-2 text-sm text-[#16130f]">
-                  Resume link
-                  <Input name="resumeUrl" placeholder="https://..." />
-                </label>
-                <label className="block space-y-2 text-sm text-[#16130f]">
-                  Portfolio link
-                  <Input name="portfolioUrl" placeholder="https://..." />
-                </label>
-                <label className="block space-y-2 text-sm text-[#16130f]">
-                  LinkedIn link
-                  <Input name="linkedinUrl" placeholder="https://..." />
-                </label>
-                <label className="block space-y-2 text-sm text-[#16130f]">
-                  GitHub link
-                  <Input name="githubUrl" placeholder="https://..." />
-                </label>
-              </div>
-            </Card>
+            </details>
 
             <Card className="space-y-3">
               {uploadError ? <p className="text-sm text-red-700">{uploadError}</p> : null}
-              <Button className="w-full sm:w-auto" disabled={isCreating || Boolean(uploadingProjectId) || isUploadingThumbnail} type="submit">
+              <Button className="min-h-11 w-full sm:w-auto" disabled={isCreating || Boolean(uploadingProjectId) || isUploadingThumbnail} type="submit">
                 {isUploadingThumbnail
                   ? "Uploading thumbnail..."
                   : uploadingProjectId
                     ? "Uploading files..."
                     : isCreating
-                    ? "Creating claim link..."
-                    : "Create claimable Passport"}
+                    ? "Saving pre-claim Passport..."
+                    : "Save pre-claim Passport"}
               </Button>
             </Card>
           </div>
@@ -1372,7 +1679,7 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
                       />
                     ) : (
                       <div className="flex h-full items-center justify-center px-6 text-center text-sm text-[#7b705f]">
-                        Add a project link or cover image
+                        Generate or add a cover image
                       </div>
                     )}
                   </div>
@@ -1380,6 +1687,7 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
                 <div className="space-y-1">
                   <p className="text-lg font-semibold text-[#16130f]">{createProjectTitle || "Untitled Project"}</p>
                   <p className="text-sm text-[#7b705f]">{createProjectHook || "Your one-line hook appears here."}</p>
+                  <p className="text-xs text-[#7b705f]">{createCourse || "Course not set"}</p>
                   <p className="text-xs text-[#7b705f]">{projectTypeLabel(createProjectType)}</p>
                 </div>
               </div>
@@ -1387,10 +1695,12 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
 
             <Card className="space-y-3 border-[#d7cebd] bg-[#fbf8f0]">
               <p className="text-sm font-semibold text-[#16130f]">Checklist</p>
+              <p className="text-sm text-[#7b705f]">{createFullName.trim() ? "Done" : "Missing"} student name</p>
+              <p className="text-sm text-[#7b705f]">{createCourse.trim() ? "Done" : "Missing"} course</p>
+              <p className="text-sm text-[#7b705f]">{createHeadline.trim() ? "Done" : "Missing"} headline</p>
               <p className="text-sm text-[#7b705f]">{createProjectTitle.trim() ? "Done" : "Missing"} project title</p>
-              <p className="text-sm text-[#7b705f]">{createProjectHook.trim() ? "Done" : "Missing"} one-line hook</p>
               <p className="text-sm text-[#7b705f]">
-                {preparedCreateArtifacts.length > 0 || createProjectImageUrls.length > 0 ? "Done" : "Missing"} visual source
+                {preparedCreateArtifacts.length > 0 || createProjectImageUrls.length > 0 ? "Set" : "AI can generate"} project cover
               </p>
               <p className="text-sm text-[#7b705f]">{createExtraProjects.length + 1} project{createExtraProjects.length === 0 ? "" : "s"} in this claim</p>
               <p className="text-sm text-[#7b705f]">{createPassportSlug.trim() ? "Set" : "Optional"} public path</p>
@@ -1400,23 +1710,39 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
         </form>
 
         <section className="space-y-4">
-          <div className="flex items-end justify-between gap-4">
+          <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="label-caps">Manage</p>
-              <h2 className="mt-2 font-serif text-2xl text-[#16130f]">Recent Passports</h2>
+              <h2 className="mt-2 font-serif text-2xl text-[#16130f]">Passport Management</h2>
             </div>
             <p className="text-sm text-[#7b705f]">{passports.length} total</p>
           </div>
 
-          {passports.length === 0 ? (
+          <div className="grid grid-cols-3 border border-[#d7cebd] bg-[#eee8dd] p-1 text-sm sm:inline-grid sm:min-w-[520px]">
+            {(["unclaimed", "claimed", "expired"] as const).map((tab) => (
+              <button
+                className={`min-h-11 px-3 py-2 font-semibold transition ${
+                  activeTab === tab ? "bg-[#16130f] text-[#fbf8f0]" : "text-[#4b4439] hover:bg-[#fbf8f0]"
+                }`}
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                type="button"
+              >
+                {TAB_LABELS[tab]} ({tabbedPassports[tab].length})
+              </button>
+            ))}
+          </div>
+
+          {visiblePassports.length === 0 ? (
             <Card>
-              <p className="text-sm text-[#7b705f]">No claimable Passports yet.</p>
+              <p className="text-sm text-[#7b705f]">No {TAB_LABELS[activeTab].toLowerCase()} Passports in this tab.</p>
             </Card>
           ) : (
             <div className="space-y-4">
-              {passports.map((passport) => {
+              {visiblePassports.map((passport) => {
                 const isLatest = latestPassportId === passport.passportId;
-                const canManage = passport.status !== "claimed";
+                const passportTab = tabForPassport(passport);
+                const canManage = passportTab !== "claimed";
                 const editableProjects = getEditableProjects(passport);
                 return (
                   <Card className="space-y-4" key={passport.passportId}>
@@ -1424,8 +1750,23 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
                       <div className="space-y-1">
                         <h3 className="font-serif text-2xl text-[#16130f]">{passport.fullName}</h3>
                         <p className="text-sm text-[#7b705f]">{passport.email || "No email set"}</p>
+                        {passport.school ? <p className="text-sm text-[#7b705f]">{passport.school}</p> : null}
+                        {passport.passportSlug ? (
+                          <a
+                            className="break-all text-sm text-[#16130f] underline underline-offset-4"
+                            href={`/passport/${passport.passportSlug}`}
+                            rel="noreferrer"
+                            target="_blank"
+                          >
+                            /passport/{passport.passportSlug}
+                          </a>
+                        ) : (
+                          <p className="text-sm text-red-700">No public path set</p>
+                        )}
                         <p className="text-xs uppercase tracking-[0.12em] text-[#7b705f]">
-                          Expires {formatDate(passport.claimExpiresAt)}
+                          {passportTab === "claimed" && passport.claimedAt
+                            ? `Claimed ${formatDate(passport.claimedAt)}`
+                            : `Expires ${formatDate(passport.claimExpiresAt)}`}
                         </p>
                       </div>
                       <Badge className={statusTone(passport.status)}>{passport.status}</Badge>
@@ -1457,7 +1798,7 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
                         Preview Passport
                       </summary>
                       <div className="mt-4 border-t border-[#d7cebd] pt-4">
-                        <ClaimablePassportPreview compact passport={passport} />
+                        <ClaimablePassportPreview compact passport={passport} showContactEmail />
                       </div>
                     </details>
 
@@ -1476,6 +1817,10 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
                             <label className="block space-y-2 text-sm text-[#16130f]">
                               Email
                               <Input defaultValue={passport.email ?? ""} name="email" type="email" />
+                            </label>
+                            <label className="block space-y-2 text-sm text-[#16130f]">
+                              Course
+                              <Input defaultValue={passport.school ?? ""} name="course" />
                             </label>
                           </div>
                           <label className="block space-y-2 text-sm text-[#16130f]">
@@ -1606,7 +1951,14 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
                             </label>
                             <label className="block space-y-2 text-sm text-[#16130f]">
                               Public slug
-                              <Input defaultValue={passport.passportSlug ?? ""} name="passportSlug" />
+                              <Input
+                                defaultValue={passport.passportSlug ?? ""}
+                                maxLength={80}
+                                minLength={3}
+                                name="passportSlug"
+                                pattern="[a-z0-9]+(-[a-z0-9]+)*"
+                                title="Use 3-80 lowercase letters, numbers, and hyphens. No spaces or special characters."
+                              />
                             </label>
                           </div>
                           <label className="block space-y-2 text-sm text-[#16130f]">
@@ -1650,21 +2002,23 @@ export function PassportAdminStudio({ passports }: PassportAdminStudioProps) {
                           </Button>
                         </form>
                       ) : null}
-                      {canManage ? (
-                        <form
-                          action={deleteFormAction}
-                          onSubmit={(event) => {
-                            if (!window.confirm(`Delete the claimable Passport for ${passport.fullName}?`)) {
-                              event.preventDefault();
-                            }
-                          }}
-                        >
-                          <input name="passportId" type="hidden" value={passport.passportId} />
-                          <Button disabled={isDeleting} type="submit" variant="danger">
-                            {isDeleting ? "Deleting..." : "Delete"}
-                          </Button>
-                        </form>
-                      ) : null}
+                      <form
+                        action={deleteFormAction}
+                        onSubmit={(event) => {
+                          const warning =
+                            passportTab === "claimed"
+                              ? `Delete the claimed public Passport for ${passport.fullName}? This removes the Passport/profile path but does not delete the user account.`
+                              : `Delete the ${passportTab} Passport for ${passport.fullName}? Any existing claim link will stop working.`;
+                          if (!window.confirm(warning)) {
+                            event.preventDefault();
+                          }
+                        }}
+                      >
+                        <input name="passportId" type="hidden" value={passport.passportId} />
+                        <Button disabled={isDeleting} type="submit" variant="danger">
+                          {isDeleting ? "Deleting..." : passportTab === "claimed" ? "Delete claimed Passport" : "Delete"}
+                        </Button>
+                      </form>
                       {isLatest && latestLink ? (
                         <a className="text-sm text-[#16130f] underline underline-offset-4" href={latestLink} rel="noreferrer" target="_blank">
                           Open latest claim preview

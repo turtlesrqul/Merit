@@ -4,8 +4,19 @@ import { createHash, randomBytes } from "node:crypto";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { buildArtifactPreviewUrl, detectArtifactType } from "@/lib/artifacts";
 import { calculateProfileCompletionScore } from "@/lib/profile/completion-score";
+import {
+  generatePassportSlugFromName,
+  normalizePassportSlugValue,
+  validatePassportSlug
+} from "@/lib/passports/slug";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import type { Database } from "@/lib/supabase/types";
+
+export {
+  generatePassportSlugFromName,
+  normalizePassportSlugValue,
+  validatePassportSlug
+} from "@/lib/passports/slug";
 
 type AdminClient = SupabaseClient<Database>;
 type UnclaimedPassportRow = Database["public"]["Tables"]["unclaimed_passports"]["Row"];
@@ -77,7 +88,6 @@ export type ClaimLookupResult = {
 };
 
 const CLAIM_LINK_TTL_MS = 3 * 24 * 60 * 60 * 1000;
-const PASSPORT_SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 function safeString(value: unknown): string {
   return typeof value === "string" ? value : "";
@@ -161,6 +171,11 @@ function mapFeaturedWork(value: unknown): ClaimablePassportFeaturedWork | null {
 }
 
 function mapPassport(row: UnclaimedPassportRow): ClaimablePassport {
+  const status =
+    row.status === "unclaimed" && new Date(row.claim_expires_at).getTime() <= Date.now()
+      ? "expired"
+      : row.status;
+
   return {
     passportId: row.passport_id,
     ownerUserId: row.owner_user_id,
@@ -181,7 +196,7 @@ function mapPassport(row: UnclaimedPassportRow): ClaimablePassport {
     claimExpiresAt: row.claim_expires_at,
     claimedAt: row.claimed_at,
     claimToken: row.claim_public_token,
-    status: row.status,
+    status,
     createdAt: row.created_at,
     updatedAt: row.updated_at
   };
@@ -225,20 +240,7 @@ export function normalizePassportSlug(value: FormDataEntryValue | null) {
   if (!normalized) {
     return null;
   }
-  return normalized
-    .toLowerCase()
-    .replace(/[^a-z0-9-]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .replace(/-{2,}/g, "-");
-}
-
-export function validatePassportSlug(slug: string | null) {
-  if (!slug) {
-    return;
-  }
-  if (slug.length < 3 || slug.length > 40 || !PASSPORT_SLUG_PATTERN.test(slug)) {
-    throw new Error("Passport slug must be 3-40 lowercase letters, numbers, or hyphens.");
-  }
+  return normalizePassportSlugValue(normalized);
 }
 
 export function parseSkillsInput(value: FormDataEntryValue | null) {
@@ -316,7 +318,18 @@ async function assertPassportSlugAvailable(
   }
 
   validatePassportSlug(slug);
+  const isTaken = await isPassportSlugTaken(adminClient, slug, ignorePassportId);
+  if (isTaken) {
+    const suggestion = await findAvailablePassportSlug(adminClient, slug, ignorePassportId);
+    throw new Error(`That Passport path is already taken. Try "${suggestion}".`);
+  }
+}
 
+async function isPassportSlugTaken(
+  adminClient: AdminClient,
+  slug: string,
+  ignorePassportId?: string
+) {
   const [profileResult, passportResult] = await Promise.all([
     adminClient
       .from("candidate_profiles")
@@ -342,9 +355,52 @@ async function assertPassportSlugAvailable(
   if (passportResult.error) {
     throw new Error(`Failed to check unclaimed Passport slug: ${passportResult.error.message}`);
   }
-  if ((profileResult.data ?? []).length > 0 || (passportResult.data ?? []).length > 0) {
-    throw new Error("That Passport path is already taken.");
+  return (profileResult.data ?? []).length > 0 || (passportResult.data ?? []).length > 0;
+}
+
+async function findAvailablePassportSlug(
+  adminClient: AdminClient,
+  requestedSlug: string,
+  ignorePassportId?: string
+) {
+  const baseSlug = requestedSlug.slice(0, 72).replace(/-+$/g, "") || "student-passport";
+  validatePassportSlug(baseSlug);
+
+  if (!(await isPassportSlugTaken(adminClient, baseSlug, ignorePassportId))) {
+    return baseSlug;
   }
+
+  for (let suffix = 2; suffix <= 99; suffix += 1) {
+    const candidate = `${baseSlug}-${suffix}`;
+    validatePassportSlug(candidate);
+    if (!(await isPassportSlugTaken(adminClient, candidate, ignorePassportId))) {
+      return candidate;
+    }
+  }
+
+  throw new Error(`Could not find an available Passport path for "${requestedSlug}".`);
+}
+
+async function resolveCreatePassportSlug(adminClient: AdminClient, input: CreateClaimablePassportInput) {
+  if (input.passportSlug) {
+    await assertPassportSlugAvailable(adminClient, input.passportSlug);
+    return input.passportSlug;
+  }
+
+  return findAvailablePassportSlug(adminClient, generatePassportSlugFromName(input.fullName));
+}
+
+async function resolveUpdatePassportSlug(
+  adminClient: AdminClient,
+  passportId: string,
+  input: CreateClaimablePassportInput
+) {
+  if (input.passportSlug) {
+    await assertPassportSlugAvailable(adminClient, input.passportSlug, passportId);
+    return input.passportSlug;
+  }
+
+  return findAvailablePassportSlug(adminClient, generatePassportSlugFromName(input.fullName), passportId);
 }
 
 export async function listClaimablePassports() {
@@ -367,8 +423,7 @@ export async function createClaimablePassport(
   adminUserId: string
 ) {
   const adminClient = createAdminSupabaseClient();
-  const slug = input.passportSlug;
-  await assertPassportSlugAvailable(adminClient, slug);
+  const slug = await resolveCreatePassportSlug(adminClient, input);
 
   const claimToken = generateClaimToken();
   const payload: UnclaimedPassportInsert = {
@@ -442,8 +497,7 @@ export async function updateClaimablePassport(
   input: CreateClaimablePassportInput
 ) {
   const adminClient = createAdminSupabaseClient();
-  const slug = input.passportSlug;
-  await assertPassportSlugAvailable(adminClient, slug, passportId);
+  const slug = await resolveUpdatePassportSlug(adminClient, passportId, input);
 
   const { data, error } = await adminClient
     .from("unclaimed_passports")
@@ -479,11 +533,33 @@ export async function updateClaimablePassport(
 
 export async function deleteClaimablePassport(passportId: string) {
   const adminClient = createAdminSupabaseClient();
+  const { data: passport, error: lookupError } = await adminClient
+    .from("unclaimed_passports")
+    .select("passport_id, owner_user_id, passport_slug, status")
+    .eq("passport_id", passportId)
+    .maybeSingle();
+
+  if (lookupError) {
+    throw new Error(`Failed to load Passport before deletion: ${lookupError.message}`);
+  }
+  if (!passport) {
+    throw new Error("Passport does not exist.");
+  }
+
+  if (passport.owner_user_id) {
+    const { error: profileError } = await adminClient
+      .from("candidate_profiles")
+      .delete()
+      .eq("user_id", passport.owner_user_id);
+    if (profileError) {
+      throw new Error(`Failed to delete claimed Passport profile: ${profileError.message}`);
+    }
+  }
+
   const { data, error } = await adminClient
     .from("unclaimed_passports")
     .delete()
     .eq("passport_id", passportId)
-    .neq("status", "claimed")
     .select("passport_id")
     .maybeSingle();
 
@@ -491,8 +567,28 @@ export async function deleteClaimablePassport(passportId: string) {
     throw new Error(`Failed to delete claimable Passport: ${error.message}`);
   }
   if (!data) {
-    throw new Error("Claimed Passports are already owned and cannot be deleted here.");
+    throw new Error("Passport does not exist.");
   }
+}
+
+export async function fetchClaimablePassportBySlug(slug: string): Promise<ClaimablePassport | null> {
+  validatePassportSlug(slug);
+
+  const adminClient = createAdminSupabaseClient();
+  const { data, error } = await adminClient
+    .from("unclaimed_passports")
+    .select("*")
+    .eq("passport_slug", slug)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Failed to load public pre-claim Passport: ${error.message}`);
+  }
+  if (!data) {
+    return null;
+  }
+
+  return mapPassport(data);
 }
 
 export async function fetchClaimablePassportByToken(token: string): Promise<ClaimLookupResult> {
@@ -563,6 +659,20 @@ function resolvePortfolioLinks(passport: ClaimablePassport) {
   ].filter((link): link is string => Boolean(link));
 }
 
+function projectTypeForCategory(category: string): "web" | "design" | "document" | "other" {
+  const normalized = category.toLowerCase();
+  if (/\b(web|website|mobile|app|dashboard|software|data)\b/.test(normalized)) {
+    return "web";
+  }
+  if (/\b(deck|presentation|document|editorial|layout)\b/.test(normalized)) {
+    return "document";
+  }
+  if (/\b(design|poster|branding|identity|fashion|moodboard|photography|media|ui|ux)\b/.test(normalized)) {
+    return "design";
+  }
+  return "other";
+}
+
 async function resolveSkillIds(adminClient: AdminClient, skillNames: string[]) {
   const skillIds: string[] = [];
   for (const skillName of skillNames) {
@@ -629,7 +739,7 @@ async function createClaimedProjects(
         what_was_built: project.description,
         category: project.category,
         impact: null,
-        project_type: "other",
+        project_type: projectTypeForCategory(project.category),
         cover_image_url: coverImageUrl,
         is_featured: index === 0
       })

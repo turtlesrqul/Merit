@@ -10,6 +10,7 @@ import type { ClaimablePassport } from "@/lib/db/claimable-passports";
 type ClaimablePassportPreviewProps = {
   passport: ClaimablePassport;
   compact?: boolean;
+  showContactEmail?: boolean;
 };
 
 type ClaimableProject = ClaimablePassport["projects"][number];
@@ -92,7 +93,11 @@ function ClaimableArchiveItem({
   );
 }
 
-export function ClaimablePassportPreview({ compact = false, passport }: ClaimablePassportPreviewProps) {
+export function ClaimablePassportPreview({
+  compact = false,
+  passport,
+  showContactEmail = false
+}: ClaimablePassportPreviewProps) {
   const cvLink = passport.resumeUrl ? { label: "Open Resume", href: passport.resumeUrl } : null;
   const portfolioLinks = [
     passport.portfolioUrl ? { label: "Open Portfolio", href: passport.portfolioUrl } : null,
@@ -262,7 +267,7 @@ export function ClaimablePassportPreview({ compact = false, passport }: Claimabl
               </div>
             </div>
           ) : null}
-          {passport.email ? (
+          {showContactEmail && passport.email ? (
             <div className="space-y-2">
               <p className="label-caps">Contact</p>
               <a className="text-sm text-[#16130f] underline underline-offset-4" href={`mailto:${passport.email}`}>
