@@ -142,8 +142,11 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
     <AppShell roleType={viewerProfile?.roleType} userEmail={user?.email}>
       <PublicPassportAnalytics
         featuredProjectId={featuredProject?.projectId ?? null}
+        isOwner={user?.id === candidate.userId}
+        ownerId={candidate.userId}
+        passportId={candidate.userId}
         passportSlug={candidate.passportSlug}
-        passportUserId={candidate.userId}
+        profileCompletionPercentage={candidate.profileCompletionScore}
         projectCount={candidate.projects.length}
         viewerSignedIn={Boolean(user)}
       />
@@ -345,8 +348,9 @@ export default async function PublicProfilePage({ params }: PublicProfilePagePro
         {!user ? (
           <div className="pt-10">
             <PublicPassportCta
+              ownerId={candidate.userId}
+              passportId={candidate.userId}
               passportSlug={candidate.passportSlug}
-              passportUserId={candidate.userId}
               placement="bottom"
             />
           </div>

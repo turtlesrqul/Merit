@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
+import { PublicPassportAnalytics } from "@/components/analytics/public-passport-analytics";
 import { ClaimablePassportPreview } from "@/components/passports/claimable-passport-preview";
 import { Card } from "@/components/ui/card";
 import PublicProfilePage from "@/app/c/[userId]/page";
@@ -50,6 +51,15 @@ export default async function PublicPassportSlugPage({ params }: PublicPassportS
 
   return (
     <AppShell userEmail={user?.email}>
+      <PublicPassportAnalytics
+        featuredProjectId={null}
+        isOwner={Boolean(user?.id && passport.ownerUserId === user.id)}
+        ownerId={passport.ownerUserId}
+        passportId={passport.passportId}
+        passportSlug={passport.passportSlug}
+        projectCount={passport.projects.length}
+        viewerSignedIn={Boolean(user)}
+      />
       <ClaimablePassportPreview passport={{ ...passport, claimToken: null }} />
       <section className="editorial-container pt-8">
         <Card className="space-y-3">

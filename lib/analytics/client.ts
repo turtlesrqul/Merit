@@ -1,16 +1,15 @@
 "use client";
 
-export type MeritAnalyticsEventName =
-  | "public_passport_viewed"
-  | "visitor_source_referrer_recorded"
-  | "public_passport_cta_clicked"
-  | "project_opened_viewed"
-  | "passport_link_copied_shared"
-  | "claim_link_copied";
-
-type AnalyticsProperties = Record<string, string | number | boolean | null | undefined>;
+import posthog from "posthog-js";
+import type { AnalyticsProperties, MeritAnalyticsEventName } from "@/lib/analytics/events";
 
 const ANONYMOUS_ID_STORAGE_KEY = "merit_analytics_anonymous_id";
+const DEDUPE_STORAGE_PREFIX = "merit_analytics_dedupe:";
+
+type TrackMeritEventOptions = {
+  dedupeKey?: string;
+  dedupeWindowMs?: number;
+};
 
 function createAnonymousId() {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -33,11 +32,58 @@ function getAnonymousId() {
   }
 }
 
+function shouldSkipForDedupe(dedupeKey: string | undefined, dedupeWindowMs: number | undefined) {
+  if (!dedupeKey || !dedupeWindowMs || dedupeWindowMs <= 0) {
+    return false;
+  }
+
+  try {
+    const storageKey = `${DEDUPE_STORAGE_PREFIX}${dedupeKey}`;
+    const lastSeenAt = Number(window.sessionStorage.getItem(storageKey));
+    const now = Date.now();
+
+    if (Number.isFinite(lastSeenAt) && now - lastSeenAt < dedupeWindowMs) {
+      return true;
+    }
+
+    window.sessionStorage.setItem(storageKey, String(now));
+  } catch {
+    return false;
+  }
+
+  return false;
+}
+
+export function identifyAnalyticsUser(userId: string | null | undefined) {
+  if (typeof window === "undefined" || !process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN) {
+    return;
+  }
+
+  try {
+    if (userId) {
+      posthog.identify(userId);
+      return;
+    }
+    posthog.reset();
+  } catch {
+    // Analytics must never interrupt a user flow.
+  }
+}
+
+export function resetAnalyticsUser() {
+  identifyAnalyticsUser(null);
+}
+
 export function trackMeritEvent(
   eventName: MeritAnalyticsEventName,
-  properties: AnalyticsProperties = {}
+  properties: AnalyticsProperties = {},
+  options: TrackMeritEventOptions = {}
 ) {
   if (typeof window === "undefined") {
+    return;
+  }
+
+  if (shouldSkipForDedupe(options.dedupeKey, options.dedupeWindowMs)) {
     return;
   }
 

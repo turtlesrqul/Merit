@@ -452,10 +452,12 @@ export function ProfileStudio({
 
     try {
       await navigator.clipboard.writeText(passportUrl);
-      trackMeritEvent("passport_link_copied_shared", {
+      trackMeritEvent("passport_link_copied", {
         method: "profile_studio_clipboard",
+        ownerId: userId,
+        passportId: userId,
         passport_slug: profile.passportSlug,
-        passport_user_id: userId
+        timestamp: new Date().toISOString()
       });
       setCopyStatus("copied");
       window.setTimeout(() => setCopyStatus("idle"), 1800);
@@ -520,6 +522,31 @@ export function ProfileStudio({
 
     if (profileResult.error) {
       throw new Error(profileResult.error.message);
+    }
+
+    const updatedFields = Object.keys(patch).sort().join(",");
+    trackMeritEvent("passport_updated", {
+      ownerId: userId,
+      passportId: userId,
+      passport_slug: nextProfile.passportSlug,
+      profileCompletionPercentage: parsedScore,
+      project_count: ownProjects.length,
+      timestamp: new Date().toISOString(),
+      updatedFieldCount: Object.keys(patch).length,
+      updatedFields,
+      userId
+    });
+
+    if (parsedScore >= 100 && profile.profileCompletionScore < 100) {
+      trackMeritEvent("profile_completed", {
+        ownerId: userId,
+        passportId: userId,
+        passport_slug: nextProfile.passportSlug,
+        profileCompletionPercentage: parsedScore,
+        project_count: ownProjects.length,
+        timestamp: new Date().toISOString(),
+        userId
+      });
     }
 
     setProfile({

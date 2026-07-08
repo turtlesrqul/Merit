@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { trackMeritEvent } from "@/lib/analytics/client";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 import { calculateProfileCompletionScore } from "@/lib/profile/completion-score";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,18 @@ function parseLineSeparatedInput(value: string): string[] {
 }
 
 export function EditProfileForm({ userId, initialValues }: EditProfileFormProps) {
+  const initialCompletionScore = useMemo(
+    () =>
+      calculateProfileCompletionScore({
+        name: initialValues.name,
+        headline: initialValues.headline,
+        bio: initialValues.bio,
+        contactEmail: initialValues.contactEmail,
+        targetRoles: parseCommaSeparatedInput(initialValues.targetRoles),
+        portfolioLinks: parseLineSeparatedInput(initialValues.portfolioLinks)
+      }),
+    [initialValues]
+  );
   const [name, setName] = useState(initialValues.name);
   const [roleType, setRoleType] = useState<"candidate" | "recruiter">(initialValues.roleType);
   const [headline, setHeadline] = useState(initialValues.headline);
@@ -111,6 +124,24 @@ export function EditProfileForm({ userId, initialValues }: EditProfileFormProps)
       setErrorMessage(profileResult.error.message);
       setIsSaving(false);
       return;
+    }
+
+    trackMeritEvent("passport_updated", {
+      ownerId: userId,
+      passportId: userId,
+      profileCompletionPercentage: profileCompletionScore,
+      timestamp: new Date().toISOString(),
+      userId
+    });
+
+    if (profileCompletionScore >= 100 && initialCompletionScore < 100) {
+      trackMeritEvent("profile_completed", {
+        ownerId: userId,
+        passportId: userId,
+        profileCompletionPercentage: profileCompletionScore,
+        timestamp: new Date().toISOString(),
+        userId
+      });
     }
 
     setSuccessMessage("Profile updated.");

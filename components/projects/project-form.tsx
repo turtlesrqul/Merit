@@ -3,6 +3,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { trackMeritEvent } from "@/lib/analytics/client";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 import { requireVerifiedBrowserUser } from "@/lib/auth/browser-verified-user";
 import { normalizeArtifactUrl, resolveProjectVisualPreview } from "@/lib/artifacts";
@@ -489,6 +490,18 @@ export function ProjectForm({ mode, initialData }: ProjectFormProps) {
           }
         }
       }
+
+      trackMeritEvent(mode === "create" ? "project_added" : "project_updated", {
+        artifactCount: preparedArtifacts.length,
+        isFeatured,
+        ownerId: user.id,
+        passportId: user.id,
+        projectId,
+        projectType: normalizedType,
+        skillCount: normalizedSkills.length,
+        timestamp: new Date().toISOString(),
+        userId: user.id
+      });
 
       router.push(`/projects/${projectId}`);
       router.refresh();

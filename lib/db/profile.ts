@@ -1,4 +1,5 @@
 import type { User } from "@supabase/supabase-js";
+import { captureServerAnalyticsEvent } from "@/lib/analytics/posthog-server";
 import type { createServerSupabaseClient } from "@/lib/supabase/server";
 import { calculateProfileCompletionScore } from "@/lib/profile/completion-score";
 import type { Database } from "@/lib/supabase/types";
@@ -116,6 +117,26 @@ export async function ensureUserAndProfile(supabase: DbClient, authUser: User) {
     );
     if (profileError) {
       throw new Error(`Failed to initialize profile row: ${profileError.message}`);
+    }
+
+    await captureServerAnalyticsEvent("passport_created", authUser.id, {
+      ownerId: authUser.id,
+      passportId: authUser.id,
+      profileCompletionPercentage: score,
+      source: "profile_initialization",
+      timestamp: new Date().toISOString(),
+      userId: authUser.id
+    });
+
+    if (score >= 100) {
+      await captureServerAnalyticsEvent("profile_completed", authUser.id, {
+        ownerId: authUser.id,
+        passportId: authUser.id,
+        profileCompletionPercentage: score,
+        source: "profile_initialization",
+        timestamp: new Date().toISOString(),
+        userId: authUser.id
+      });
     }
   }
 }

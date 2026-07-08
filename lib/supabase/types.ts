@@ -60,6 +60,50 @@ export type Database = {
           created_at?: string;
         }
       >;
+      passport_views: Table<
+        {
+          id: string;
+          passport_id: string;
+          viewer_user_id: string | null;
+          viewer_session_id: string | null;
+          owner_id: string | null;
+          viewed_at: string;
+          referrer: string | null;
+          country: string | null;
+          city: string | null;
+          device: string | null;
+          browser: string | null;
+          created_at: string;
+        },
+        {
+          id?: string;
+          passport_id: string;
+          viewer_user_id?: string | null;
+          viewer_session_id?: string | null;
+          owner_id?: string | null;
+          viewed_at?: string;
+          referrer?: string | null;
+          country?: string | null;
+          city?: string | null;
+          device?: string | null;
+          browser?: string | null;
+          created_at?: string;
+        },
+        {
+          id?: string;
+          passport_id?: string;
+          viewer_user_id?: string | null;
+          viewer_session_id?: string | null;
+          owner_id?: string | null;
+          viewed_at?: string;
+          referrer?: string | null;
+          country?: string | null;
+          city?: string | null;
+          device?: string | null;
+          browser?: string | null;
+          created_at?: string;
+        }
+      >;
       users: Table<
         {
           user_id: string;

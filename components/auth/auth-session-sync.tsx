@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { identifyAnalyticsUser, resetAnalyticsUser } from "@/lib/analytics/client";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 
 export function AuthSessionSync() {
@@ -18,6 +19,7 @@ export function AuthSessionSync() {
         return;
       }
 
+      identifyAnalyticsUser(data.session.user.id);
       router.refresh();
     };
 
@@ -27,6 +29,7 @@ export function AuthSessionSync() {
       data: { subscription }
     } = supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_OUT") {
+        resetAnalyticsUser();
         if (typeof window !== "undefined") {
           if (window.location.pathname !== "/home") {
             window.location.assign("/home");
@@ -35,6 +38,12 @@ export function AuthSessionSync() {
           }
           return;
         }
+      }
+
+      if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
+        void supabase.auth.getUser().then(({ data }) => {
+          identifyAnalyticsUser(data.user?.id);
+        });
       }
 
       if (

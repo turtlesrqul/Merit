@@ -6,15 +6,19 @@ import { trackMeritEvent } from "@/lib/analytics/client";
 
 type PublicPassportAnalyticsProps = {
   featuredProjectId: string | null;
+  isOwner: boolean;
+  ownerId: string | null;
+  passportId: string;
   passportSlug: string | null;
-  passportUserId: string;
+  profileCompletionPercentage?: number | null;
   projectCount: number;
   viewerSignedIn: boolean;
 };
 
 type PublicPassportCtaProps = {
+  ownerId: string | null;
+  passportId: string;
   passportSlug: string | null;
-  passportUserId: string;
   placement: "top" | "bottom";
 };
 
@@ -22,30 +26,49 @@ const SIGNUP_HREF = "/sign-up?next=%2Fprofile";
 
 export function PublicPassportAnalytics({
   featuredProjectId,
+  isOwner,
+  ownerId,
+  passportId,
   passportSlug,
-  passportUserId,
+  profileCompletionPercentage,
   projectCount,
   viewerSignedIn
 }: PublicPassportAnalyticsProps) {
   useEffect(() => {
     const baseProperties = {
       featured_project_id: featuredProjectId,
+      isLoggedIn: viewerSignedIn,
+      isOwner,
+      ownerId,
+      passportId,
       passport_slug: passportSlug,
-      passport_user_id: passportUserId,
+      profileCompletionPercentage: profileCompletionPercentage ?? null,
       project_count: projectCount,
-      viewer_signed_in: viewerSignedIn
+      timestamp: new Date().toISOString()
     };
 
-    trackMeritEvent("public_passport_viewed", baseProperties);
-    trackMeritEvent("visitor_source_referrer_recorded", baseProperties);
-  }, [featuredProjectId, passportSlug, passportUserId, projectCount, viewerSignedIn]);
+    trackMeritEvent("passport_viewed", baseProperties, {
+      dedupeKey: `passport_viewed:${passportId}`,
+      dedupeWindowMs: 60_000
+    });
+  }, [
+    featuredProjectId,
+    isOwner,
+    ownerId,
+    passportId,
+    passportSlug,
+    profileCompletionPercentage,
+    projectCount,
+    viewerSignedIn
+  ]);
 
   return null;
 }
 
 export function PublicPassportCta({
+  ownerId,
+  passportId,
   passportSlug,
-  passportUserId,
   placement
 }: PublicPassportCtaProps) {
   return (
@@ -60,7 +83,8 @@ export function PublicPassportCta({
         onClick={() =>
           trackMeritEvent("public_passport_cta_clicked", {
             passport_slug: passportSlug,
-            passport_user_id: passportUserId,
+            ownerId,
+            passportId,
             placement
           })
         }

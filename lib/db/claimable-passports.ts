@@ -2,6 +2,7 @@ import "server-only";
 
 import { createHash, randomBytes } from "node:crypto";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
+import { captureServerAnalyticsEvent } from "@/lib/analytics/posthog-server";
 import { buildArtifactPreviewUrl, detectArtifactType } from "@/lib/artifacts";
 import { calculateProfileCompletionScore } from "@/lib/profile/completion-score";
 import {
@@ -886,5 +887,31 @@ export async function claimPassportForUser(token: string, authUser: User) {
   }
 
   await createClaimedProjects(adminClient, authUser.id, passport);
-  return mapPassport(claimedRow);
+  const claimedPassport = mapPassport(claimedRow);
+
+  await captureServerAnalyticsEvent("passport_created", authUser.id, {
+    ownerId: authUser.id,
+    passportId: claimedPassport.passportId,
+    passport_slug: claimedPassport.passportSlug,
+    profileCompletionPercentage: profileScore,
+    projectCount: passport.projects.length,
+    source: "claim_passport",
+    timestamp: new Date().toISOString(),
+    userId: authUser.id
+  });
+
+  if (profileScore >= 100) {
+    await captureServerAnalyticsEvent("profile_completed", authUser.id, {
+      ownerId: authUser.id,
+      passportId: claimedPassport.passportId,
+      passport_slug: claimedPassport.passportSlug,
+      profileCompletionPercentage: profileScore,
+      projectCount: passport.projects.length,
+      source: "claim_passport",
+      timestamp: new Date().toISOString(),
+      userId: authUser.id
+    });
+  }
+
+  return claimedPassport;
 }

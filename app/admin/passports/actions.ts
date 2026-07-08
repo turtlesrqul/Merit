@@ -2,6 +2,7 @@
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { captureServerAnalyticsEvent } from "@/lib/analytics/posthog-server";
 import { buildClaimPassportUrl, resolveClaimLinkBaseUrl } from "@/lib/auth/claim-links";
 import {
   createClaimablePassport,
@@ -188,6 +189,16 @@ export async function createAdminPassportAction(
       user.id
     );
 
+    await captureServerAnalyticsEvent("passport_created", user.id, {
+      ownerId: passport.ownerUserId,
+      passportId: passport.passportId,
+      passport_slug: passport.passportSlug,
+      projectCount: passport.projects.length,
+      source: "admin_passports",
+      timestamp: new Date().toISOString(),
+      userId: user.id
+    });
+
     return {
       status: "success",
       message: "Unclaimed Passport created. Copy this claim link now; the raw token is not stored.",
@@ -233,7 +244,7 @@ export async function updateAdminPassportAction(
   formData: FormData
 ): Promise<AdminPassportActionState> {
   try {
-    await requireAdminUser();
+    const user = await requireAdminUser();
     const passportId = normalizeRequiredText(formData.get("passportId"), "Passport id");
     const featuredWork = parseFeaturedWork(formData);
     const passportSlug = normalizePassportSlug(formData.get("passportSlug"));
@@ -253,6 +264,16 @@ export async function updateAdminPassportAction(
       linkedinUrl: normalizeFormUrl(formData, "linkedinUrl", "LinkedIn link"),
       githubUrl: normalizeFormUrl(formData, "githubUrl", "GitHub link"),
       passportSlug
+    });
+
+    await captureServerAnalyticsEvent("passport_updated", user.id, {
+      ownerId: passport.ownerUserId,
+      passportId: passport.passportId,
+      passport_slug: passport.passportSlug,
+      projectCount: passport.projects.length,
+      source: "admin_passports",
+      timestamp: new Date().toISOString(),
+      userId: user.id
     });
 
     return {

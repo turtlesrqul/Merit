@@ -25,19 +25,23 @@ export function PublicProfileActions({
 
     if (navigator.share) {
       await navigator.share({ title, url });
-      trackMeritEvent("passport_link_copied_shared", {
+      trackMeritEvent("passport_link_copied", {
         method: "native_share",
+        ownerId: passportUserId,
+        passportId: passportUserId,
         passport_slug: passportSlug,
-        passport_user_id: passportUserId
+        timestamp: new Date().toISOString()
       });
       return;
     }
 
     await navigator.clipboard.writeText(url);
-    trackMeritEvent("passport_link_copied_shared", {
+    trackMeritEvent("passport_link_copied", {
       method: "clipboard",
+      ownerId: passportUserId,
+      passportId: passportUserId,
       passport_slug: passportSlug,
-      passport_user_id: passportUserId
+      timestamp: new Date().toISOString()
     });
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1800);

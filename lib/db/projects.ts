@@ -75,6 +75,7 @@ export type PublicCandidateData = {
   targetRoles: string[];
   portfolioLinks: string[];
   passportSlug: string | null;
+  profileCompletionScore: number;
   projects: ProjectCardData[];
 };
 
@@ -712,7 +713,7 @@ export async function fetchPublicCandidateData(
       .maybeSingle(),
     supabase
       .from("candidate_profiles")
-      .select("bio, contact_email, portfolio_links, passport_slug")
+      .select("bio, contact_email, portfolio_links, passport_slug, profile_completion_score")
       .eq("user_id", userId)
       .maybeSingle(),
     fetchProjectsByUser(supabase, userId)
@@ -721,7 +722,7 @@ export async function fetchPublicCandidateData(
   if (profileResult.error && isMissingPassportSlugColumn(profileResult.error.message)) {
     profileResult = await supabase
       .from("candidate_profiles")
-      .select("bio, contact_email, portfolio_links")
+      .select("bio, contact_email, portfolio_links, profile_completion_score")
       .eq("user_id", userId)
       .maybeSingle();
   }
@@ -749,6 +750,8 @@ export async function fetchPublicCandidateData(
     targetRoles: safeStringArray(user.target_roles),
     portfolioLinks: safeStringArray(profile.portfolio_links),
     passportSlug: safeNullableString(profile.passport_slug),
+    profileCompletionScore:
+      typeof profile.profile_completion_score === "number" ? profile.profile_completion_score : 0,
     projects
   };
 }
