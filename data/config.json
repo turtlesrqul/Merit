@@ -1,0 +1,24 @@
+{
+  "site": "Grid",
+  "title": "Grid Production Digital Twin",
+  "staleAfterSeconds": 30,
+  "dataSource": {
+    "type": "none",
+    "websocketUrl": "wss://your-gateway.example/f17/state",
+    "restUrl": "/api/f17/state",
+    "pollSeconds": 5
+  },
+  "demoMode": true,
+  "machineScale": 0.765,
+  "demoRunning": [
+    "L2-*",
+    "HYB-DB-01",
+    "HYB-WBP-01",
+    "HYB-AOI-01",
+    "HYB-N2B-01",
+    "SMT-XRY-01",
+    "HOLD-MYT-01",
+    "HASS-HALT-01",
+    "LASER-ENG-01"
+  ]
+}
